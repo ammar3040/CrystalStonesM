@@ -1,0 +1,339 @@
+<%- include("header") %>
+
+<div class="container">
+  <div class="page-inner">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Add New Crystal Product</div>
+          </div>
+          <form action="/admin/AddProduct" method="post" enctype="multipart/form-data">
+            <div class="card-body"> 
+              <div class="row">
+                <div class="col-md-6">
+                  <!-- Product Basic Information -->
+                  <div class="form-control w-full max-w-xs">
+                    <label class="label">
+                      <span class="label-text">Product Name</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="input input-bordered w-full max-w-xs"
+                      id="productName"
+                      name="productName"
+                      placeholder="Enter Product Name"
+                      required
+                    />
+                  </div>
+                  
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text">Product Description</span>
+                    </label>
+                    <textarea 
+                      class="textarea textarea-bordered h-24" 
+                      id="description" 
+                      name="description" 
+                      placeholder="Detailed product description..."
+                      required
+                    ></textarea>
+                  </div>
+                  
+                  <div class="form-control w-full max-w-xs">
+                    <label class="label">
+                      <span class="label-text">Product Category</span>
+                    </label>
+                  <select class="select select-bordered" id="category" name="category" required>
+  <option disabled selected>Select Category</option>
+  <option value="angels">Angels</option>
+  <option value="arrowhead">Arrowhead</option>
+  <option value="ball-sphere">Ball Sphere</option>
+  <option value="bowl">Bowl</option>
+  <option value="bracelets">Bracelets</option>
+  <option value="chakra-products">Chakra Products</option>
+  <option value="cabochons">Cabochons</option>
+  <option value="candle-holders">Candle Holders</option>
+  <option value="energy-generating-tools">Energy Generating Tools</option>
+  <option value="gemstone-egg">Gemstone Egg</option>
+  <option value="gemstone-beads">Gemstone Beads</option>
+  <option value="geometric-platonic-solids">Geometric Platonic Solids</option>
+  <option value="gemstone-shivalingam">Gemstone Shivalingam</option>
+  <option value="gemstone-tree">Gemstone Tree</option>
+  <option value="healing-stick">Healing Stick</option>
+  <option value="heart">Heart</option>
+  <option value="idols-hand-carvings">Idols Hand Carvings</option>
+  <option value="japa-mala">Japa Mala</option>
+  <option value="massage-wands">Massage Wands</option>
+  <option value="merkaba-star">Merkaba Star</option>
+  <option value="orgone-energy-products">Orgone Energy Products</option>
+  <option value="obelisk-tower">Obelisk Tower</option>
+  <option value="pencil-points">Pencil Points</option>
+  <option value="pendulums">Pendulums</option>
+</select>
+
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <!-- Pricing Information -->
+                  <div class="form-control w-full max-w-xs">
+                    <label class="label">
+                      <span class="label-text">Original Price (₹)</span>
+                    </label>
+                    <input
+                      type="number"
+                      class="input input-bordered w-full max-w-xs"
+                      id="originalPrice"
+                      name="originalPrice"
+                      placeholder="Original price in INR"
+                      step="0.01"
+                      required
+                    />
+                  </div>
+               
+                  
+                  <div class="form-control w-full max-w-xs">
+                    <label class="label">
+                      <span class="label-text">Discounted Price (₹)</span>
+                    </label>
+                    <input
+                      type="number"
+                      class="input input-bordered w-full max-w-xs"
+                      id="discountedPrice"
+                      name="discountedPrice"
+                      placeholder="Discounted price in INR"
+                      step="0.01"
+                    />
+                  </div>
+                  
+                  <div class="form-control w-full max-w-xs">
+                    <label class="label">
+                      <span class="label-text">Price ($)</span>
+                    </label>
+                    <input
+                      type="number"
+                      class="input input-bordered w-full max-w-xs"
+                      id="dollarPrice"
+                      name="dollarPrice"
+                      placeholder="Price in USD"
+                      step="0.01"
+                    />
+                  </div>
+                  <div class="form-control w-full max-w-xs mt-4">
+  <label class="label">
+    <span class="label-text">Quantity Unit</span>
+  </label>
+  <select class="select select-bordered" id="quantityUnit" name="quantityUnit" required>
+    <option disabled selected>Select Unit</option>
+    <option value="per/piece">Per Piece</option>
+    <option value="per/kg">Per Kg</option>
+    <option value="per/kg">Per set</option>
+  </select><br>
+
+  <label class="label">
+    <span class="label-text">Minimum Quantity</span>
+  </label>
+  <select class="select select-bordered" id="MinQuantity" name="MinQuantity" required>
+    <option disabled selected>Select Unit</option>
+    <option value="2">2</option>
+    <option value="5">5</option>
+    <option value="10">10</option>
+    <option value="20">20</option>
+  </select>
+</div>
+
+                </div>
+              </div>
+              
+              <div class="row mt-4">
+                <div class="col-md-6">
+                  <!-- Astrological Benefits -->
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text">Astrological Benefits</span>
+                    </label>
+                    <div class="flex flex-wrap gap-2">
+                      <div class="form-control">
+                        <label class="cursor-pointer label">
+                          <input type="checkbox" name="benefits" value="wealth" class="checkbox checkbox-primary">
+                          <span class="label-text ml-2">Attracts Wealth</span> 
+                        </label>
+                      </div>
+                      <div class="form-control">
+                        <label class="cursor-pointer label">
+                          <input type="checkbox" name="benefits" value="happiness" class="checkbox checkbox-primary">
+                          <span class="label-text ml-2">Promotes Happiness</span>
+                        </label>
+                      </div>
+                      <div class="form-control">
+                        <label class="cursor-pointer label">
+                          <input type="checkbox" name="benefits" value="protection" class="checkbox checkbox-primary">
+                          <span class="label-text ml-2">Provides Protection</span>
+                        </label>
+                      </div>
+                      <div class="form-control">
+                        <label class="cursor-pointer label">
+                          <input type="checkbox" name="benefits" value="health" class="checkbox checkbox-primary">
+                          <span class="label-text ml-2">Improves Health</span>
+                        </label>
+                      </div>
+                      <div class="form-control">
+                        <label class="cursor-pointer label">
+                          <input type="checkbox" name="benefits" value="love" class="checkbox checkbox-primary">
+                          <span class="label-text ml-2">Enhances Love</span>
+                        </label>
+                      </div>
+                      <div class="form-control">
+                        <label class="cursor-pointer label">
+                          <input type="checkbox" name="benefits" value="success" class="checkbox checkbox-primary">
+                          <span class="label-text ml-2">Brings Success</span>
+                        </label>
+                      </div>
+                      <div class="form-control">
+                        <label class="cursor-pointer label">
+                          <input type="checkbox" name="benefits" value="peace" class="checkbox checkbox-primary">
+                          <span class="label-text ml-2">Creates Peace</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-control w-full max-w-xs mt-4">
+                    <label class="label">
+                      <span class="label-text">Crystal Type</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="input input-bordered w-full max-w-xs"
+                      id="crystalType"
+                      name="crystalType"
+                      placeholder="e.g., Rose Quartz, Amethyst"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div class="col-md-6">
+                  <!-- Product Images -->
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text">Main Product Image</span>
+                    </label>
+                    <input
+                      type="file"
+                      class="file-input file-input-bordered w-full max-w-xs"
+                      id="mainImage"
+                      name="mainImage"
+                      accept="image/*"
+                      required
+                    />
+                    <label class="label">
+                      <span class="label-text-alt">This will be the primary display image</span>
+                    </label>
+                  </div>
+                  
+                  <div class="form-control mt-4">
+                    <label class="label">
+                      <span class="label-text">Additional Product Images</span>
+                    </label>
+                    <input
+                      type="file"
+                      class="file-input file-input-bordered w-full max-w-xs"
+                      id="image1"
+                      name="additionalImages"
+                      accept="image/*"
+                      multiple
+                    />
+                     <input
+                      type="file"
+                      class="file-input file-input-bordered w-full max-w-xs"
+                      id="image1"
+                      name="additionalImages"
+                      accept="image/*"
+                      multiple
+                    />
+                     <input
+                      type="file"
+                      class="file-input file-input-bordered w-full max-w-xs"
+                      id="image1"
+                      name="additionalImages"
+                      accept="image/*"
+                      multiple
+                    />
+                     <input
+                      type="file"
+                      class="file-input file-input-bordered w-full max-w-xs"
+                      id="image1"
+                      name="additionalImages"
+                      accept="image/*"
+                      multiple
+                    />
+                    <label class="label">
+                      <span class="label-text-alt">Upload multiple images to show different angles</span>
+                    </label>
+                  </div>
+                  
+                  <div class="form-control mt-4">
+                    <label class="label">
+                      <span class="label-text">Product Dimensions (cm)</span>
+                    </label>
+                    <div class="flex gap-2">
+                      <input
+                        type="number"
+                        class="input input-bordered w-20"
+                        id="length"
+                        name="length"
+                        placeholder="Length"
+                        step="0.1"
+                      />
+                      <input
+                        type="number"
+                        class="input input-bordered w-20"
+                        id="width"
+                        name="width"
+                        placeholder="Width"
+                        step="0.1"
+                      />
+                      <input
+                        type="number"
+                        class="input input-bordered w-20"
+                        id="height"
+                        name="height"
+                        placeholder="Height"
+                        step="0.1"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row mt-4">
+                <div class="col-md-12">
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text">Special Notes</span>
+                    </label>
+                    <textarea 
+                      class="textarea textarea-bordered" 
+                      id="specialNotes" 
+                      name="specialNotes" 
+                      rows="2" 
+                      placeholder="Any special care instructions or unique features..."
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-action">
+              <button type="submit" class="btn btn-success">Add Product</button>
+              <button type="reset" class="btn btn-error">Reset Form</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include("footer") %>

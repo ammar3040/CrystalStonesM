@@ -1,0 +1,10 @@
+
+.addCartbtn:hover{
+    background-color: black;
+    color: wheat !important;
+   
+}
+.addCartbtn{
+
+    border-radius: 20px;
+}

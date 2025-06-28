@@ -1,0 +1,167 @@
+<%- include("header") %>
+
+<div class="container">
+  <div class="page-inner">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Edit Crystal Product</div>
+          </div>
+
+          <form action="/admin/updateData" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="<%= ProductData._id %>">
+
+            <div class="card-body"> 
+              <div class="row">
+                <div class="col-md-6">
+                  <!-- Basic Info -->
+                  <div class="form-control">
+                    <label class="label">Product Name</label>
+                    <input type="text" name="productName" value="<%= ProductData.productName %>" class="input input-bordered" required />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">Description</label>
+                    <textarea name="description" class="textarea textarea-bordered" required><%= ProductData.description %></textarea>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">Category</label>
+                    <select name="category" class="select select-bordered" required>
+                        <% const categories = [
+    "pendant", "bracelet", "ring", "earring", "statue", "other",
+    "angels", "arrowhead", "ball-sphere", "bowl", "bracelets", "chakra-products",
+    "cabochons", "candle-holders", "energy-generating-tools", "gemstone-egg",
+    "gemstone-beads", "geometric-platonic-solids", "gemstone-shivalingam",
+    "gemstone-tree", "healing-stick", "heart", "idols-hand-carvings", "japa-mala",
+    "massage-wands", "merkaba-star", "orgone-energy-products", "obelisk-tower",
+    "pencil-points", "pendulums"
+  ]; %>
+  
+                      <% categories.forEach(c => { %>
+                        <option value="<%= c %>" <%= ProductData.category === c ? "selected" : "" %>><%= c.charAt(0).toUpperCase() + c.slice(1) %></option>
+                      <% }) %>
+                    </select>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">Original Price (₹)</label>
+                    <input type="number" name="originalPrice" value="<%= ProductData.originalPrice %>" class="input input-bordered" required />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">Discounted Price (₹)</label>
+                    <input type="number" name="discountedPrice" value="<%= ProductData.discountedPrice %>" class="input input-bordered" />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">Dollar Price ($)</label>
+                    <input type="number" name="dollarPrice" value="<%= ProductData.dollarPrice %>" class="input input-bordered" />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">Quantity Unit</label>
+                    <select name="quantityUnit" class="select select-bordered" required>
+                      <option value="per/piece" <%= ProductData.quantityUnit === "per/piece" ? "selected" : "" %>>Per Piece</option>
+                      <option value="per/kg" <%= ProductData.quantityUnit === "per/kg" ? "selected" : "" %>>Per Kg</option>
+                      <option value="per/set" <%= ProductData.quantityUnit === "per/set" ? "selected" : "" %>>Per Kg</option>
+                    </select>
+                  </div>
+                     <div class="form-control">
+                   
+  <label class="label">
+    <span class="label-text">Minimum Quantity</span>
+  </label>
+  <select class="select select-bordered" id="MinQuantity" name="MinQuantity" required>
+    <option disabled selected>Select Unit</option>
+    <option value="2"  <%= ProductData.MinQuantity === "2" ? "selected" : ""%>>2</option>
+    <option value="5" <%= ProductData.MinQuantity === "5" ? "selected" : ""%>>5</option>
+    <option value="10" <%= ProductData.MinQuantity === "10" ? "selected" : ""%>>10</option>
+    <option value="20" <%= ProductData.MinQuantity === "20" ? "selected" : ""%>>20</option>
+  </select>
+                  </div>
+
+
+                </div>
+
+                <div class="col-md-6">
+                  <!-- Benefits -->
+                  <div class="form-control">
+                    <label class="label">Astrological Benefits</label>
+                    <% const benefitsList = ["wealth", "happiness", "protection", "health", "love", "success", "peace"]; %>
+                    <div class="flex flex-wrap gap-2">
+                      <% benefitsList.forEach(b => { %>
+                        <label class="cursor-pointer">
+                          <input type="checkbox" name="benefits" value="<%= b %>" <%= ProductData.benefits && ProductData.benefits.includes(b) ? "checked" : "" %> />
+                          <span class="ml-2"><%= b.charAt(0).toUpperCase() + b.slice(1) %></span>
+                        </label>
+                      <% }) %>
+                    </div>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">Crystal Type</label>
+                    <input type="text" name="crystalType" value="<%= ProductData.crystalType %>" class="input input-bordered" required />
+                  </div>
+
+                  <!-- Images -->
+                  <div class="form-control">
+                    <label class="label">Main Image</label>
+                    <input type="file" name="mainImage" class="file-input file-input-bordered" />
+                    <% if (ProductData.mainImage && ProductData.mainImage.url) { %>
+                      <div class="mt-1">
+                        <span class="text-xs">Current:</span>
+                        <img src="<%= ProductData.mainImage.url %>" width="60" />
+                      </div>
+                    <% } %>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">Additional Images</label>
+                    <input type="file" name="additionalImages" multiple class="file-input file-input-bordered" />
+                    <input type="file" name="additionalImages" multiple class="file-input file-input-bordered" />
+                    <input type="file" name="additionalImages" multiple class="file-input file-input-bordered" />
+                    <input type="file" name="additionalImages" multiple class="file-input file-input-bordered" />
+                    <% if (ProductData.additionalImages && ProductData.additionalImages.length > 0) { %>
+                      <div class="flex gap-2 mt-2">
+                        <% ProductData.additionalImages.forEach(img => { %>
+                          <img src="<%= img.url %>" width="50" />
+                        <% }) %>
+                      </div>  
+                    <% } %>
+                 <!-- <a href="/admin/deleteImage?productid=<%= ProductData._id %>">
+<button class="btn btn-danger" >delete Photo from server to if you want to update</button></a> -->
+                  </div>
+
+                  <!-- Dimensions -->
+                  <div class="form-control">
+                    <label class="label">Dimensions (cm)</label>
+                    <div class="flex gap-2">
+                      <input type="number" name="length" value="<%= ProductData.dimensions?.length %>" class="input input-bordered w-20" placeholder="Length" />
+                      <input type="number" name="width" value="<%= ProductData.dimensions?.width %>" class="input input-bordered w-20" placeholder="Width" />
+                      <input type="number" name="height" value="<%= ProductData.dimensions?.height %>" class="input input-bordered w-20" placeholder="Height" />
+                    </div>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">Special Notes</label>
+                    <textarea name="specialNotes" class="textarea textarea-bordered"><%= ProductData.specialNotes %></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-action">
+              <button type="submit" class="btn btn-success">Update Product</button>
+              <a href="/admin/datatable" class="btn btn-error">Cancel</a>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include("footer") %>

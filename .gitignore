@@ -1,0 +1,12 @@
+node_modules
+# Ignore env files
+.env
+Server/.env
+Client/.env
+
+# Ignore Node modules
+node_modules/
+
+# Build files
+dist/
+build/

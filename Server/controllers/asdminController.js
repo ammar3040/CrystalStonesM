@@ -12,7 +12,7 @@ const { v2: cloudinary } = require("cloudinary"); //for deletion
 
 
 module.exports.dashboard = (req, res) => {
- return res.render("dashboard") 
+ return res.render("Dashboard") 
 };
 
 

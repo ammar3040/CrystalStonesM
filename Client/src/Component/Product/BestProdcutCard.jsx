@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaHeart, FaShoppingCart, FaEye } from 'react-icons/fa';
-import "./product.css";
+import "./Product.css";
 
 function BestProductCard({ productImg, productName, productAbout, ProductPrice, oldProductPrice }) {
   return (

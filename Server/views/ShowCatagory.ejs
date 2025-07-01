@@ -1,0 +1,79 @@
+<%- include("Header") %>
+
+
+<div class="container mt-4">
+  <h2 class="fw-bold mb-4">Category Management</h2>
+
+  <!-- Add Category Form -->
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Add New Category</h5>
+    </div>
+    <div class="card-body">
+      <form action="/admin/addcatagory" method="POST" enctype="multipart/form-data" id="addCategoryForm">
+        <div class="form-group">
+          <label for="category">Category Name</label>
+          <input type="text" class="form-control" name="category" id="category" placeholder="Enter category name" required>
+        </div>
+        <div class="form-group mt-3">
+          <label for="imageUrl">Main Image URL</label>
+          <input type="file" class="form-control" name="mainImage" id="imageUrl" placeholder="Enter image URL" required>
+        </div>
+      
+        <button type="submit" class="btn btn-success mt-3">Add Category</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Show Category Table -->
+  <div class="card">
+    <div class="card-header bg-light">
+      <h5 class="mb-0">All Categories</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+ <table class="table table-striped table-hover">
+  <thead class="table-dark">
+    <tr>
+      <th>#</th>
+      <th>Category</th>
+      <th>Main Image</th>
+      <th>Created At</th>
+      <th class="text-center">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% allCatagoryData.forEach((cat, index) => { %>
+      <tr>
+        <td><%= index + 1 %></td>
+        <td><%= cat.category %></td>
+        <td>
+          <img 
+            src="<%= cat.mainImage?.url || 'https://via.placeholder.com/80' %>" 
+            alt="Image" 
+            class="img-thumbnail" 
+            style="max-width: 80px;"
+          >
+        </td>
+        <td><%= new Date(cat.createdAt).toLocaleDateString('en-GB') %></td>
+        <td class="text-center">
+          <a href="/admin/deletecatagory/?cid=<%= cat._id %>" class="btn btn-danger btn-sm">
+            <i class="fa fa-trash"></i> Delete
+          </a>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- loader css and js -->
+
+
+
+<%- include("Footer") %>

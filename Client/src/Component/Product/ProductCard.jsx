@@ -3,7 +3,7 @@ import { FaHeart, FaShoppingCart, FaEye } from 'react-icons/fa';
 
 function ProductCard({ productImg, productName, productAbout, ProductPrice, oldProductPrice }) {
   return (
-    <div className="group max-w-xs mx-auto hover:shadow-md transition-all duration-300">
+    <div className="group prdcard max-w-xs mx-auto hover:shadow-md transition-all duration-300">
       <div className="card bg-white rounded-lg shadow-sm h-[380px] flex flex-col overflow-hidden">
         {/* Image container */}
         <figure className="relative flex-shrink-0 h-[55%] overflow-hidden">

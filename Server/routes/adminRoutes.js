@@ -25,7 +25,19 @@ routes.post("/updateData", upload.fields([
 ]), adminctl.updateData);
 routes.get("/EditPage",adminctl.AdminEdit)
 routes.get("/deleteProduct",adminctl.ProductDelete)
+
 // routes.get("/deleteImage",adminctl.ImageDelete)
+
+
+// admin panle user table
+
+routes.get("/usertable",adminctl.UserTable)
+routes.get("/userdelete",adminctl.UserDelete)
+routes.post("/addcatagory",upload.fields([
+  { name: 'mainImage', maxCount: 1 }
+]),adminctl.AddCatagory)
+routes.get("/catagorytable",adminctl.ShowCatagory)
+routes.get("/deletecatagory",adminctl.deleteCatagory)
 
 
 module.exports = routes;

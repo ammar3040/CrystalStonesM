@@ -1,30 +1,7 @@
-
-        <%- include("Header") %>
+<%- include("Header") %>
 
 <div class="container">
   <div class="page-inner">
-    <div class="page-header">
-      <h3 class="fw-bold mb-3">Product Management</h3>
-      <ul class="breadcrumbs mb-3">
-        <li class="nav-home">
-          <a href="#">
-            <i class="icon-home"></i>
-          </a>
-        </li>
-        <li class="separator">
-          <i class="icon-arrow-right"></i>
-        </li>
-        <li class="nav-item">
-          <a href="#">Products</a>
-        </li>
-        <li class="separator">
-          <i class="icon-arrow-right"></i>
-        </li>
-        <li class="nav-item">
-          <a href="#">All Products</a>
-        </li>
-      </ul>
-    </div>
     <div class="row">
       <div class="col-md-12">
         <div class="card">
@@ -32,7 +9,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <div class="dataTables_length">
                 <label>Show 
-                  <select name="multi-filter-select_length" aria-controls="multi-filter-select" class="form-control form-control-sm">
+                  <select name="multi-filter-select_length" id="rows-per-page" class="form-control form-control-sm">
                     <option value="10">10</option>
                     <option value="25">25</option>
                     <option value="50">50</option>
@@ -43,9 +20,9 @@
               <div class="dataTables_filter">
                 <label>Search:
                   <div class="input-group">
-                    <input type="search" class="form-control form-control-sm" placeholder="Search products..." aria-controls="multi-filter-select">
+                    <input type="search" id="search-input" class="form-control form-control-sm" placeholder="Search products..." aria-controls="multi-filter-select">
                     <div class="input-group-append">
-                      <button class="btn btn-sm btn-primary" type="button">
+                      <button class="btn btn-sm btn-primary" id="search-button" type="button">
                         <i class="fa fa-search"></i>
                       </button>
                     </div>
@@ -56,40 +33,43 @@
           </div>
           <div class="card-body">
             <div class="table-responsive">
+              <form action="/api/setbestproductlist"  method="post">
               <table id="multi-filter-select" class="display table table-hover">
                 <thead class="bg-light">
                   <tr>
-                    <th>Product Name</th>
-                    <th>Category</th>
-                    <th class="text-right">Price (₹)</th>
-                    <th class="text-right">Discounted (₹)</th>
-                    <th class="text-right">Price ($)</th>
-                    <th>Crystal Type</th>
-                    <th>Best Product</th>
+                    <th>Best Product <button class="btn btn-primary" type="submit">submit</button></th>
+                    <th class="sortable" data-column="1">Product Name <i class="fa fa-sort ml-1"></i></th>
+                    <th class="sortable" data-column="2">Category <i class="fa fa-sort ml-1"></i></th>
+                    <th class="sortable text-right" data-column="3">Discounted (₹) <i class="fa fa-sort ml-1"></i></th>
+                    <th class="sortable text-right" data-column="4">Price ($) <i class="fa fa-sort ml-1"></i></th>
+                    <th class="sortable text-right" data-column="5">Original Price (₹) <i class="fa fa-sort ml-1"></i></th>
+                    <th class="sortable" data-column="6">Crystal Type <i class="fa fa-sort ml-1"></i></th>
                     <th>Image</th>
                     <th class="text-center">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="table-body">
                   <% if (allProductData && allProductData.length > 0) { %>
                     <% allProductData.forEach((product) => { %>
-                      <%let Dimens=product.dimensions%>
-                      <tr>
+                      <tr data-product-id="<%= product._id %>" data-description="<%= product.description || '' %>">
+                        <td class="text-center">
+                          <div class="custom-control custom-checkbox d-inline-block">
+                            <input type="checkbox" class="custom-control-input"
+                                   id="best-product-<%= product._id %>"
+                                   name="bestProducts"
+                                 <%= product.bestproduct ? 'checked' : '' %>
+                                 value="<%= product._id %>" />
+                            <label class="custom-control-label" for="best-product-<%= product._id %>"></label>
+                          </div>
+                        </td>
                         <td class="font-weight-bold"><%= product.productName %></td>
                         <td><span class="badge badge-info"><%= product.category %></span></td>
-                        <td class="text-right"><%= product.originalPrice %></td>
                         <td class="text-right <%= product.discountedPrice ? 'text-danger font-weight-bold' : '' %>">
                           <%= product.discountedPrice || '-' %>
                         </td>
                         <td class="text-right"><%= product.dollarPrice || '-' %></td>
+                        <td class="text-right"><%= product.originalPrice %></td>
                         <td><%= product.crystalType %></td>
-                        <td class="text-center">
-                          <div class="form-check d-inline-block">
-                            <input type="checkbox" class="form-check-input best-product" 
-                                   <%= product.isBestProduct ? 'checked' : '' %> 
-                                   data-product-id="<%= product._id %>">
-                          </div>
-                        </td>
                         <td>
                           <div class="product-img-container">
                             <img src="<%= product.mainImage.url %>" class="img-thumbnail" alt="Product Image" 
@@ -109,7 +89,7 @@
                       </tr>
                     <% }) %>
                   <% } else { %>
-                    <tr>
+                    <tr id="no-products-row">
                       <td colspan="10" class="text-center py-4">
                         <div class="empty-state">
                           <i class="fa fa-box-open fa-3x text-muted mb-3"></i>
@@ -124,31 +104,7 @@
                   <% } %>
                 </tbody>
               </table>
-            </div>
-            <div class="row mt-3">
-              <div class="col-sm-12 col-md-5">
-                <div class="dataTables_info">
-                  Showing <%= allProductData ? Math.min(1, allProductData.length) : 0 %> to <%= allProductData ? Math.min(10, allProductData.length) : 0 %> of <%= allProductData ? allProductData.length : 0 %> entries
-                </div>
-              </div>
-              <div class="col-sm-12 col-md-7">
-                <div class="dataTables_paginate">
-                  <ul class="pagination pagination-rounded">
-                    <li class="paginate_button page-item previous disabled">
-                      <a href="#" class="page-link"><i class="fa fa-chevron-left"></i></a>
-                    </li>
-                    <li class="paginate_button page-item active">
-                      <a href="#" class="page-link">1</a>
-                    </li>
-                    <li class="paginate_button page-item">
-                      <a href="#" class="page-link">2</a>
-                    </li>
-                    <li class="paginate_button page-item next">
-                      <a href="#" class="page-link"><i class="fa fa-chevron-right"></i></a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+              </form>
             </div>
           </div>
         </div>
@@ -157,121 +113,5 @@
   </div>
 </div>
 
-<style>
-  .product-img-container {
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    overflow: hidden;
-    margin: 0 auto;
-  }
-  
-  .product-img-container img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: cover;
-  }
-  
-  .empty-state {
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-  }
-  
-  .table th {
-    white-space: nowrap;
-    position: relative;
-  }
-  
-  .table th:after {
-    content: "↕";
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    opacity: 0.3;
-    font-size: 12px;
-  }
-  
-  .table th.sort-asc:after {
-    content: "↑";
-    opacity: 1;
-  }
-  
-  .table th.sort-desc:after {
-    content: "↓";
-    opacity: 1;
-  }
-  
-  .badge {
-    font-size: 0.8em;
-    font-weight: 500;
-    padding: 4px 8px;
-  }
-</style>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    let currentPage = 1;
-    let rowsPerPage = 10;
-    let sortColumn = 0;
-    let sortDirection = 'asc';
-    let allData = [];
-
-    const table = document.getElementById('multi-filter-select');
-    const tbody = table.querySelector('tbody');
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-    const pageInfo = document.querySelector('.dataTables_info');
-    const pagination = document.querySelector('.dataTables_paginate');
-    
-    // Initialize best product checkboxes
-    document.querySelectorAll('.best-product').forEach(checkbox => {
-      checkbox.addEventListener('change', function() {
-        const productId = this.getAttribute('data-product-id');
-        const isBest = this.checked;
-        
-        // Send AJAX request to update best product status
-        fetch('/admin/updateBestProduct', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            productId: productId,
-            isBestProduct: isBest
-          })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            showToast('Product status updated successfully');
-          } else {
-            showToast('Error updating product status', 'error');
-            this.checked = !isBest; // Revert checkbox if error
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          showToast('Error updating product status', 'error');
-          this.checked = !isBest; // Revert checkbox if error
-        });
-      });
-    });
-    
-    function showToast(message, type = 'success') {
-      // Implement your toast notification here
-      console.log(`${type}: ${message}`);
-    }
-
-    // Rest of your DataTable functionality...
-    // (Keep your existing updateTable, getSortValue, updatePagination functions)
-    
-    // Initialize the table
-    updateTable();
-  });
-</script>
-
 <%- include("Footer") %>
+s

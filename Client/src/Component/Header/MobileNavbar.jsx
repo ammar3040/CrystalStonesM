@@ -1,20 +1,68 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AddCart from './AddCart';
+import LoginMain from '../Form/LoginMain';
+import { MdEmail, MdLocationOn, MdPhoneAndroid } from 'react-icons/md';
 
-const DockItem = ({ icon, label }) => {
-  return (
-    <div className="group relative flex-1 flex flex-col items-center cursor-pointer">
-      <div className="flex items-center justify-center p-2 hover:text-blue-500">
-        {icon}
-      </div>
-      <span className="absolute -top-8 left-[50%] -translate-x-[50%] z-20 origin-left scale-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium shadow-md transition-all duration-300 ease-in-out group-hover:scale-100">
-        {label}
-      </span>
-    </div>
-  );
-};
+const MobileNavbar = ({catagory}) => {
+  const navigate = useNavigate();
 
-const MobileNavbar = () => {
-  // Define your icons as JSX elements
+  const [cartOpen, setCartOpen] = useState(false);
+  const [showAside, setShowAside] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [user, setUser] = useState(null);
+const [openCollection, setOpenCollection] = useState(false);
+  // Function to read user from cookie
+  useEffect(() => {
+    const getUserFromCookie = () => {
+   const cookieString = document.cookie;
+   const cookies = cookieString.split('; ');
+   const userCookie = cookies.find(cookie => cookie.startsWith('user='));
+   
+   if (userCookie) {
+     const cookieValue = userCookie.split('=')[1];
+     try {
+       // First decode the URI component, then handle any unexpected prefixes
+       const decodedValue = decodeURIComponent(cookieValue);
+       
+       // Handle cases where the value might start with "j:" or similar
+       const jsonString = decodedValue.startsWith('j:') 
+         ? decodedValue.substring(2) 
+         : decodedValue;
+       
+       const userData = JSON.parse(jsonString);
+       setUser(userData);
+     } catch (error) {
+       console.error('Error parsing user cookie:', error);
+       // Try to manually extract data if parsing fails
+       try {
+         const manualMatch = decodedValue.match(/"name":"([^"]+)"/);
+         if (manualMatch) {
+           setUser({ name: manualMatch[1] });
+         } else {
+           setUser(null);
+         }
+       } catch {
+         setUser(null);
+       }
+     }
+   } else {
+     setUser(null);
+   }
+ };
+ 
+     getUserFromCookie();
+   }, [showProfile]); // Re-check when modal opens
+ 
+
+  const handleLogout = () => {
+    document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    setUser(null);
+    setShowProfile(false);
+    navigate('/');
+  };
+
   const homeIcon = (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" height="24" width="24">
       <path stroke="currentColor" d="M9 22V12H15V22M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z"></path>
@@ -45,16 +93,133 @@ const MobileNavbar = () => {
     </svg>
   );
 
+  const DockItem = ({ icon, label, onClick }) => (
+    <div className="group relative flex-1 flex flex-col items-center cursor-pointer" onClick={onClick}>
+      <div className="flex items-center justify-center p-2 hover:text-yellow-500">{icon}</div>
+      <span className="absolute -top-8 left-1/2 -translate-x-1/2 z-20 scale-0 rounded bg-white px-3 py-1 text-xs font-medium shadow-md transition-all group-hover:scale-100">
+        {label}
+      </span>
+    </div>
+  );
+
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white shadow-lg border-t border-gray-200">
-      <div className="flex justify-around items-center px-4 py-3">
-        <DockItem icon={homeIcon} label="Home" />
-        <DockItem icon={shopIcon} label="Shop" />
-        <DockItem icon={collectionsIcon} label="Collections" />
-        <DockItem icon={aboutIcon} label="About" />
-        <DockItem icon={accountIcon} label="Account" />
+    <>
+      {/* Bottom Nav */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white shadow-lg border-t border-gray-200">
+        <div className="flex justify-around items-center px-4 py-3">
+          <DockItem icon={homeIcon} label="Home" onClick={() => navigate('/')} />
+          <DockItem icon={shopIcon} label="Cart" onClick={() => setCartOpen(true)} />
+          <DockItem icon={collectionsIcon} label="Collections" onClick={() => setShowAside(true)} />
+          <DockItem icon={aboutIcon} label="About" onClick={() => navigate('/about')} />
+          <DockItem icon={accountIcon} label="Account" onClick={() => setShowProfile(true)} />
+        </div>
+      </div>
+
+      {/* Cart Modal */}
+      <AddCart show={cartOpen} onClose={() => setCartOpen(false)} />
+
+      {/* Aside Slide Menu */}
+      {showAside && (
+        // hayblackbox ai i want to scroll below asie in vertial so which class is use
+
+  <div className="fixed inset-0 z-50 flex bg-opacity-50 "> 
+    <div className="w-64 bg-white shadow-lg p-4 flex flex-col gap-3 overflow-x-scroll">
+      <h3 className="text-lg font-semibold mb-2">Explore</h3>
+      
+      {/* Simple Accordion */}
+      <div className="space-y-2">
+        {/* Collections Accordion Item */}
+        <div>
+          <button 
+            onClick={() => setOpenCollection(!openCollection)}
+            className="w-full flex justify-between items-center p-2 hover:bg-gray-50 rounded"
+          >
+            <span className="font-medium">Collections</span>
+            <svg
+              className={`w-4 h-4 transition-transform ${openCollection ? 'rotate-180' : ''}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
+            
+          {/* Collection List - shown when expanded */}
+          {openCollection && (
+            <ul className="pl-4 py-1 space-y-1 border-l-2 border-gray-100">
+              {  catagory.map((catagory) => (
+                    <li>
+                    <a 
+                      key={catagory._id } 
+                      href={`/catagory/${catagory.category}`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700"
+                    >
+                      {catagory.category}
+                    </a></li>
+                  ))} 
+            </ul>
+          )}
+        </div>
+        
+        {/* Other menu items */}
+        <a href="/#bestProduct" className="block p-2 hover:bg-gray-50 rounded">Best Products</a>
+        <a href="/allProduct" className="block p-2 hover:bg-gray-50 rounded">All Products</a>
       </div>
     </div>
+    <div className="flex-1  bg-opacity-10" onClick={() => setShowAside(false)} />
+  </div>
+)}
+
+
+
+      {/* Profile Modal */}
+      {showProfile && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="fixed inset-0  bg-opacity-30 backdrop-blur-sm" onClick={() => setShowProfile(false)}></div>
+
+          {user ? (
+            <div className="flex items-center justify-center min-h-screen p-4">
+              <div className="relative bg-white rounded-lg shadow-xl w-full max-w-xs p-6">
+                <div className="flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-4">
+                    <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900">{user.name}</h3>
+                  <p className="text-sm text-gray-500 flex items-center gap-1"><MdEmail /> {user.email}</p>
+                  <p className="text-sm text-gray-500 flex items-center gap-1"><MdLocationOn /> {user.address}</p>
+                  {user.mobile && <p className="text-sm text-gray-500 flex items-center gap-1"><MdPhoneAndroid /> {user.mobile}</p>}
+                </div>
+                <div className="mt-6 border-t border-gray-200 pt-4">
+                  <button onClick={() => { setShowProfile(false); navigate('/'); }} className="w-full py-2 text-sm font-medium text-yellow-600 hover:bg-yellow-50 rounded-md">
+                    View Product
+                  </button>
+                  <button onClick={handleLogout} className="w-full mt-2 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md">
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <LoginMain
+              onLoginSuccess={(userData) => {
+                setUser(userData);
+                if (userData.role === 'admin') {
+                  window.location.href = `${import.meta.env.VITE_API_URL}/admin`;
+                } else {
+                  setShowProfile(false);
+                }
+              }}
+              onClose={() => setShowProfile(false)}
+            />
+          )}
+          
+        </div>
+      )}
+    </>
   );
 };
 

@@ -2,17 +2,27 @@
 import React from 'react'
 import ProductCard from './BestProdcutCard'
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react';
+
+import axios from 'axios';
 
 
 function BestProduct() {
-  const bestProducts = [
-    { id: 1, name: 'Blue Lace Agate', price: 45,Oldprice: 45, image: '/ProductImg/IMG-20250617-WA0004.jpg',about:"best Prodcut" },
-    { id: 2, name: 'Fire Agate', price: 65,Oldprice: 45, image: '/ProductImg/IMG-20250617-WA0005.jpg' ,about:"best Prodcut" },
-    { id: 3, name: 'Moss Agate', price: 38,Oldprice: 45, image: '/ProductImg/IMG-20250617-WA0009.jpg',about:"best Prodcut" },
-    { id: 4, name: 'Dendritic Agate', price: 52,Oldprice: 45, image: '/ProductImg/IMG-20250617-WA0010.jpg',about:"best Prodcut" },
-    { id: 5, name: 'Crazy Lace Agate', price: 48,Oldprice: 45, image: '/ProductImg/IMG-20250617-WA0011.jpg',about:"best Prodcut" },
-    { id: 6, name: 'Sardonyx Agate', price: 55,Oldprice: 45, image: '/ProductImg/IMG-20250617-WA0012.jpg',about:"best Prodcut" },
-  ]
+const [bestProducts, setBestProducts] = useState([]);
+
+
+  useEffect(() => {
+
+
+    axios.get(`${import.meta.env.VITE_API_URL}/api/getbestproductlist`)
+      .then((res) => {
+        setBestProducts(res.data); // store product data
+      })
+      .catch((err) => {
+        console.error("Error fetching products:", err);
+      });
+  }, []);
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -22,16 +32,16 @@ function BestProduct() {
     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
 
         {bestProducts.map((product) => (
-          <Link to={"/Product/"+product.id}>
+          <Link to={"/Product/"+product._id}>
           <ProductCard
-            key={product.id}
+            key={product._id}
             product={product}
-            productImg={product.image}
+            productImg={product.mainImage.url}
           
-            productName={product.name}
-            productAbout={product.about}
-            ProductPrice={product.price}
-            oldProductPrice={product.Oldprice}
+            productName={product.productName}
+            productAbout={product.description}
+            ProductPrice={product. discountedPrice}
+            oldProductPrice={product.originalPrice}
           />
           </Link>
         ))}

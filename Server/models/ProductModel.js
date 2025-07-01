@@ -25,6 +25,7 @@ const productSchema = new mongoose.Schema({
       public_id: String
     }
   ],
+  bestproduct: { type: Boolean, default: false },
   quantityUnit:{type:String,require:true},
   MinQuantity:{type:String,require:true}
   ,

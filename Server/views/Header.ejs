@@ -48,7 +48,7 @@
         <div class="sidebar-logo">
           <!-- Logo Header -->
           <div class="logo-header" data-background-color="dark">
-            <a href="index.html" class="logo">
+            <a href="/admin" class="logo">
               <img
                 src="/img/kaiadmin/logo_light.svg"
                 alt="navbar brand"
@@ -115,8 +115,14 @@
                         <span class="sub-item">Add New Product</span>
                       </a>
                     </li>
+                        <li>
+                      <a href="/admin/catagorytable">
+                        <span class="sub-item">Add New category</span>
+                      </a>
+                    </li>
                   </ul>
                 </div>
+                
               </li>
               
               <li class="nav-item">
@@ -129,13 +135,19 @@
                   <ul class="nav nav-collapse">
                     <li>
                       <a href="/admin/datatable">
-                        <span class="sub-item">Basic Table</span>
+                        <span class="sub-item">Product Table</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/admin/usertable">
+                        <span class="sub-item">Users</span>
                       </a>
                     </li>
                    
                   </ul>
                 </div>
               </li>
+              
       
             </ul>
           </div>
@@ -525,3 +537,142 @@
           </nav>
           <!-- End Navbar -->
         </div>
+        <!-- Add this modal HTML before the closing </body> tag -->
+<div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">User Profile</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center mb-4">
+          <div class="avatar-lg mx-auto mb-3">
+            <img src="/img/profile.jpg" alt="Profile" class="avatar-img rounded-circle">
+          </div>
+          <h4 id="profileName">Loading...</h4>
+          <p class="text-muted" id="profileRole">Admin User</p>
+        </div>
+        
+        <div class="mb-3">
+          <div class="d-flex align-items-center mb-2">
+            <i class="fas fa-envelope me-2"></i>
+            <span id="profileEmail">-</span>
+          </div>
+          <div class="d-flex align-items-center mb-2">
+            <i class="fas fa-phone me-2"></i>
+            <span id="profilePhone">-</span>
+          </div>
+          <div class="d-flex align-items-center">
+            <i class="fas fa-map-marker-alt me-2"></i>
+            <span id="profileAddress">-</span>
+          </div>
+        </div>
+        
+        <div class="d-grid gap-2">
+          <button class="btn btn-primary" onclick="window.location.href='/'">
+            <i class="fas fa-home me-1"></i> View Store
+          </button>
+          <button class="btn btn-danger" onclick="logout()">
+            <i class="fas fa-sign-out-alt me-1"></i> Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Function to parse user data from cookie
+function getUserFromCookie() {
+  const cookieString = document.cookie;
+  if (!cookieString) return null;
+  
+  const cookies = cookieString.split('; ');
+  const userCookie = cookies.find(cookie => cookie.startsWith('user='));
+  
+  if (!userCookie) return null;
+  
+  try {
+    const cookieValue = userCookie.split('=')[1];
+    const decodedValue = decodeURIComponent(cookieValue);
+    
+    // Handle cases where the value might start with "j:" (common in some frameworks)
+    const jsonString = decodedValue.startsWith('j:') 
+      ? decodedValue.substring(2) 
+      : decodedValue;
+    
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.error('Error parsing user cookie:', error);
+    
+    // Fallback: Try to extract basic info if full parsing fails
+    const manualMatch = decodedValue.match(/"name":"([^"]+)"/);
+    if (manualMatch) {
+      return { name: manualMatch[1] };
+    }
+    return null;
+  }
+}
+
+// Function to show profile modal with user data
+function showProfile() {
+  const user = getUserFromCookie();
+  const modal = new bootstrap.Modal(document.getElementById('profileModal'));
+  
+  if (user) {
+    // Populate modal with user data
+    document.getElementById('profileName').textContent = user.name || 'Admin User';
+    document.getElementById('profileEmail').textContent = user.email || '-';
+    document.getElementById('profilePhone').textContent = user.mobile || '-';
+    document.getElementById('profileAddress').textContent = user.address || '-';
+    
+    // Update profile image in navbar
+    if (user.profileImage) {
+      document.querySelector('.topbar-user .avatar-img').src = user.profileImage;
+      document.querySelector('#profileModal .avatar-img').src = user.profileImage;
+    }
+    
+    // Show modal
+    modal.show();
+  } else {
+    // If no user found, redirect to login
+    window.location.href =  `${cv}/SignInPage ` ;
+  }
+}
+
+// Logout function
+function logout() {
+  // Clear all auth-related cookies
+  document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  document.cookie = 'isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  
+  // Redirect to login page
+  window.location.href = '/login';
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // Attach click handler to profile button
+  const profileButton = document.querySelector('.topbar-user .profile-pic');
+  if (profileButton) {
+    profileButton.onclick = function(e) {
+      e.preventDefault();
+      showProfile();
+    };
+    
+    // Remove the dropdown menu since we're using a modal
+    const dropdownMenu = document.querySelector('.topbar-user .dropdown-menu');
+    if (dropdownMenu) {
+      dropdownMenu.remove();
+    }
+  }
+  
+  // Check if user is logged in on page load
+  const user = getUserFromCookie();
+  if (!user) {
+    window.location.href = '/login';
+  }
+});
+</script>

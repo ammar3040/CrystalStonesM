@@ -1,7 +1,7 @@
 // AllProducts.jsx (new component)
-import React, { useEffect, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import ProductCard from '../Product/ProductCard'
 import axios from 'axios';
 
@@ -9,9 +9,12 @@ function CatagoryProducts() {
   
 
 const [products, setProducts] = useState([]);
+const catagoryName=useParams().CatagoryName; 
 
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_URL}/api/all`)
+
+
+    axios.get(`${import.meta.env.VITE_API_URL}/api/catagoryproduct/?catagoryName=${catagoryName}`)
       .then((res) => {
         setProducts(res.data); // store product data
       })
@@ -38,7 +41,7 @@ const [products, setProducts] = useState([]);
           </Link>
         ))}
       </div>
-   
+  
       {/* Optional View More Button */}
       <div className="text-center mt-8">
         <button className="px-6 py-2 border border-amber-500 text-amber-500 rounded-md hover:bg-amber-500 hover:text-white transition-colors">

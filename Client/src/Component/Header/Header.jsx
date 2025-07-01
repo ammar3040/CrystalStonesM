@@ -15,6 +15,7 @@ import { MdLocationOn } from 'react-icons/md';
 
 
 function Header({ onCartClick }) {
+  const [catagorys, setCatagorys] = useState([]);
   const [placeholder, setPlaceholder] = useState('');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [user, setUser] = useState(null); // to hold cookie user
@@ -32,6 +33,11 @@ function Header({ onCartClick }) {
  
   const [cartOpen, setCartOpen] = useState(false);
 
+  const [allProducts, setAllProducts] = useState([]);
+const [searchResults, setSearchResults] = useState([]);
+const [searchQuery, setSearchQuery] = useState('');
+const [showSuggestions, setShowSuggestions] = useState(false);
+
   // Blinking cursor effect
   useEffect(() => {
     const cursorInterval = setInterval(() => {
@@ -48,6 +54,7 @@ function Header({ onCartClick }) {
     }
   
 },[])
+
 
   // Typing animation
   useEffect(() => {
@@ -124,7 +131,62 @@ function Header({ onCartClick }) {
     navigate('/');
   };
 
+  // handle seach input change
+
+  const handleSearchChange = (query) => {
+  setSearchQuery(query);
+
+  if (!query.trim()) {
+    setSearchResults([]);
+    return;
+  }
+
+  const filtered = allProducts.filter(product =>
+    product.productName.toLowerCase().includes(query.toLowerCase())
+  );
+  setSearchResults(filtered.slice(0, 5)); // limit to 5 suggestions
+};
+
+
+
   
+
+  useEffect(() => {
+    const fetchCatagorys = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/getCatagory`);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        setCatagorys(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCatagorys(); // <-- make sure to call it
+  }, []);
+
+
+  // for search api
+
+  useEffect(() => {
+  const fetchAllProducts = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/all`);
+      const data = await response.json();
+      setAllProducts(data);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+    }
+  };
+
+  fetchAllProducts();
+}, []);
+
+
 
   return (
     <>
@@ -147,13 +209,39 @@ function Header({ onCartClick }) {
             {/* Animated Search */}
             <div className="flex-grow flex justify-center px-4">
               <div className="relative w-full max-w-md">
-                <input
-                  placeholder={placeholder}
-                  id="input"
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-                  name="text"
-                  type="text"
-                />
+               <input
+  placeholder={placeholder}
+  id="input"
+  value={searchQuery}
+  onChange={(e) => handleSearchChange(e.target.value)}
+  onFocus={() => setShowSuggestions(true)}
+  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+  name="text"
+  type="text"
+/>
+{showSuggestions && searchResults.length > 0 && (
+  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+    {searchResults.map(product => (
+  <a
+    key={product._id}
+    href={`/product/${product._id}`}
+    className="flex items-center px-4 py-2 hover:bg-yellow-50 transition-all"
+  >
+    <img
+      src={product.mainImage.url} // make sure this is your correct image field
+      alt={product.productName}
+      className="w-10 h-10 object-cover rounded mr-3 border"
+    />
+    <span className="text-sm text-gray-700">{product.productName}</span>
+  </a>
+))}
+
+
+  </div>
+)}
+
+
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg className="h-5 w-5 text-gray-400" viewBox="0 0 512 512">
                     <path
@@ -219,33 +307,15 @@ function Header({ onCartClick }) {
                   <div 
                     className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-100"
                     onMouseLeave={() => setIsShopOpen(false)} style={{height:"350px",overflowX:"scroll"}}>
-           
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Angels</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Arrowhead</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Ball Sphere</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Bowl</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Bracelets</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Chakra Products</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Cabochons</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Candle Holders</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Energy Generating Tools</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Gemstone Egg</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Gemstone Beads</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Geometric Platonic Solids</a>
-
-
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Gemstone Shivalingam</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Gemstone Tree</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Healing Stick</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Heart</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Idols Hand Carvings</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Japa Mala</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Massage Wands</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Merkaba Star</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Orgone Energy Products</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Obelisk Tower</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Pencil Points</a>
-<a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700">Pendulums</a>
+           {           catagorys.map((catagory) => (
+                    <a 
+                      key={catagory._id } 
+                      href={`/catagory/${catagory.category}`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700"
+                    >
+                      {catagory.category}
+                    </a>
+                  ))}
                   </div>
                 )}
               </div>
@@ -264,7 +334,7 @@ function Header({ onCartClick }) {
       
       {/* Mobile Navigation (shown only on mobile) */}
       <div className="md:hidden">
-        <MobileNavbar />
+        <MobileNavbar catagory={catagorys} />
       </div>
       
       <AddCart show={cartOpen} onClose={() => setCartOpen(false)} />

@@ -22,5 +22,12 @@ routes.post("/register", UserCtl.SignUp);
 // In your server routes file
 routes.post('/login', UserCtl.SignIn);
 routes.post("/send-otp",UserCtl.SendOtp)
+routes.get("/catagoryproduct",UserCtl.ShowCatagoryProducts)
+routes.post("/setbestproductlist",UserCtl.setBestProductList)
+routes.get("/getbestproductlist",UserCtl.getBestProductList)
+
+
+// send catagory
+routes.get("/getCatagory",UserCtl.getCatagory);
 
 module.exports = routes;

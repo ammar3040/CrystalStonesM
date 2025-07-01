@@ -13,6 +13,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@msg91comm/sendotp-react-native": "^2.0.2",
     "@tailwindcss/postcss": "^4.1.8",
     "@tailwindcss/vite": "^4.1.10",
     "axios": "^1.10.0",

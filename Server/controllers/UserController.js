@@ -3,7 +3,7 @@ const Product = require('../models/ProductModel');
 const UserModel=require("../models/UserModel")
 const SECRET_KEY = process.env.SECRET_KEY || 'fallback_dev_key_only';
 const bcrypt = require('bcrypt');
-
+const CatagoryModel = require('../models/CatagoryModel');
 
 const dotenv = require('dotenv');
 dotenv.config({ path: `${__dirname}/../.env` }); 
@@ -194,5 +194,64 @@ module.exports.SendOtp= async (req, res) => {
   } catch (error) {
     console.error('Twilio verification error:', error.response?.data);
     res.status(500).json({ success: false, error: 'OTP verification failed' });
+  }
+}
+
+
+// get catagory
+module.exports.getCatagory=async (req, res) => {
+  try {
+    const allCatagoryData = await CatagoryModel.find();
+    return res.json(allCatagoryData);
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+module.exports.ShowCatagoryProducts=async (req, res) => {
+  try {
+    const catagoryName = req.query.catagoryName;
+    console.log("Catagory Name:", catagoryName);
+ 
+    const allCatagoryProducts = await Product.find({ category: catagoryName });
+    console.log(allCatagoryProducts);
+    res.json(allCatagoryProducts);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+module.exports.setBestProductList= async (req, res) => {
+  const selectedIds = req.body.bestProducts; // could be array or single string
+
+  try {
+    // First, reset all to false
+    await Product.updateMany({}, { $set: { bestproduct: false } });
+
+    // Then, set selected to true
+    if (selectedIds) {
+      const idsArray = Array.isArray(selectedIds) ? selectedIds : [selectedIds];
+      await Product.updateMany(
+        { _id: { $in: idsArray } },
+        { $set: { bestproduct: true } }
+      );
+    }
+    
+
+    res.redirect('/admin/datatable'); // or wherever you want
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
+}
+module.exports.getBestProductList= async (req, res) => {
+  try {
+    const bestProducts = await Product.find({ bestproduct: true });
+    res.json(bestProducts);
+  } catch (error) {
+    console.error("Error fetching best products:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 }

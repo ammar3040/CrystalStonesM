@@ -1,7 +1,7 @@
 {"name": "your-project",
   "version": "1.0.0",
   "scripts": {
-   "client": "npm run dev --prefix client",
+   "client": "npm run build --prefix client",
     "server": "node Server/app.js",
     "dev": "concurrently \"npm run server\" \"npm run client\""
   },

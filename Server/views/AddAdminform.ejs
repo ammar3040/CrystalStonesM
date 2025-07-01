@@ -1,7 +1,11 @@
 
         <%- include("Header") %>
 
+
+     
+
 <div class="container">
+     
   <div class="page-inner">
     <div class="row">
       <div class="col-md-12">
@@ -47,30 +51,11 @@
                     </label>
                   <select class="select select-bordered" id="category" name="category" required>
   <option disabled selected>Select Category</option>
-  <option value="angels">Angels</option>
-  <option value="arrowhead">Arrowhead</option>
-  <option value="ball-sphere">Ball Sphere</option>
-  <option value="bowl">Bowl</option>
-  <option value="bracelets">Bracelets</option>
-  <option value="chakra-products">Chakra Products</option>
-  <option value="cabochons">Cabochons</option>
-  <option value="candle-holders">Candle Holders</option>
-  <option value="energy-generating-tools">Energy Generating Tools</option>
-  <option value="gemstone-egg">Gemstone Egg</option>
-  <option value="gemstone-beads">Gemstone Beads</option>
-  <option value="geometric-platonic-solids">Geometric Platonic Solids</option>
-  <option value="gemstone-shivalingam">Gemstone Shivalingam</option>
-  <option value="gemstone-tree">Gemstone Tree</option>
-  <option value="healing-stick">Healing Stick</option>
-  <option value="heart">Heart</option>
-  <option value="idols-hand-carvings">Idols Hand Carvings</option>
-  <option value="japa-mala">Japa Mala</option>
-  <option value="massage-wands">Massage Wands</option>
-  <option value="merkaba-star">Merkaba Star</option>
-  <option value="orgone-energy-products">Orgone Energy Products</option>
-  <option value="obelisk-tower">Obelisk Tower</option>
-  <option value="pencil-points">Pencil Points</option>
-  <option value="pendulums">Pendulums</option>
+  <% allCatagoryData.forEach((category) => { %>
+    <option value="<%= category.category%>">
+      <%= category.category %>
+    </option>
+  <% }); %>
 </select>
 
                   </div>

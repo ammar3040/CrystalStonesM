@@ -30,19 +30,15 @@
                   <div class="form-control">
                     <label class="label">Category</label>
                     <select name="category" class="select select-bordered" required>
-                        <% const categories = [
-    "pendant", "bracelet", "ring", "earring", "statue", "other",
-    "angels", "arrowhead", "ball-sphere", "bowl", "bracelets", "chakra-products",
-    "cabochons", "candle-holders", "energy-generating-tools", "gemstone-egg",
-    "gemstone-beads", "geometric-platonic-solids", "gemstone-shivalingam",
-    "gemstone-tree", "healing-stick", "heart", "idols-hand-carvings", "japa-mala",
-    "massage-wands", "merkaba-star", "orgone-energy-products", "obelisk-tower",
-    "pencil-points", "pendulums"
-  ]; %>
+                      <option value="" disabled>Select Category</option>
+             
   
-                      <% categories.forEach(c => { %>
-                        <option value="<%= c %>" <%= ProductData.category === c ? "selected" : "" %>><%= c.charAt(0).toUpperCase() + c.slice(1) %></option>
-                      <% }) %>
+                     <% allCatagoryData.forEach((category) => { %>
+  <option value="<%= category.category %>" 
+    <%= ProductData.category === category.category ? 'selected' : '' %>>
+    <%= category.category %>
+  </option>
+<% }); %>
                     </select>
                   </div>
 

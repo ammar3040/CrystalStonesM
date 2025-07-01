@@ -9,7 +9,8 @@ const crypto = require('crypto');
 const { log } = require("console");
 const Product = require('../models/ProductModel'); // Import Product model
 const { v2: cloudinary } = require("cloudinary"); //for deletion
-
+const UserModel=require("../models/UserModel")
+const CatagoryModel = require("../models/CatagoryModel");
 
 module.exports.dashboard = (req, res) => {
  return res.render("Dashboard") 
@@ -17,9 +18,12 @@ module.exports.dashboard = (req, res) => {
 
 
 // addForm
-module.exports.AddAdminForm=(req,res)=>{
-    return res.render("AddAdminform")
+module.exports.AddAdminForm= async(req,res)=>{
+  const allCatagoryData = await CatagoryModel.find();
+ 
+    return res.render("AddAdminform", { allCatagoryData });// Pass the categories to the view
 }
+
 
 
 // admintable
@@ -57,6 +61,7 @@ module.exports.AddProduct = async (req, res) => {
       height,
       specialNotes,
       quantityUnit,
+      bestproduct,
       MinQuantity
     } = req.body;
 
@@ -91,6 +96,7 @@ module.exports.AddProduct = async (req, res) => {
       quantityUnit,
       MinQuantity,
       crystalType,
+       bestproduct,
       dimensions: {
         length,
         width,
@@ -165,13 +171,13 @@ module.exports.AdminEdit=async(req,res)=>{
   try{
 
 
-
+let allCatagoryData = await CatagoryModel.find();
  let ProductId =req.query.id;
 let ProductData= await Product.findOne({_id:ProductId})
  if(ProductData){
 console.log(ProductData);
 
- return res.render("EditAdminForm", {ProductData})
+ return res.render("EditAdminForm", {ProductData, allCatagoryData }); // Pass the product
 
 
  }else{
@@ -323,3 +329,110 @@ module.exports.updateData = async (req, res) => {
     session.endSession();
   }
 };
+// admin panle user data table rander
+
+module.exports.UserTable=async (req, res) => {
+  const AllUserData = await UserModel.find({role:"user"})
+  console.log("AllUserData", AllUserData);
+  
+
+  return res.render("UserTable", { AllUserData });
+}
+module.exports.UserDelete=async (req, res) => {
+const userId = req.query.uid;
+  console.log("User ID to delete:", userId);  
+  if (!userId) {
+    console.error("User ID is required for deletion");
+   
+  }else{
+    try {
+      const deletedUser = await UserModel.findByIdAndDelete(userId);
+      if (!deletedUser) {
+        console.error("User not found for deletion");
+      
+      } else {  
+        console.log("User deleted successfully:", deletedUser);
+       
+      }  }  catch (err) {
+      console.error("Error deleting user:", err);
+     
+      }
+     return res.redirect("/admin/usertable");}
+
+}
+module.exports.ShowCatagory=async (req, res) => {
+  try {
+    const allCatagoryData = await CatagoryModel.find();
+    return res.render("ShowCatagory",{ allCatagoryData });
+  } catch (err) {
+    console.error("Error rendering AddCatagory:", err);
+    return res.status(500).send("Failed to load AddCatagory page");
+  }
+};
+// Adjust the path as needed
+
+
+// add catagory
+
+module.exports.AddCatagory = async (req, res) => {
+  try {
+  const category = req.body.category?.trim();
+
+    const mainImage = req.files?.mainImage?.[0]; // safer access with optional chaining
+
+    if (!category || !mainImage) {
+      return res.status(400).send("Category name and image is required");
+    }
+
+    const mainImageData = {
+      url: mainImage.path,
+      public_id: mainImage.filename
+    };
+
+    const newCatagory = new CatagoryModel({
+      category,
+      mainImage: mainImageData
+    });
+
+    await newCatagory.save();
+
+    // ✅ Redirect to category table page
+    return res.redirect("/admin/catagorytable");
+    
+  } catch (err) {
+    console.error("Error adding category:", err);
+    return res.status(500).send("Failed to add category");
+  }
+};
+// delete catagory
+
+
+module.exports.deleteCatagory = async (req, res) => {
+  try {
+    const catagoryId = req.query.cid; 
+
+    if (!catagoryId) {
+      console.error("Catagory ID is required for deletion");
+      return res.status(400).send("Catagory ID is required");
+    }
+
+    const deletedCatagory = await CatagoryModel.findByIdAndDelete(catagoryId);
+    if (!deletedCatagory) {
+      console.error("Catagory not found for deletion");
+      return res.status(404).send("Catagory not found");
+    }
+
+    // Delete the main image from Cloudinary
+    if (deletedCatagory.mainImage && deletedCatagory.mainImage.public_id) {
+      await cloudinary.uploader.destroy(deletedCatagory.mainImage.public_id);
+      console.log("Main image deleted from Cloudinary");
+    }
+
+    console.log("Catagory deleted successfully:", deletedCatagory);
+  } catch (err) {
+    console.error("Error deleting catagory:", err);
+    return res.status(500).send("Failed to delete catagory");
+  }
+
+  return res.redirect("/admin/catagorytable");
+}

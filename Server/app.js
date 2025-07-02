@@ -22,12 +22,14 @@ app.set("view engine","ejs")
 app.set("views",path.join(__dirname,"views"))
 
 app.use(express.urlencoded({ extended: true }))
+
+app.use(express.json()); 
+const allowedOrigin = process.env.ALLOWED_ORIGIN;
+
 app.use(cors({
-  origin: 'http://localhost:5173',  // or wherever your React app runs
+  origin: allowedOrigin,  // or wherever your React app runs
   credentials: true
 }));
-app.use(express.json()); 
-
 
 app.use("/", Routeroutes);
 app.use (express.static(path.join(__dirname,"assets")))

@@ -92,12 +92,13 @@ const [showSuggestions, setShowSuggestions] = useState(false);
       const decodedValue = decodeURIComponent(cookieValue);
       
       // Handle cases where the value might start with "j:" or similar
-      const jsonString = decodedValue.startsWith('j:') 
-        ? decodedValue.substring(2) 
-        : decodedValue;
-      
-      const userData = JSON.parse(jsonString);
-      setUser(userData);
+   if (jsonString === "undefined") {
+  setUser(null);
+} else {
+  const userData = JSON.parse(jsonString);
+  setUser(userData);
+}
+
     } catch (error) {
       console.error('Error parsing user cookie:', error);
       // Try to manually extract data if parsing fails

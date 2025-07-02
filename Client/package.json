@@ -20,6 +20,7 @@
     "bootstrap": "^5.3.7",
     "firebase": "^11.9.1",
     "flowbite": "^3.1.2",
+    "js-cookie": "^3.0.5",
     "react": "^19.1.0",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.1.0",

@@ -5,10 +5,15 @@ import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react';
 
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 
 function BestProduct() {
 const [bestProducts, setBestProducts] = useState([]);
+
+const raw = Cookies.get('user'); // get cookie string
+const parsed = JSON.parse(decodeURIComponent(raw).replace(/^j:/, ''));
+const uid = parsed.uid;
 
 
   useEffect(() => {

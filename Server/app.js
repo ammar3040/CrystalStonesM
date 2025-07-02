@@ -24,13 +24,22 @@ app.set("views",path.join(__dirname,"views"))
 app.use(express.urlencoded({ extended: true }))
 
 app.use(express.json()); 
-const allowedOrigin = process.env.ALLOWED_ORIGIN;
+
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(",");
 
 app.use(cors({
-  origin: allowedOrigin,  // or wherever your React app runs
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
-
 app.use("/", Routeroutes);
 app.use (express.static(path.join(__dirname,"assets")))
 app.use ("/uploads",express.static(path.join(__dirname,"uploads")))

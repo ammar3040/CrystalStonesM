@@ -135,6 +135,7 @@ const isPasswordMatch = await bcrypt.compare(password, user.password);
 
     // Also set a user cookie with the basic info
     res.cookie('user', {
+      uid: user._id,
       name: user.Uname,
       email: user.email,
       mobile: user.mobile,

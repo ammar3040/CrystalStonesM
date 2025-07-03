@@ -85,37 +85,28 @@ const [showSuggestions, setShowSuggestions] = useState(false);
   const cookies = cookieString.split('; ');
   const userCookie = cookies.find(cookie => cookie.startsWith('user='));
   
-  if (userCookie) {
-    const cookieValue = userCookie.split('=')[1];
-    try {
-      // First decode the URI component, then handle any unexpected prefixes
-      const decodedValue = decodeURIComponent(cookieValue);
-      
-      // Handle cases where the value might start with "j:" or similar
-   if (jsonString === "undefined") {
-  setUser(null);
-} else {
-  const userData = JSON.parse(jsonString);
-  setUser(userData);
-}
+if (userCookie) {
+  const cookieValue = userCookie.split('=')[1];
+  try {
+    const decodedValue = decodeURIComponent(cookieValue);
+    
+    // Handle possible "j:" prefix (used by express-session sometimes)
+    const cleanValue = decodedValue.startsWith('j:') ? decodedValue.slice(2) : decodedValue;
 
-    } catch (error) {
-      console.error('Error parsing user cookie:', error);
-      // Try to manually extract data if parsing fails
-      try {
-        const manualMatch = decodedValue.match(/"name":"([^"]+)"/);
-        if (manualMatch) {
-          setUser({ name: manualMatch[1] });
-        } else {
-          setUser(null);
-        }
-      } catch {
-        setUser(null);
-      }
+    if (!cleanValue || cleanValue === "undefined") {
+      setUser(null);
+    } else {
+      const userData = JSON.parse(cleanValue);
+      setUser(userData);
     }
-  } else {
+  } catch (error) {
+    console.error('Error parsing user cookie:', error);
     setUser(null);
   }
+} else {
+  setUser(null);
+}
+
 };
 
     getUserFromCookie();

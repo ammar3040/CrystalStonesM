@@ -85,28 +85,37 @@ const [showSuggestions, setShowSuggestions] = useState(false);
   const cookies = cookieString.split('; ');
   const userCookie = cookies.find(cookie => cookie.startsWith('user='));
   
-if (userCookie) {
- const cookieValue = userCookie.split('=')[1];
-try {
-  const decodedValue = decodeURIComponent(cookieValue);
-  const cleanValue = decodedValue.startsWith('j:') ? decodedValue.slice(2) : decodedValue;
-
-  // ✅ Prevent crash if cookie is invalid or "undefined"
-  if (!cleanValue || cleanValue === "undefined" || cleanValue === "null") {
-    setUser(null);
-  } else {
-    const userData = JSON.parse(cleanValue);
-    setUser(userData);
-  }
-} catch (error) {
-  console.error('Error parsing user cookie:', error);
+  if (userCookie) {
+    const cookieValue = userCookie.split('=')[1];
+    try {
+      // First decode the URI component, then handle any unexpected prefixes
+      const decodedValue = decodeURIComponent(cookieValue);
+      
+      // Handle cases where the value might start with "j:" or similar
+   if (jsonString === "undefined") {
   setUser(null);
-}
-
 } else {
-  setUser(null);
+  const userData = JSON.parse(jsonString);
+  setUser(userData);
 }
 
+    } catch (error) {
+      console.error('Error parsing user cookie:', error);
+      // Try to manually extract data if parsing fails
+      try {
+        const manualMatch = decodedValue.match(/"name":"([^"]+)"/);
+        if (manualMatch) {
+          setUser({ name: manualMatch[1] });
+        } else {
+          setUser(null);
+        }
+      } catch {
+        setUser(null);
+      }
+    }
+  } else {
+    setUser(null);
+  }
 };
 
     getUserFromCookie();

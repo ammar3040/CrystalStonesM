@@ -6,6 +6,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/thumbs';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import ProductCard from '../Product/ProductCard';
 
 const ViewProduct = () => {
   const { ProductId } = useParams();
@@ -13,7 +14,20 @@ const ViewProduct = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
   const [product, setProduct] = useState(null);
+  const [allProduct, setAllProduct] = useState(null);
+useEffect(() => {
+  const fetchAllProducts = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/all`);
+      const data = await response.json();
+      setAllProduct(data);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+    }
+  };
 
+  fetchAllProducts();
+}, []);
 useEffect(() => {
   axios.get(`${import.meta.env.VITE_API_URL}/api/product/?id=${ProductId}`)
     .then((res) => {
@@ -57,6 +71,7 @@ let  MinQuantity= product.MinQuantity
   };
 
   return (
+    <>
     <div className="container mx-auto px-4 py-8 font-sans">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -121,6 +136,10 @@ let  MinQuantity= product.MinQuantity
               
               <span className="text-2xl font-bold text-gray-900">₹{product.discountedPrice}</span>
               <span className='  ms-2 font-medium'>{product.quantityUnit }</span>
+               <div className="">
+    <span className="text-2xl font-bold text-gray-900">USD: </span><span className="text-2xl font-semibold text-gray-800 ">${product.dollarPrice}</span>  <span className='   font-medium'>{product.quantityUnit }</span>
+  </div>
+              
               {product.originalPrice && (
                 <span className="text-green-600 ml-2 font-medium ">
                   ({Math.round((1 - product.discountedPrice/product.originalPrice)*100)}% OFF)
@@ -266,6 +285,29 @@ let  MinQuantity= product.MinQuantity
         </div>
       </div>
     </div>
+    {/* Recommended Products */}
+<div className="mt-12">
+  <h2 className="text-xl font-semibold text-gray-900 mb-4">You may also like</h2>
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+    {allProduct
+      ?.filter(p => p._id !== product._id) // exclude current product
+      .sort(() => 0.5 - Math.random())     // shuffle
+      .slice(0, 4)                          // take 4
+      .map(p => (
+        <ProductCard
+              productImg={p?.mainImage?.url || '/fallback.png'} // Prevent crash
+              productName={p?.productName || 'No Name'}
+              productAbout={p?.description || 'No description available'}
+              ProductPrice={p?.discountedPrice || 0}
+              oldProductPrice={p?.originalPrice || 0}
+              minQuentity={p?.MinQuantity || 1}
+              pid={product?._id}
+            />
+      ))}
+  </div>
+</div>
+
+    </>
   );
 };
 

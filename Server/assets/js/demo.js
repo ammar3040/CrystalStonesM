@@ -192,8 +192,8 @@ Circles.create({
 //Notify
 $.notify({
 	icon: 'icon-bell',
-	title: 'Kaiadmin',
-	message: 'Premium Bootstrap 5 Admin Dashboard',
+	title: 'crystal stones mart',
+	message: 'walcome to admin panel of crystal stones mart',
 },{
 	type: 'secondary',
 	placement: {

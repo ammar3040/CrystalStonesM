@@ -3,7 +3,7 @@ const express = require("express");
 
 const routes = express.Router();
 const UserCtl=require("../controllers/UserController")
-
+const passport = require('passport');
 const dotenv = require('dotenv');
 dotenv.config({ path: `${__dirname}/../.env` }); 
 
@@ -20,14 +20,34 @@ routes.get("/Product",UserCtl.ShowProduct);
 // Registration Route
 routes.post("/register", UserCtl.SignUp);
 // In your server routes file
-routes.post('/login', UserCtl.SignIn);
-routes.post("/send-otp",UserCtl.SendOtp)
+routes.post('/login',
+  passport.authenticate('local', { session: false }),
+  UserCtl.SignIn
+);
+// Google OAuth Route
+routes.get('/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+routes.get('/google/callback',
+  passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_LINK}` }),
+  UserCtl.GoogleSignIn  // your controller to handle cookie setting & redirect
+);
 routes.get("/catagoryproduct",UserCtl.ShowCatagoryProducts)
 routes.post("/setbestproductlist",UserCtl.setBestProductList)
 routes.get("/getbestproductlist",UserCtl.getBestProductList)
 
 
+routes.post("/getCartItem", UserCtl.getCartItem);
+routes.post("/cartedItem", UserCtl.getCartedItem);
+routes.delete('/deleteCart', UserCtl.deleteCartItem);
+
+
+routes.post("/send-otp", UserCtl.sendOtp);
+routes.post("/updatePhone", UserCtl.updatePhone);
+
 // send catagory
 routes.get("/getCatagory",UserCtl.getCatagory);
+routes.post("/verify-otp", UserCtl.verifyOtp);
+
 
 module.exports = routes;

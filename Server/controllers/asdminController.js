@@ -57,6 +57,7 @@ module.exports.AddProduct = async (req, res) => {
       dollarPrice,
       crystalType,
       length,
+      modelNumber,
       width,
       height,
       specialNotes,
@@ -95,6 +96,7 @@ module.exports.AddProduct = async (req, res) => {
       benefits,
       quantityUnit,
       MinQuantity,
+      modelNumber,
       crystalType,
        bestproduct,
       dimensions: {
@@ -175,7 +177,7 @@ let allCatagoryData = await CatagoryModel.find();
  let ProductId =req.query.id;
 let ProductData= await Product.findOne({_id:ProductId})
  if(ProductData){
-console.log(ProductData);
+
 
  return res.render("EditAdminForm", {ProductData, allCatagoryData }); // Pass the product
 
@@ -333,14 +335,14 @@ module.exports.updateData = async (req, res) => {
 
 module.exports.UserTable=async (req, res) => {
   const AllUserData = await UserModel.find({role:"user"})
-  console.log("AllUserData", AllUserData);
+  
   
 
   return res.render("UserTable", { AllUserData });
 }
 module.exports.UserDelete=async (req, res) => {
 const userId = req.query.uid;
-  console.log("User ID to delete:", userId);  
+  
   if (!userId) {
     console.error("User ID is required for deletion");
    

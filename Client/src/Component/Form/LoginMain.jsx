@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
+import SendOtpWithNumber from './OTP/SendOtpWithNumber';
+import toast from 'react-hot-toast'; // Import toast for notifications
 const LoginMain = ({ onLoginSuccess, onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -21,77 +24,48 @@ const LoginMain = ({ onLoginSuccess, onClose }) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    try {
-      // Check if email exists in database
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-         credentials: 'include',
-        body: JSON.stringify(formData)
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-        
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(formData)
+    });
 
-      });
+    const data = await response.json();
 
-      const data = await response.json();
-      
-      
-
-      if (response.ok) {
-        // Success - show toast and navigate
-        document.getElementById('toast-success').classList.remove('hidden');
-       setTimeout(() => {
-  if (data.user && data.user.role === 'admin') {
-    window.location.href = `${import.meta.env.VITE_API_URL}/admin`;
-  } else {
-
-    // Close the modal for normal users
-    if (onClose){ onClose()};
-    navigate("/") // Assuming you pass an onClose prop
-  }
-}, 1500);
-      } else {
-        // Error - show alert
-        document.getElementById('alert-error').classList.remove('hidden');
-        setTimeout(() => {
-          document.getElementById('alert-error').classList.add('hidden');
-        }, 3000);
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      document.getElementById('alert-error').classList.remove('hidden');
+    if (response.ok) {
+      toast.success('✅ Login successful! Redirecting...');
       setTimeout(() => {
-        document.getElementById('alert-error').classList.add('hidden');
-      }, 3000);
+        if (data && data.role === 'admin') {
+          window.location.href = data.redirect;
+        } else {
+          if (onClose) onClose();
+          navigate('/');
+        }
+      }, 1500);
+    } else {
+      toast.error('Invalid email or password. Please try again.');
     }
-  };
+  } catch (error) {
+    console.error('Login error:', error);
+    toast.error(' wrong email/password Please try again later.');
+  }
+};
+
 
   return (
+    <>
     <section className="bg-transparent min-h-screen flex box-border justify-center items-center" style={{scale:.7}}>
-      {/* Error Alert (hidden by default) */}
-      <div id="alert-error" className="hidden alert alert-error absolute  w-full max-w-md shadow-lg" style={{position:"absolute",top:"-10%",right:"30%",zIndex:"1000000"}}>
-        <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span>Invalid email or password. Please try again.</span>
-      </div>
+  
+     
 
-      {/* Success Toast (hidden by default) */}
-      <div id="toast-success" className="hidden toast toast-center" style={{position:"absolute",top:"-10%",right:"30%",zIndex:"1000000"}}>
-        <div className="alert alert-success flex">
-          <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>Login successful! Redirecting...</span>
-        </div>
-      </div>
-
-      <div className="bg-[#dfa674] rounded-2xl flex max-w-3xl p-5 items-center">
+      <div className="bg-[#fff8a8] rounded-2xl flex max-w-3xl p-5 items-center" style={{backgroundColor:"#fff8a8 !important"}}>
         <div className="md:w-1/2 px-8">
           <h2 className="font-bold text-3xl text-[#002D74]">Login</h2>
           <p className="text-sm mt-4 text-[#002D74]">If you already a member, easily log in now.</p>
@@ -154,6 +128,7 @@ const LoginMain = ({ onLoginSuccess, onClose }) => {
             <p className="text-center text-sm">OR</p>
             <hr className="border-gray-300" />
           </div>
+          <a  href={`${import.meta.env.VITE_API_URL}/api/google`}>
           <button className="bg-white border py-2 w-full rounded-xl mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 hover:bg-[#60a8bc4f] font-medium">
             <svg className="mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="25px">
               <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
@@ -163,22 +138,27 @@ const LoginMain = ({ onLoginSuccess, onClose }) => {
             </svg>
             Login with Google
           </button>
+          </a>
           <div className="mt-10 text-sm border-b border-gray-500 py-5 playfair tooltip">Forget password?</div>
 
           <div className="mt-4 text-sm flex justify-between items-center container-mr">
             <p className="mr-3 md:mr-0">If you don't have an account..</p>
-            <a href="/SignUpPage"><button className="hover:border register text-white bg-[#002D74] hover:border-gray-400 rounded-xl py-2 px-5 hover:scale-110 hover:bg-[#002c7424] font-semibold duration-300">Register</button></a>
+            <button onClick={() => setShowOtpModal(true)} className="hover:border register text-white bg-[#002D74] hover:border-gray-400 rounded-xl py-2 px-5 hover:scale-110 hover:bg-[#002c7424] font-semibold duration-300"
+            >Register</button>
           </div>
         </div>
         <div className="md:block hidden w-1/2">
           <img 
             className="rounded-2xl max-h-[1600px]" 
-            src="https://images.unsplash.com/photo-1552010099-5dc86fcfaa38?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NzEyNjZ8MHwxfHNlYXJjaHwxfHxmcmVzaHxlbnwwfDF8fHwxNzEyMTU4MDk0fDA&ixlib=rb-4.0.3&q=80&w=1080" 
-            alt="login form" 
+          src={"/img/loginpage.jpeg"}
           />
         </div>
       </div>
+    
+
     </section>
+      {showOtpModal && <SendOtpWithNumber  forceOpen={true}  onClose={() => setShowOtpModal(false)} />}
+      </>
   );
 };
 

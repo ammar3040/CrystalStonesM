@@ -146,7 +146,7 @@ function ProductCategory() {
         }}
       >
         {catagory.map((c, index) => (
-          <SwiperSlide key={index}>
+          <SwiperSlide >
             <div style={{ padding: '10px' }}>
           
   <CategoryCard category={c} />

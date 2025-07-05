@@ -4,11 +4,13 @@ const UserModel=require("../models/UserModel")
 const SECRET_KEY = process.env.SECRET_KEY || 'fallback_dev_key_only';
 const bcrypt = require('bcrypt');
 const CatagoryModel = require('../models/CatagoryModel');
-
+const CartModel = require('../models/CartModel');
 const dotenv = require('dotenv');
 dotenv.config({ path: `${__dirname}/../.env` }); 
+const axios = require("axios");
 
 
+const otpStore = new Map();
 const jwt = require('jsonwebtoken');
  module.exports.ShowAllProduct = async (req, res) => {
   try {
@@ -36,10 +38,8 @@ module.exports.ShowProduct= async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 }
-module.exports.SignUp=async (req, res) => {
+module.exports.SignUp = async (req, res) => {
   try {
-  
-    
     const { Uname, email, mobile, address, password, confirmPassword } = req.body;
 
     // Basic validation
@@ -51,103 +51,72 @@ module.exports.SignUp=async (req, res) => {
       return res.status(400).json({ success: false, message: "Passwords do not match" });
     }
 
-    // Check if user already exists
-    const existingUser = await UserModel.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ success: false, message: "Email already registered" });
+    const existingUser = await UserModel.findOne({ mobile });
+
+    if (!existingUser) {
+      return res.status(404).json({ success: false, message: "Mobile number not verified yet. Please verify OTP first." });
+    }
+
+    if (existingUser.email) {
+      return res.status(409).json({ success: false, message: "User already registered with this mobile number" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
-    const newUser = new UserModel({
-      Uname,
-      email,
-      mobile: mobile || undefined, // Only store if provided
-      address: address || undefined, // Only store if provided
-       password: hashedPassword // Note: In production, you should hash the password before saving
-    });
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { mobile },
+      {
+        $set: {
+          Uname: Uname.trim(),
+          email: email.trim(),
+          address: address?.trim() || undefined,
+          password: hashedPassword,
+          // isVerified: true // Optional: use if you want a verification flag
+        },
+      },
+      { new: true }
+    );
 
-    // Save to database
-    const savedUser = await newUser.save();
-
-
-    // Respond with success (excluding password in response)
-    const userResponse = savedUser.toObject();
-    delete userResponse.password;
-
-    res.status(201).json({ 
-      success: true, 
-      message: "Registered successfully!",
-      user: userResponse
-    });
+    return res.status(200).json({ success: true, message: "User registered successfully", user: updatedUser });
 
   } catch (error) {
     console.error("Registration error:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Registration failed or already Registrat",
-      error: error.message 
+    return res.status(500).json({
+      success: false,
+      message: "Registration failed. Please try again.",
+      error: error.message
     });
   }
-}
-module.exports.SignIn=async (req, res) => {
-  try {
-    const { email, password } = req.body;
+};
+module.exports.SignIn = (req, res) => {
+  const user = req.user;
+ 
+  // Set cookie with user data (JSON string)
+  res.cookie('user', JSON.stringify({
+    uid: user._id,
+    name: user.Uname,
+    email: user.email,
+    mobile: user.mobile,
+    address: user.address,
+    role: user.role
+  }), {
+    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: false,
+    secure: true,
+    sameSite: 'none'
+  });
 
-  
-
-
-    const user = await UserModel.findOne({
-      email: { $regex: new RegExp(`^${email}$`, 'i') }
-    });
-     if (!user) {
-      return res.status(401).json({ success: false, message: 'User not found' });
-    }
-const isPasswordMatch = await bcrypt.compare(password, user.password);
-
-
-    if ( !isPasswordMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid password' });
-    }
-
-    // Generate JWT token with all necessary user data
-    const token = jwt.sign(
-      { 
-        id: user._id, 
-        name: user.Uname, 
-        email: user.email,
-        mobile: user.mobile,
-        address: user.address,
-         role: user.role
-      },
-      SECRET_KEY,
-      { expiresIn: '1d' }
-    );
-
-    // Set cookie with the token
-    res.cookie('authToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // true in production
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000 // 1 day
-    });
-
-    // Also set a user cookie with the basic info
-    res.cookie('user', {
-      uid: user._id,
-      name: user.Uname,
-      email: user.email,
-      mobile: user.mobile,
-      address: user.address
-    }, {
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-      httpOnly: false // So client-side can read it
-    });
-
-    res.json({
+  if (user.role === 'admin') {
+    return res.json({
       success: true,
-      message: 'Login successful',
+      role: 'admin',
+      redirect:`${process.env.BACKEND_LINK}/admin`,
+    });
+  } else {
+   
+    return res.json({
+      success: true,
+      role: 'user',
       user: {
         id: user._id,
         name: user.Uname,
@@ -157,46 +126,12 @@ const isPasswordMatch = await bcrypt.compare(password, user.password);
         role: user.role
       }
     });
-
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
   }
-}
+};
+
+
 
 // for sending otp
-
-module.exports.SendOtp= async (req, res) => {
-  try {
-    const { mobile, otp } = req.body;
-    
-    const response = await axios.post(
-      `https://verify.twilio.com/v2/Services/${verifyServiceSid}/VerificationCheck`,
-      new URLSearchParams({
-        To: mobile,
-        Code: otp
-      }),
-      {
-        auth: {
-          username: accountSid,
-          password: authToken
-        },
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }
-    );
-
-    if (response.data.status === 'approved') {
-      res.json({ success: true, verified: true });
-    } else {
-      res.json({ success: false, verified: false });
-    }
-  } catch (error) {
-    console.error('Twilio verification error:', error.response?.data);
-    res.status(500).json({ success: false, error: 'OTP verification failed' });
-  }
-}
 
 
 // get catagory
@@ -213,10 +148,10 @@ module.exports.getCatagory=async (req, res) => {
 module.exports.ShowCatagoryProducts=async (req, res) => {
   try {
     const catagoryName = req.query.catagoryName;
-    console.log("Catagory Name:", catagoryName);
+ 
  
     const allCatagoryProducts = await Product.find({ category: catagoryName });
-    console.log(allCatagoryProducts);
+
     res.json(allCatagoryProducts);
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -256,3 +191,208 @@ module.exports.getBestProductList= async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 }
+module.exports.sendOtp = async (req, res) => {
+  const { phone } = req.body;
+
+  if (!phone) {
+    return res.status(400).json({ success: false, message: "Phone number required" });
+  }
+
+  const otp = Math.floor(1000 + Math.random() * 9000); // 🔢 4-digit OTP
+
+  try {
+    const response = await axios.post(
+      "https://www.fast2sms.com/dev/bulkV2",
+      {
+        route: `${process.env.FAST2SMS_ROUTE }`, // Use environment variable for route
+        message: `Crystal Stones Mart
+Your OTP is ${otp}.
+Thank you for logging in and trusting us with your crystal journey!`,
+        language: "english",
+        numbers: phone
+      },
+      {
+        headers: {
+          authorization: process.env.FAST2SMS_API_KEY,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    otpStore.set(phone, otp); // ✅ Store OTP after sending
+
+    res.json({ success: true, message: "OTP sent", otp }); // ⚠️ Don't send OTP in production
+  } catch (error) {
+    console.error("SMS sending error:", error.response?.data || error.message);
+    res.status(500).json({
+      success: false,
+      message: "Failed to send OTP",
+      error: error.response?.data || error.message
+    });
+  }
+};
+
+// verfication of otp
+// adjust path if needed
+
+module.exports.verifyOtp = async (req, res) => {
+  const { phone, otp } = req.body;
+
+  if (!phone || !otp) {
+    return res.status(400).json({ success: false, message: "Phone number and OTP are required" });
+  }
+
+  const savedOtp = otpStore.get(phone);
+
+  if (savedOtp && String(savedOtp).trim() === String(otp).trim()) {
+    otpStore.delete(phone); // ✅ Clear OTP after verification
+
+    try {
+      // Check if user already exists
+      const existingUser = await UserModel.findOne({ mobile:phone });
+      if (existingUser) {
+        return res.status(200).json({ success: true, message: "✅ OTP verified, user already exists", user: existingUser });
+      }
+
+      // Create a new user with phone number
+      const newUser = new UserModel({ mobile:phone });
+      await newUser.save();
+
+      return res.status(201).json({ success: true, message: "✅ OTP verified and user created", user: newUser });
+    } catch (error) {
+      console.error("Error during user creation:", error);
+      return res.status(500).json({ success: false, message: "Server error while creating user" });
+    }
+
+  } else {
+    return res.status(400).json({ success: false, message: "❌ Invalid or expired OTP" });
+  }
+};
+
+
+// goggle authentication 
+
+
+module.exports.GoogleSignIn = (req, res) => {
+  const user = req.user;
+
+  res.cookie('user', JSON.stringify({
+    uid: user._id,
+    name: user.Uname,
+    email: user.email,
+    mobile: user.mobile,
+    address: user.address,
+    role: user.role
+  }), {
+    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: false,
+    secure: true,
+    sameSite: 'none'
+  });
+
+  if (user.role === 'admin') {
+    return res.redirect(`${process.env.BACKEND_LINK}/admin`);
+  } else {
+    return res.redirect(`${process.env.FRONTEND_LINK }/`);
+  }
+};
+
+
+// add to cart 
+
+
+module.exports.getCartItem = async (req, res) => {
+  const { pid, uid } = req.body;
+  let quantity = req.body.quantity || 1;
+
+  if (!pid || !uid) {
+    return res.status(400).json({ success: false, message: "Missing fields" });
+  }
+
+  try {
+    let existingCartItem = await CartModel.findOne({
+      userId: uid,
+      productId: pid
+    });
+
+    if (existingCartItem) {
+      // ✅ Correctly increase quantity and save
+      existingCartItem.quantity += 1;
+      await existingCartItem.save();
+    } else {
+      const newCartItem = new CartModel({
+        userId: uid,
+        productId: pid,
+        quantity
+      });
+      await newCartItem.save();
+    }
+
+    res.status(200).json({ success: true, message: "Item added to cart" });
+  } catch (err) {
+    console.error("Error adding to cart:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+}
+
+
+// show perticular user carted item
+module.exports.getCartedItem = async (req, res) => {
+  const userId = req.body.uid;
+
+  if (!userId) {
+    return res.status(400).json({ success: false, message: "User ID is required" });
+  }
+
+  try {
+    const cartItems = await CartModel.find({ userId }).populate('productId');
+    res.status(200).json(cartItems);
+  } catch (error) {
+    console.error("Error fetching cart items:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+}
+
+// delete cart item
+module.exports.deleteCartItem =async (req, res) => {
+  const { cartId, uid } = req.body;
+
+  try {
+    const deleted = await CartModel.findOneAndDelete({
+      _id: cartId,
+      uid: uid,
+    });
+
+    if (!deleted) {
+      return res.status(404).json({ message: 'Cart item not found' });
+    }
+
+    res.json({ message: 'Item deleted successfully' });
+  } catch (error) {
+    console.error('Delete error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+// update mobile number wit h otp
+module.exports.updatePhone = async (req, res) => {
+  const { email, mobile } = req.body;
+
+
+  try {
+   const user = await UserModel.findByIdAndUpdate(
+  email,  // here, 'email' is actually user ID if you're passing it like that
+  { mobile: mobile },
+  { new: true }
+);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({ success: true, user });
+  } catch (err) {
+    console.error("Update error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};

@@ -6,9 +6,10 @@ import AddCart from './AddCart';
 import MobileNavbar from './MobileNavbar';
 import LoginMain from '../Form/LoginMain';
 import SignUpMain from '../Form/SignUpMain';
-import { useNavigate } from 'react-router-dom';
+import { Link,  useNavigate } from 'react-router-dom';
 import { MdEmail,MdPhoneAndroid } from 'react-icons/md';
 import { MdLocationOn } from 'react-icons/md';
+import axios from 'axios';
 
 
 
@@ -30,6 +31,8 @@ function Header({ onCartClick }) {
   const typingSpeed = 150;
   const deletingSpeed = 50;
   const pauseDuration = 2000;
+  const [cartItems, setCartItems] = useState([]);
+
  
   const [cartOpen, setCartOpen] = useState(false);
 
@@ -46,14 +49,6 @@ const [showSuggestions, setShowSuggestions] = useState(false);
     return () => clearInterval(cursorInterval);
   }, []);
   
-  useEffect( () => {
-    if (user) {
-      setIsProfileOpen(true); // Show profile modal if logged in
-    } else {
-      setIsLoginOpen(true); // Show login modal if logged out
-    }
-  
-},[])
 
 
   // Typing animation
@@ -79,47 +74,44 @@ const [showSuggestions, setShowSuggestions] = useState(false);
 
     return () => clearTimeout(timeout);
   }, [placeholder, placeholderIndex]);
- useEffect(() => {
-   const getUserFromCookie = () => {
-  const cookieString = document.cookie;
-  const cookies = cookieString.split('; ');
-  const userCookie = cookies.find(cookie => cookie.startsWith('user='));
-  
-  if (userCookie) {
-    const cookieValue = userCookie.split('=')[1];
-    try {
-      // First decode the URI component, then handle any unexpected prefixes
-      const decodedValue = decodeURIComponent(cookieValue);
-      
-      // Handle cases where the value might start with "j:" or similar
-   if (jsonString === "undefined") {
-  setUser(null);
-} else {
-  const userData = JSON.parse(jsonString);
-  setUser(userData);
-}
+useEffect(() => {
+  const getUserFromCookie = () => {
+    const cookieString = document.cookie;
+    const cookies = cookieString.split('; ');
+    const userCookie = cookies.find(cookie => cookie.startsWith('user='));
 
-    } catch (error) {
-      console.error('Error parsing user cookie:', error);
-      // Try to manually extract data if parsing fails
+    if (userCookie) {
       try {
-        const manualMatch = decodedValue.match(/"name":"([^"]+)"/);
-        if (manualMatch) {
-          setUser({ name: manualMatch[1] });
-        } else {
+        const cookieValue = decodeURIComponent(userCookie.split('=')[1]);
+
+        // Check if it's valid
+        if (cookieValue === 'undefined') {
           setUser(null);
+        } else {
+          const parsedUser = JSON.parse(cookieValue);
+          setUser(parsedUser);
+            fetchCartItems(parsedUser.uid); // 👈 Fetch with Axios
         }
-      } catch {
+      } catch (error) {
+        console.error('Error parsing user cookie:', error);
         setUser(null);
       }
+    } else {
+      setUser(null);
     }
-  } else {
-    setUser(null);
-  }
-};
+  };
 
-    getUserFromCookie();
-  }, [isProfileOpen]); // Re-check when modal opens
+  getUserFromCookie();
+},[isProfileOpen, isLoginOpen]);
+useEffect(() => {
+  if (user) {
+    setIsProfileOpen(true);
+    setIsLoginOpen(false);
+  } else {
+    setIsProfileOpen(false);
+    setIsLoginOpen(true);
+  }
+}, []);
 
 
   const handleLogout = () => {
@@ -186,6 +178,21 @@ const [showSuggestions, setShowSuggestions] = useState(false);
 
   fetchAllProducts();
 }, []);
+
+// Fetch cart items when user is set
+const fetchCartItems = async (uid) => {
+  try {
+    const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/cartedItem`, {
+      uid: uid
+    }, {
+      withCredentials: true
+    });
+
+    setCartItems(res.data); // assuming your API returns the cart array directly
+  } catch (error) {
+    console.error('Error fetching cart items:', error);
+  }
+};
 
 
 
@@ -258,7 +265,15 @@ const [showSuggestions, setShowSuggestions] = useState(false);
             <div className="flex items-center space-x-4">
               {/* Cart button */}
               <button 
-                onClick={() => setCartOpen(true)} 
+               onClick={() => {
+    if (!user) {
+      setIsLoginOpen(true);
+      setIsProfileOpen(true);
+    } else {
+      fetchCartItems(user.uid); // refresh cart
+      setCartOpen(true);
+    }
+  }}
                 className="text-gray-500 hover:text-yellow-600 focus:outline-none"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,10 +335,11 @@ const [showSuggestions, setShowSuggestions] = useState(false);
                   </div>
                 )}
               </div>
-              
-              <a href="/" className="text-gray-700 hover:text-yellow-600 px-1 text-sm font-medium uppercase tracking-wider transition-colors">
+              <Link to={"/ViewAllProduct"}>
+              <p  className="text-gray-700 hover:text-yellow-600 px-1 text-sm font-medium uppercase tracking-wider transition-colors">
                 Collections
-              </a>
+              </p>
+              </Link>
               <a href="/" className="text-gray-700 hover:text-yellow-600 px-1 text-sm font-medium uppercase tracking-wider transition-colors">
                 About
               </a>
@@ -338,7 +354,7 @@ const [showSuggestions, setShowSuggestions] = useState(false);
         <MobileNavbar catagory={catagorys} />
       </div>
       
-      <AddCart show={cartOpen} onClose={() => setCartOpen(false)} />
+      <AddCart show={cartOpen} onClose={() => setCartOpen(false)} cartItems={cartItems}/>
 {isProfileOpen && (
   <div className="fixed inset-0 z-50 overflow-y-auto">
     <div 
@@ -401,16 +417,18 @@ const [showSuggestions, setShowSuggestions] = useState(false);
       </div>
     </div>
        ) : (
-          <LoginMain
-           onLoginSuccess={(userData) => {
-          setUser(userData);
-          // Redirect logic for admins only
-          if (userData.role === 'admin') {
-            window.location.href = `${import.meta.env.VITE_API_URL}/admin`;
-          }
-        }}
-        onClose={() => setIsProfileOpen(false)} 
-          />
+        <LoginMain
+  onLoginSuccess={(userData) => {
+    setUser(userData);
+    if (userData.role === 'admin') {
+      window.location.href = `${import.meta.env.VITE_API_URL}/admin`;
+    }
+  }}
+  onClose={() => {setIsProfileOpen(false);
+  
+  setIsLoginOpen(false)}} 
+/>
+
            
           
          

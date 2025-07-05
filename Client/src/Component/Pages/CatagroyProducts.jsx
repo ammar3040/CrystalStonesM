@@ -30,23 +30,27 @@ const catagoryName=useParams().CatagoryName;
       <h2 className="text-2xl font-bold text-center mb-8">Explore Our Agate Collection</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {products.map((product) => (
-          <Link to={`/Product/${product._id}`} key={product._id}>
+       
             <ProductCard
               productImg={product.mainImage.url}
               productName={product.productName}
               productAbout={product.description}
               ProductPrice={product.discountedPrice}
               oldProductPrice={product.originalPrice}
+              minQuentity={product.MinQuantity}
+              pid={product._id}
             />
-          </Link>
+       
         ))}
       </div>
   
       {/* Optional View More Button */}
       <div className="text-center mt-8">
+        <Link to={'/ViewAllProduct'}>
         <button className="px-6 py-2 border border-amber-500 text-amber-500 rounded-md hover:bg-amber-500 hover:text-white transition-colors">
           View All Products
         </button>
+        </Link>
       </div>
     </div>
   )

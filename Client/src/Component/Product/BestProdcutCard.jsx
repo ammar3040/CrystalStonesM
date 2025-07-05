@@ -4,55 +4,48 @@ import "./Product.css";
 
 function BestProductCard({ productImg, productName, productAbout, ProductPrice, oldProductPrice }) {
   return (
-    <div className="group"> {/* Outer container for hover effects */}
-      <div className="max-w-xs mx-auto overflow-hidden bg-white rounded-full shadow-lg flex flex-col transition-transform duration-300 group-hover:scale-105" style={{ height: '500px' }}>
-        {/* Image container with fixed height */}
-        <div className="flex-shrink-0 relative" style={{ height: '60%' }}>
+  <div className="group prdcard w-full max-w-[280px] mx-auto transition-all duration-300 bg-transparent shadow-none">
+
+      {/* Capsule-shaped container */}
+      <div className="bg-white rounded-full overflow-hidden  h-full flex flex-col hover:shadow-md">
+        {/* Image container (top half of capsule) */}
+        <div className="relative h-[220px] overflow-hidden">
           <img 
             src={productImg}
-            className="w-full h-full object-cover" 
-            alt="Product" 
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+            alt={productName} 
           />
-          {/* Wishlist button (bottom right of image) */}
-          <button className="absolute bottom-2 right-2 bg-black p-2 rounded-full hover:bg-gray-800 transition">
-            <FaHeart className="text-white" />
+          {/* Wishlist button */}
+          <button className="absolute top-3 right-3 bg-white/90 hover:bg-gray-100 p-2 rounded-full  transition">
+            <FaHeart className="text-gray-700 text-sm hover:text-red-500" />
           </button>
         </div>
         
-        {/* Content container with fixed height */}
-        <div 
-          className="px-6 py-4 text-white text-center flex-grow flex flex-col " 
-          style={{
-            backgroundColor: "#fff8a8", 
-            height: '40%'
-          }}
-        >
-          <div className='w-full mx-0 my-0'>
-            <div className="font-bold text-xl  text-black">{productName}</div>
-            <p className="text-gray-800 text-sm pt-1 mb-0">
+        {/* Content container (bottom half of capsule) */}
+        <div className="bg-[#fff8a8] flex-grow p-4 flex flex-col">
+          {/* Title and description */}
+          <div className="text-center mb-2 flex-1">
+            <h2 className="font-semibold text-gray-900 text-sm md:text-base line-clamp-1">
+              {productName}
+            </h2>
+            <p className="text-gray-700 text-xs line-clamp-2 mt-1">
               {productAbout}
             </p>
           </div>
-          <hr className='text-black' />
           
-          <div>
-            {/* Price moved above buttons */}
-            <div className="mb-1 text-black">
-              <span className="text-lg text-gray-400 line-through">₹{oldProductPrice}</span>{' '}
-              <span className="text-lg text-black font-bold">₹{ProductPrice}</span>
-            </div>
-            
-            <div className="flex justify-center space-x-4">
-              {/* View button */}
-              <button className="px-4 py-1 rounded-full font-medium text-black addCartbtn transition flex items-center">
-                <FaEye className="mr-1" /> View
-              </button>
-              
-              {/* Add to Cart button */}
-              <button className="text-black px-4 py-1 rounded-full font-medium addCartbtn transition flex items-center">
-                <FaShoppingCart className="mr-1" /> Cart
-              </button>
-            </div>
+          {/* Price */}
+          <div className="flex justify-center items-center gap-2 mb-3">
+            <span className="text-gray-500 text-xs line-through">₹{oldProductPrice}</span>
+            <span className="text-sm md:text-base font-bold text-gray-900">₹{ProductPrice}</span>
+          </div>
+          
+          {/* Buttons */}
+          <div className="flex justify-center gap-0">            <button className="px-2 ms-2 py-1 text-xs rounded-full font-medium addCartbtn transition flex items-center">
+              <FaEye className="mr-1" /> View
+            </button>
+            <button className="px-2 py-1 text-xs rounded-full font-medium me-2  addCartbtn transition flex items-center">
+              <FaShoppingCart className="mr-1" /> Cart
+            </button>
           </div>
         </div>
       </div>

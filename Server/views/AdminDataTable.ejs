@@ -38,12 +38,13 @@
                 <thead class="bg-light">
                   <tr>
                     <th>Best Product <button class="btn btn-primary" type="submit">submit</button></th>
-                    <th class="sortable" data-column="1">Product Name <i class="fa fa-sort ml-1"></i></th>
-                    <th class="sortable" data-column="2">Category <i class="fa fa-sort ml-1"></i></th>
-                    <th class="sortable text-right" data-column="3">Discounted (₹) <i class="fa fa-sort ml-1"></i></th>
-                    <th class="sortable text-right" data-column="4">Price ($) <i class="fa fa-sort ml-1"></i></th>
-                    <th class="sortable text-right" data-column="5">Original Price (₹) <i class="fa fa-sort ml-1"></i></th>
-                    <th class="sortable" data-column="6">Crystal Type <i class="fa fa-sort ml-1"></i></th>
+                    <th class="sortable" data-column="1">Model Number <i class="fa fa-sort ml-1"></i></th>
+                    <th class="sortable" data-column="2">Product Name <i class="fa fa-sort ml-1"></i></th>
+                    <th class="sortable" data-column="3">Category <i class="fa fa-sort ml-1"></i></th>
+                    <th class="sortable text-right" data-column="4">Discounted (₹) <i class="fa fa-sort ml-1"></i></th>
+                    <th class="sortable text-right" data-column="5">Price ($) <i class="fa fa-sort ml-1"></i></th>
+                    <th class="sortable text-right" data-column="6">Original Price (₹) <i class="fa fa-sort ml-1"></i></th>
+                    <th class="sortable" data-column="7">Crystal Type <i class="fa fa-sort ml-1"></i></th>
                     <th>Image</th>
                     <th class="text-center">Actions</th>
                   </tr>
@@ -62,6 +63,7 @@
                             <label class="custom-control-label" for="best-product-<%= product._id %>"></label>
                           </div>
                         </td>
+                        <td class="font-weight-bold"><%= product.modelNumber %></td>
                         <td class="font-weight-bold"><%= product.productName %></td>
                         <td><span class="badge badge-info"><%= product.category %></span></td>
                         <td class="text-right <%= product.discountedPrice ? 'text-danger font-weight-bold' : '' %>">
@@ -112,6 +114,141 @@
     </div>
   </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  let currentPage = 1;
+  let rowsPerPage = parseInt(document.getElementById('rows-per-page').value);
+  let sortColumn = -1;
+  let sortDirection = 'asc';
+  let searchQuery = '';
+
+  const tableBody = document.getElementById('table-body');
+  const noProductsRow = document.getElementById('no-products-row');
+
+  function getAllRows() {
+    return Array.from(tableBody.querySelectorAll('tr')).filter(row => !row.id.includes("no-products-row"));
+  }
+
+  function getSortValue(row, column) {
+    const cell = row.cells[column];
+    if (!cell) return '';
+    return cell.textContent.trim().toLowerCase();
+  }
+
+  function updateTable() {
+    let allRows = getAllRows();
+
+    // Search filter
+    let filteredRows = allRows.filter(row => {
+      if (!searchQuery) return true;
+      return [...row.cells].some(cell => cell.textContent.toLowerCase().includes(searchQuery));
+    });
+
+    // Sort
+    if (sortColumn >= 0) {
+      filteredRows.sort((a, b) => {
+        const aVal = getSortValue(a, sortColumn);
+        const bVal = getSortValue(b, sortColumn);
+        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    // Pagination
+    const totalRows = filteredRows.length;
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = Math.min(startIndex + rowsPerPage, totalRows);
+
+    // Hide all, then show relevant
+    allRows.forEach(row => row.style.display = 'none');
+    for (let i = startIndex; i < endIndex; i++) {
+      filteredRows[i].style.display = '';
+    }
+
+    if (noProductsRow) noProductsRow.style.display = totalRows === 0 ? '' : 'none';
+
+    updatePagination(totalPages, startIndex, endIndex, totalRows);
+  }
+
+  function updatePagination(totalPages, start, end, total) {
+    const info = document.querySelector('#table-info');
+    if (info) {
+      info.textContent = `Showing ${total === 0 ? 0 : start + 1} to ${end} of ${total} entries`;
+    }
+
+    const pagination = document.getElementById('pagination');
+    if (!pagination) return;
+
+    pagination.innerHTML = '';
+    const createBtn = (text, page, disabled = false, icon = '') => {
+      const li = document.createElement('li');
+      li.className = `paginate_button page-item ${page === currentPage ? 'active' : ''} ${disabled ? 'disabled' : ''}`;
+      li.innerHTML = `<a href="#" class="page-link">${icon || text}</a>`;
+      if (!disabled) {
+        li.addEventListener('click', e => {
+          e.preventDefault();
+          currentPage = page;
+          updateTable();
+        });
+      }
+      return li;
+    };
+
+    pagination.appendChild(createBtn('', currentPage - 1, currentPage === 1, '<i class="fa fa-chevron-left"></i>'));
+    for (let i = 1; i <= totalPages; i++) {
+      pagination.appendChild(createBtn(i, i));
+    }
+    pagination.appendChild(createBtn('', currentPage + 1, currentPage === totalPages, '<i class="fa fa-chevron-right"></i>'));
+  }
+
+  document.getElementById('search-button').addEventListener('click', () => {
+    searchQuery = document.getElementById('search-input').value.toLowerCase();
+    currentPage = 1;
+    updateTable();
+  });
+
+  document.getElementById('search-input').addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') {
+      searchQuery = e.target.value.toLowerCase();
+      currentPage = 1;
+      updateTable();
+    }
+  });
+
+  document.getElementById('rows-per-page').addEventListener('change', function () {
+    rowsPerPage = parseInt(this.value);
+    currentPage = 1;
+    updateTable();
+  });
+
+  document.querySelectorAll('.sortable').forEach(header => {
+    header.addEventListener('click', function () {
+      const column = parseInt(this.getAttribute('data-column'));
+      if (sortColumn === column) {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortColumn = column;
+        sortDirection = 'asc';
+      }
+
+      document.querySelectorAll('.sortable').forEach(h => {
+        h.classList.remove('sort-asc', 'sort-desc');
+        h.querySelector('i').className = 'fa fa-sort ml-1';
+      });
+      this.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+      this.querySelector('i').className = sortDirection === 'asc' ? 'fa fa-sort-up ml-1' : 'fa fa-sort-down ml-1';
+
+      updateTable();
+    });
+  });
+
+  updateTable();
+});
+</script>
+
+
 
 <%- include("Footer") %>
 s

@@ -37,8 +37,23 @@ console.log("Received OTP:", otp, "for phone:", phone); // 🚨 DEBUG THIS
     });
   }
 });
-routes.get("/login", (req, res) => {
-  res.redirect(process.env.FRONTEND_LINK );
+routes.get("/logout", (req, res) => {
+  try {
+    // Clear the user cookie
+    res.clearCookie('user', {
+      path: '/',
+      httpOnly: false,
+      secure: true,
+      sameSite: 'none',
+    });
+
+    // Redirect to frontend login page
+    res.redirect(`${process.env.FRONTEND_LINK}`); // Change to your actual frontend login URL
+  } catch (err) {
+    console.error("Logout Error:", err);
+    res.status(500).json({ error: "Logout failed" });
+  }
 });
+
 
 module.exports = routes;

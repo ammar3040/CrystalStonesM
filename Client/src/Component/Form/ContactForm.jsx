@@ -120,7 +120,7 @@ const ContactForm = () => {
   };
 
   return (
-    <div style={styles.contactFormContainer}>
+    <div style={styles.contactFormContainer} id="contact-form">
       <div style={styles.overlay}></div>
       
       <div style={styles.formContainer}>

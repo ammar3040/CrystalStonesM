@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Kaiadmin - Bootstrap 5 Admin Dashboard</title>
+    <title>crystal stone mart admin panel</title>
     <meta
       content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
       name="viewport"
@@ -272,10 +272,7 @@
                           </a>
                           <a href="#">
                             <div class="notif-img">
-                              <img
-                                src="/img/chadengle.jpg"
-                                alt="Img Profile"
-                              />
+                              
                             </div>
                             <div class="notif-content">
                               <span class="subject">Chad</span>
@@ -300,10 +297,7 @@
                           </a>
                           <a href="#">
                             <div class="notif-img">
-                              <img
-                                src="/img/talha.jpg"
-                                alt="Img Profile"
-                              />
+                             
                             </div>
                             <div class="notif-content">
                               <span class="subject">Talha</span>
@@ -368,10 +362,7 @@
                           </a>
                           <a href="#">
                             <div class="notif-img">
-                              <img
-                                src="/img/profile2.jpg"
-                                alt="Img Profile"
-                              />
+                            
                             </div>
                             <div class="notif-content">
                               <span class="block">
@@ -573,9 +564,9 @@
           <button class="btn btn-primary" onclick="window.location.href='/'">
             <i class="fas fa-home me-1"></i> View Store
           </button>
-          <button class="btn btn-danger" onclick="logout()">
+          <a href="/logout" class="btn btn-danger">
             <i class="fas fa-sign-out-alt me-1"></i> Logout
-          </button>
+          </a>
         </div>
       </div>
     </div>
@@ -642,15 +633,11 @@ function showProfile() {
 }
 
 // Logout function
-function logout() {
-  // Clear all auth-related cookies
-  document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-  document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-  document.cookie = 'isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-  
-  // Redirect to login page
-  window.location.href = '/login';
-}
+// function logout() {
+//   // Clear cookie with secure attributes
+//   document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=La
+// }
+
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {

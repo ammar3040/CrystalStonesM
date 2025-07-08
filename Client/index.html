@@ -25,6 +25,12 @@
     <div id="root"></div>
 
     <!-- Vite React App -->
+     <script>
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+</script>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -8,7 +8,7 @@ const CartModel = require('../models/CartModel');
 const dotenv = require('dotenv');
 dotenv.config({ path: `${__dirname}/../.env` }); 
 const axios = require("axios");
-
+const InquiryModel = require('../models/InquiryModel'); // Adjust the path as needed
 
 const otpStore = new Map();
 const jwt = require('jsonwebtoken');
@@ -110,7 +110,7 @@ module.exports.SignIn = (req, res) => {
     return res.json({
       success: true,
       role: 'admin',
-      redirect:`${process.env.BACKEND_LINK}/admin`,
+      redirect:`${process.env.ADMIN_LINK}`,
     });
   } else {
    
@@ -174,9 +174,10 @@ module.exports.setBestProductList= async (req, res) => {
         { $set: { bestproduct: true } }
       );
     }
-    
+    console.log("produc tupdatedfrom here ")
 
-    res.redirect('/admin/datatable'); // or wherever you want
+    res.status(200).json({ success: true, message: 'Best products updated successfully!' });
+ // or wherever you want
   } catch (err) {
     console.error(err);
     res.status(500).send('Server Error');
@@ -249,16 +250,50 @@ module.exports.verifyOtp = async (req, res) => {
 
     try {
       // Check if user already exists
-      const existingUser = await UserModel.findOne({ mobile:phone });
+      const existingUser = await UserModel.findOne({ mobile: phone });
+
       if (existingUser) {
-        return res.status(200).json({ success: true, message: "✅ OTP verified, user already exists", user: existingUser });
+        const userData = {
+          uid: existingUser._id,
+          name: existingUser.Uname,
+          email: existingUser.email,
+          mobile: existingUser.mobile,
+          address: existingUser.address,
+          role: existingUser.role
+        };
+
+        // ✅ Set cookie for the existing user
+        res.cookie('user', JSON.stringify(userData), {
+          maxAge: 24 * 60 * 60 * 1000, // 1 day
+          httpOnly: false,
+          secure: true,
+          sameSite: 'none'
+        });
+
+        return res.status(200).json({
+          success: true,
+          message: "✅ OTP verified, user already exists",
+          user: userData
+        });
       }
 
       // Create a new user with phone number
-      const newUser = new UserModel({ mobile:phone });
+      const newUser = new UserModel({ mobile: phone });
       await newUser.save();
 
-      return res.status(201).json({ success: true, message: "✅ OTP verified and user created", user: newUser });
+      return res.status(201).json({
+        success: true,
+        message: "✅ OTP verified and user created",
+        user: {
+          uid: newUser._id,
+          name: newUser.Uname,
+          email: newUser.email,
+          mobile: newUser.mobile,
+          address: newUser.address,
+          role: newUser.role
+        }
+      });
+
     } catch (error) {
       console.error("Error during user creation:", error);
       return res.status(500).json({ success: false, message: "Server error while creating user" });
@@ -396,3 +431,90 @@ module.exports.updatePhone = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
+// submit inquiry from user
+
+
+module.exports.submitInquiry = async (req, res) => {
+  const { uid, products, message, contactPhone } = req.body;
+
+  if (!uid || !products || products.length === 0) {
+    return res.status(400).json({ success: false, message: "Missing required fields" });
+  }
+
+  try {
+    const inquiry = new InquiryModel({
+      userId: uid,
+      products,
+      message,
+      contactPhone
+    });
+
+    await inquiry.save();
+
+    res.status(201).json({ success: true, message: "Inquiry submitted", inquiry });
+  } catch (err) {
+    console.error("Inquiry error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
+// clear cart after inquery 
+
+module.exports.clearCart=async (req, res) => {
+  try {
+    const { uid } = req.body;
+
+    if (!uid) {
+      return res.status(400).json({ message: "UID required" });
+    }
+
+    await CartModel.deleteMany({ userId:uid });
+
+    res.status(200).json({ message: "Cart cleared successfully" });
+  } catch (err) {
+    console.error("Error clearing cart:", err);
+    res.status(500).json({ message: "Server error while clearing cart" });
+  }
+}
+module.exports.getUserInquiries= async (req, res) => {
+  try {
+    const { uid } = req.params;
+
+    
+    const inquiries = await InquiryModel.find({ userId: uid })
+      .populate("products.productId")
+      .sort({ submittedAt: -1 });
+    res.json(inquiries);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch inquiries" });
+  }
+}
+module.exports.getAllInquiries= async (req, res) => {
+  try {
+const inquiries = await InquiryModel.find() // or any filter
+  .populate("userId", "Uname email mobile")
+  .populate("products.productId", "productName mainImage modelNumber");
+
+    res.status(200).json(inquiries);
+  } catch (error) {
+    console.error("Error fetching all inquiries:", error);
+    res.status(500).json({ message: "Server error while fetching inquiries" });
+  }
+}
+// change status of inquery
+
+module.exports.updateInquiryStatus= async (req, res) => {
+  try {
+    console.log("status :"+req.body.status)
+    console.log("id :"+req.params.id)
+    const { status } = req.body;
+    await InquiryModel.findByIdAndUpdate(req.params.id, { status });
+    res.json({ message: "Status updated successfully" });
+  } catch (err) {
+    console.error("Failed to update status:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}

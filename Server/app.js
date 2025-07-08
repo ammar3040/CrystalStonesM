@@ -26,7 +26,6 @@ app.use(passport.session());
 
 app.use(cookieParser());
 app.set("view engine","ejs")
-app.set("views",path.join(__dirname,"views"))
 
 app.use(express.urlencoded({ extended: true }))
 
@@ -49,9 +48,8 @@ app.use(cors({
   credentials: true
 }));
 app.use("/", Routeroutes);
-app.use (express.static(path.join(__dirname,"assets")))
-app.use ("/uploads",express.static(path.join(__dirname,"uploads")))
 
-app.listen(port, () => {
+
+app.listen(port,"0.0.0.0", () => {
   console.log("Server is running on port " + port);
 }); 

@@ -3,9 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import AddCart from './AddCart';
 import LoginMain from '../Form/LoginMain';
 import { MdEmail, MdLocationOn, MdPhoneAndroid } from 'react-icons/md';
+import { FaBoxOpen } from 'react-icons/fa';
+import Inquiry from './Inquiry'; // Make sure the path is correct
+
 
 const MobileNavbar = ({catagory}) => {
   const navigate = useNavigate();
+  const [showInquiry, setShowInquiry] = useState(false);
+
 
   const [cartOpen, setCartOpen] = useState(false);
   const [showAside, setShowAside] = useState(false);
@@ -92,15 +97,24 @@ const [openCollection, setOpenCollection] = useState(false);
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" stroke="currentColor" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
     </svg>
   );
+const DockItem = ({ icon, label, onClick }) => (
+  <div
+    className="relative flex-1 flex flex-col items-center cursor-pointer group"
+    onClick={onClick}
+  >
+    {/* Tooltip */}
+    <span
+      className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs 
+                 font-medium px-2 py-1 rounded shadow-md opacity-0 group-hover:opacity-100 
+                 transition-all duration-200 pointer-events-none z-50"
+    >
+      {label}
+    </span>
 
-  const DockItem = ({ icon, label, onClick }) => (
-    <div className="group relative flex-1 flex flex-col items-center cursor-pointer" onClick={onClick}>
-      <div className="flex items-center justify-center p-2 hover:text-yellow-500">{icon}</div>
-      <span className="absolute -top-8 left-1/2 -translate-x-1/2 z-20 scale-0 rounded bg-white px-3 py-1 text-xs font-medium shadow-md transition-all group-hover:scale-100">
-        {label}
-      </span>
-    </div>
-  );
+    {/* Icon */}
+    <div className="p-2 hover:text-yellow-500">{icon}</div>
+  </div>
+);
 
   return (
     <>
@@ -110,7 +124,18 @@ const [openCollection, setOpenCollection] = useState(false);
           <DockItem icon={homeIcon} label="Home" onClick={() => navigate('/')} />
           <DockItem icon={shopIcon} label="Cart" onClick={() => setCartOpen(true)} />
           <DockItem icon={collectionsIcon} label="Collections" onClick={() => setShowAside(true)} />
-          <DockItem icon={aboutIcon} label="About" onClick={() => navigate('/about')} />
+         <DockItem 
+  icon={<FaBoxOpen size={22} />} 
+  label="Inquiry" 
+  onClick={() => {
+    if (!user) {
+      setShowProfile(true); // force login
+    } else {
+      setShowInquiry(true); // open inquiry aside
+    }
+  }} 
+/>
+
           <DockItem icon={accountIcon} label="Account" onClick={() => setShowProfile(true)} />
         </div>
       </div>
@@ -165,7 +190,7 @@ const [openCollection, setOpenCollection] = useState(false);
         
         {/* Other menu items */}
         <a href="/#bestProduct" className="block p-2 hover:bg-gray-50 rounded">Best Products</a>
-        <a href="/allProduct" className="block p-2 hover:bg-gray-50 rounded">All Products</a>
+        <a href="/ViewAllProduct" className="block p-2 hover:bg-gray-50 rounded">All Products</a>
       </div>
     </div>
     <div className="flex-1  bg-opacity-10" onClick={() => setShowAside(false)} />
@@ -219,6 +244,10 @@ const [openCollection, setOpenCollection] = useState(false);
           
         </div>
       )}
+      {user && (
+  <Inquiry show={showInquiry} onClose={() => setShowInquiry(false)} user={user} />
+)}
+
     </>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './OTP/otp.css';
+import toast from 'react-hot-toast';
 
 const MissMobileNumber = ({ user }) => {
   const [showPopup, setShowPopup] = useState(false);
@@ -31,7 +32,7 @@ const MissMobileNumber = ({ user }) => {
     try {
       if (!/^[6-9]\d{9}$/.test(phoneNumber)) {
         setIsSending(false);
-        return alert('❌ Invalid mobile number');
+        return toast.error('❌ Invalid mobile number');
       }
 
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/updatePhone`, {
@@ -44,14 +45,14 @@ const MissMobileNumber = ({ user }) => {
       console.log('updatePhone response:', data);
 
       if (res.ok && data.success) {
-        alert('✅ Mobile number added successfully!');
+        toast.success('✅ Mobile number added successfully!');
         setShowPopup(false);
         window.location.reload();
       } else {
-        alert('❌ Failed to update number');
+        toast.error('❌ Failed to update number');
       }
     } catch (err) {
-      alert('❌ Error: ' + err.message);
+      toast.error('❌ Error: ' + err.message);
     } finally {
       setIsSending(false);
     }

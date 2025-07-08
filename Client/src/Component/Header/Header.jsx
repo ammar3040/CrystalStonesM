@@ -10,6 +10,8 @@ import { Link,  useNavigate } from 'react-router-dom';
 import { MdEmail,MdPhoneAndroid } from 'react-icons/md';
 import { MdLocationOn } from 'react-icons/md';
 import axios from 'axios';
+import { FaBoxOpen, FaClipboardList } from 'react-icons/fa';
+import Inquiry from './Inquiry';
 
 
 
@@ -23,6 +25,7 @@ function Header({ onCartClick }) {
 
   const navigate = useNavigate();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+const [inquiryOpen, setInquiryOpen] = useState(false);
 
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [showCursor, setShowCursor] = useState(true);
@@ -199,17 +202,19 @@ const fetchCartItems = async (uid) => {
   return (
     <>
       <nav className="bg-white shadow-sm sticky top-0 transition-all duration-300 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex ">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 flex ">
            {/* Logo */}
-            <div className="flex " style={{height:"200%",width:"25%",}}>
-              <a href="#" className="flex items-center">
-                <img src={"/img/fullLogo.png"} alt="" className=" h-full" style={{
-                  objectFit:"contain",
-                 
-                }}/>
-              </a>
-            </div>
-            <div className='' style={{width:"75%",}}>
+           <div className="flex-shrink-0 flex items-center" style={{ minWidth: "150px", maxWidth: "200px" }}>
+  <Link to="/" className="flex items-center h-full">
+    <img 
+      src={"/img/fullLogo.png"} 
+      alt="Company Logo" 
+      className="h-14 object-contain w-auto" // Ensures proportional scaling
+    />
+  </Link>
+</div>
+
+            <div className='lex-1 w-full sm:w-auto mt-2 sm:mt-0' style={{width:"87%"}} >
           {/* First Row - Logo, Search, Icons */}
           <div className="flex justify-between items-center h-16  transition-all duration-300" style={{}}>
            
@@ -229,7 +234,8 @@ const fetchCartItems = async (uid) => {
   type="text"
 />
 {showSuggestions && searchResults.length > 0 && (
-  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+   <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+
     {searchResults.map(product => (
   <a
     key={product._id}
@@ -262,24 +268,53 @@ const fetchCartItems = async (uid) => {
             </div>
 
             {/* Icons */}
+            <div className="md:flex hidden items-center space-x-4">
             <div className="flex items-center space-x-4">
+              {/* inqur6 icon */}
+
+              <div className="relative">
+  <button
+    onClick={() => {
+      if (!user) {
+        setIsLoginOpen(true);
+        setIsProfileOpen(true);
+      } else {
+        setInquiryOpen(true); // 👈 Open inquiry panel
+      }
+    }}
+    className="text-gray-500 hover:text-yellow-600 focus:outline-none"
+  >
+    <FaBoxOpen className="h-5 w-5" />
+  </button>
+</div>
+
               {/* Cart button */}
-              <button 
-               onClick={() => {
-    if (!user) {
-      setIsLoginOpen(true);
-      setIsProfileOpen(true);
-    } else {
-      fetchCartItems(user.uid); // refresh cart
-      setCartOpen(true);
-    }
-  }}
-                className="text-gray-500 hover:text-yellow-600 focus:outline-none"
-              >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-              </button>
+           <div className="relative">
+  <button 
+    onClick={() => {
+      if (!user) {
+        setIsLoginOpen(true);
+        setIsProfileOpen(true);
+      } else {
+        fetchCartItems(user.uid); // refresh cart
+        setCartOpen(true);
+      }
+    }}
+    className="text-gray-500 hover:text-yellow-600 focus:outline-none"
+  >
+    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+    </svg>
+  
+  </button>
+
+  {cartItems.length > 0 && (
+    <span className="absolute -top-2 -right-2 bg-[#fff8a8]  text-xs font-bold px-1.5 py-0.5 rounded-full">
+      {cartItems.length}
+    </span>
+  )}
+</div>
+
 
               <button className="text-gray-500 hover:text-yellow-600 focus:outline-none" 
                 onClick={() => setIsProfileOpen(true)}
@@ -288,6 +323,7 @@ const fetchCartItems = async (uid) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </button>
+              </div>
             </div>
           </div>
 {/* Profile Modal using DaisyUI */}
@@ -340,7 +376,7 @@ const fetchCartItems = async (uid) => {
                 Collections
               </p>
               </Link>
-              <a href="/" className="text-gray-700 hover:text-yellow-600 px-1 text-sm font-medium uppercase tracking-wider transition-colors">
+              <a href="/#contactForm" className="text-gray-700 hover:text-yellow-600 px-1 text-sm font-medium uppercase tracking-wider transition-colors">
                 About
               </a>
             </div>
@@ -354,7 +390,7 @@ const fetchCartItems = async (uid) => {
         <MobileNavbar catagory={catagorys} />
       </div>
       
-      <AddCart show={cartOpen} onClose={() => setCartOpen(false)} cartItems={cartItems}/>
+      <AddCart show={cartOpen} onClose={() => setCartOpen(false)} cartItems={cartItems} user={user}/>
 {isProfileOpen && (
   <div className="fixed inset-0 z-50 overflow-y-auto">
     <div 
@@ -437,6 +473,10 @@ const fetchCartItems = async (uid) => {
 
   </div>
 )}
+{user && (
+  <Inquiry show={inquiryOpen} onClose={() => setInquiryOpen(false)} user={user} />
+)}
+
     </>
     
 )

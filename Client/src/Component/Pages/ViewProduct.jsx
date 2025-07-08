@@ -4,10 +4,11 @@ import { Navigation, Thumbs } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/thumbs';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import ProductCard from '../Product/ProductCard';
-
+import Cookies from "js-cookie";
+import toast from 'react-hot-toast';
 const ViewProduct = () => {
   const { ProductId } = useParams();
   const [activeThumb, setActiveThumb] = useState(null);
@@ -15,6 +16,7 @@ const ViewProduct = () => {
   const [activeTab, setActiveTab] = useState('description');
   const [product, setProduct] = useState(null);
   const [allProduct, setAllProduct] = useState(null);
+  const navigate = useNavigate();
 useEffect(() => {
   const fetchAllProducts = async () => {
     try {
@@ -58,17 +60,36 @@ let  MinQuantity= product.MinQuantity
 };
 
 
-  const handleAddToCart = () => {
-    const cartItem = {
-      id: product._id,
-      name: product.productName,
-      price: product.discountedPrice,
-      quantity,
-      image: product.mainImage.url
-    };
-    console.log("Added to cart:", cartItem);
-    // Here you would typically dispatch to Redux or context
-  };
+  const handleAddToCart = async () => {
+  const user = Cookies.get("user");
+
+  if (!user) {
+    // Not logged in, redirect
+    navigate("/SignInPage");
+    return;
+  }
+
+  const uid = JSON.parse(user).uid;
+
+  try {
+    const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/getCartItem`, {
+      pid: product._id,
+      quantity: quantity,
+      uid: uid
+    }, {
+      withCredentials: true
+    });
+
+    if (res.status === 200) {
+      toast.success('🛒 Product added to cart!');
+
+    }
+  } catch (err) {
+    console.error('Add to cart error:', err);
+    toast.success('🛒 fail to add product');
+
+  }
+};
 
   return (
     <>

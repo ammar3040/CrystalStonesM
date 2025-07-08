@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState , useRef } from 'react';
+import toast from 'react-hot-toast';
 
-function AddCart({ show, onClose, cartItems = [] }) {
+function AddCart({ show, onClose, cartItems = [],user}) {
   const [showInDollar, setShowInDollar] = useState(false);
   const [localCart, setLocalCart] = useState([]);
   const [intervalId, setIntervalId] = useState(null);
+const intervalMap = useRef({});
 
  useEffect(() => {
   const updatedCart = cartItems.map((item) => {
@@ -54,23 +56,35 @@ function AddCart({ show, onClose, cartItems = [] }) {
     setLocalCart(updated);
   };
 
-  const startQuantityChange = (id, action) => {
-    updateQuantity(id, action);
-    const idInterval = setInterval(() => {
-      updateQuantity(id, action);
-    }, 150);
-    setIntervalId(idInterval);
-  };
+const startQuantityChange = (id, action) => {
+  updateQuantity(id, action);
+  
+  // clear any existing interval for this item
+  if (intervalMap.current[id]) {
+    clearInterval(intervalMap.current[id]);
+  }
 
-  const stopQuantityChange = () => {
-    clearInterval(intervalId);
-    setIntervalId(null);
-  };
-  useEffect(() => {
+  const newInterval = setInterval(() => {
+    updateQuantity(id, action);
+  }, 150);
+
+  intervalMap.current[id] = newInterval;
+};
+
+
+const stopQuantityChange = (id) => {
+  if (intervalMap.current[id]) {
+    clearInterval(intervalMap.current[id]);
+    delete intervalMap.current[id];
+  }
+};
+
+useEffect(() => {
   return () => {
-    if (intervalId) clearInterval(intervalId);
+    Object.values(intervalMap.current).forEach(clearInterval);
   };
-}, [intervalId]);
+}, []);
+
 
 const handleDelete = async (item) => {
   try {
@@ -92,11 +106,11 @@ const handleDelete = async (item) => {
       setLocalCart((prev) => prev.filter((i) => i._id !== item._id));
     } else {
       console.error('Failed to delete:', data.message);
-      alert('Failed to delete item');
+      toast.error('Failed to delete item');
     }
   } catch (err) {
     console.error('Error:', err);
-    alert('Something went wrong while deleting');
+    toast.error('Something went wrong while deleting');
   }
 };
 
@@ -107,6 +121,58 @@ const handleDelete = async (item) => {
       : item.productId?.discountedPrice || 0;
     return acc + price * item.quantity;
   }, 0);
+
+
+  // make inquiry for order
+const handleInquiry = async () => {
+  const uid = user.uid;
+
+  if (!uid) {
+    toast.error("User ID not found. Please log in.");
+    return;
+  }
+
+  const inquiryData = {
+    uid,
+    contactPhone: localCart[0]?.userMobile || "",
+    message: "Inquiry from cart",
+    products: localCart.map((item) => ({
+      productId: item.productId._id,
+      quantity: item.quantity,
+    })),
+  };
+
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/submitInquiry`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(inquiryData),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      // ✅ Clear cart from database
+      await fetch(`${import.meta.env.VITE_API_URL}/api/clearCart`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid }), // use uid to identify user's cart
+      });
+
+      // ✅ Clear cart in UI
+      setLocalCart([]);
+      toast.success("Inquiry submitted and cart cleared!");
+      onClose();
+    } else {
+      toast.error(data.message || "Failed to submit inquiry");
+    }
+  } catch (err) {
+    console.error("Inquiry Error:", err);
+    toast.error("Something went wrong while sending inquiry");
+  }
+};
+
+
 
   return (
     <>
@@ -189,28 +255,26 @@ const handleDelete = async (item) => {
                       </div>
 
                       <div className="flex items-center gap-2 mt-1">
-                        <button
-                          className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                          onMouseDown={() => startQuantityChange(item._id, 'decrease')}
-                          onMouseUp={stopQuantityChange}
-                          onMouseLeave={stopQuantityChange}
-                          onTouchStart={() => startQuantityChange(item._id, 'decrease')}
-                          onTouchEnd={stopQuantityChange}
-                          disabled={item.quantity <= minQty}
-                        >
-                          -
-                        </button>
+                       <button
+  onMouseDown={() => startQuantityChange(item._id, 'decrease')}
+  onMouseUp={() => stopQuantityChange(item._id)}
+  onMouseLeave={() => stopQuantityChange(item._id)}
+  onTouchStart={() => startQuantityChange(item._id, 'decrease')}
+  onTouchEnd={() => stopQuantityChange(item._id)}
+  disabled={item.quantity <= minQty}
+>
+  -
+</button>
                         <span className="text-sm">{item.quantity}</span>
                         <button
-                          className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                          onMouseDown={() => startQuantityChange(item._id, 'increase')}
-                          onMouseUp={stopQuantityChange}
-                          onMouseLeave={stopQuantityChange}
-                          onTouchStart={() => startQuantityChange(item._id, 'increase')}
-                          onTouchEnd={stopQuantityChange}
-                        >
-                          +
-                        </button>
+  onMouseDown={() => startQuantityChange(item._id, 'increase')}
+  onMouseUp={() => stopQuantityChange(item._id)}
+  onMouseLeave={() => stopQuantityChange(item._id)}
+  onTouchStart={() => startQuantityChange(item._id, 'increase')}
+  onTouchEnd={() => stopQuantityChange(item._id)}
+>
+  +
+</button>
                       </div>
 
                       <p className="text-sm font-semibold mt-1">
@@ -239,9 +303,13 @@ const handleDelete = async (item) => {
                   : `₹${total.toFixed(0)}`}
               </span>
             </div>
-            <button className="w-full py-2 px-4 rounded font-semibold bg-[#fff8a8] text-black hover:!text-white hover:!bg-black transition-all duration-300">
-              Make Inquiry for Order
-            </button>
+            <button
+  onClick={handleInquiry}
+  className="w-full py-2 px-4 rounded font-semibold bg-[#fff8a8] text-black hover:!text-white hover:!bg-black transition-all duration-300"
+>
+  Make Inquiry for Order
+</button>
+
           </div>
         </div>
       </div>

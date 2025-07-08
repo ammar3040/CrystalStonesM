@@ -49,5 +49,11 @@ routes.post("/updatePhone", UserCtl.updatePhone);
 routes.get("/getCatagory",UserCtl.getCatagory);
 routes.post("/verify-otp", UserCtl.verifyOtp);
 
+// inquiry
+routes.post("/submitInquiry", UserCtl.submitInquiry);
+routes.delete("/clearCart",UserCtl.clearCart)
+routes.get("/getUserInquiries/:uid", UserCtl.getUserInquiries)
+routes.get("/getAllInquiries", UserCtl.getAllInquiries)
+routes.patch("/updateInquiryStatus/:id",UserCtl.updateInquiryStatus);
 
 module.exports = routes;

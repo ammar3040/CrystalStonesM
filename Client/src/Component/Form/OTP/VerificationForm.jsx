@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import toast from 'react-hot-toast';
 
 const VerificationForm = ({ phoneNumber, onClose, onVerified }) => {
   const [otp, setOtp] = useState(["", "", "", ""]);
@@ -28,6 +29,7 @@ const VerificationForm = ({ phoneNumber, onClose, onVerified }) => {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ Include cookies for session support
         body: JSON.stringify({
           phone: phoneNumber,
           otp: fullOtp,
@@ -37,13 +39,14 @@ const VerificationForm = ({ phoneNumber, onClose, onVerified }) => {
       const data = await res.json();
 
       if (data.success) {
-        alert("✅ OTP verified successfully!");
-        if (onVerified) onVerified();
+        toast.success("✅ OTP verified successfully!"+data.user)
+        console.log("User data:", data.user); // ✅ Debug user data
+        if (onVerified) onVerified(data.user); // ✅ Send user data to parent
       } else {
-        alert("❌ Invalid or expired OTP");
+        toast.error("❌ Invalid or expired OTP"+data);
       }
     } catch (err) {
-      alert("❌ Verification failed: " + err.message);
+      toast.error("❌ Verification failed: " + err.message);
     }
   };
 
@@ -67,6 +70,7 @@ const VerificationForm = ({ phoneNumber, onClose, onVerified }) => {
           />
         ))}
       </div>
+
 
       <button type="submit" className="verify-button">
         Verify OTP

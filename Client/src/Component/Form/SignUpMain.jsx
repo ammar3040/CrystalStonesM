@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
+import toast from 'react-hot-toast';
 const SignUpMain = ({phoneNumber}) => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate= useNavigate()
@@ -36,19 +37,19 @@ const handleSubmit = async (e) => {
   e.preventDefault();
 
   if (formData.password !== formData.confirmPassword) {
-    alert("Passwords don't match!");
+    toast.error("Passwords don't match!");
     return;
   }
 
   try {
     const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/register`, formData);
     console.log("Server Response:", response.data);
-    alert("Registration Successful!");
-    navigate('/SignInPage')
+    toast.success("Registration Successful!");
+    navigate('/')
     
   } catch (error) {
     console.error("Registration Failed:", error);
-    alert("Registration failed. Please try again.");
+    toast.error("Registration failed. Please try again.");
   }
 };
 

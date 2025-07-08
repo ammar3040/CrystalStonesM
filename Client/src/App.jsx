@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import MainPage from './Component/Pages/MainPage';
 import ViewProduct from './Component/Pages/ViewProduct';
 import Header from './Component/Header/Header';
@@ -11,8 +11,18 @@ import SignUpMain from './Component/Form/SignUpMain';
 import ViewAllProduct from './Component/Pages/ViewAllProduct';
 import VerificationForm from './Component/Form/OTP/VerificationForm';
 import SendOtpWithNumber from './Component/Form/OTP/SendOtpWithNumber';
-import MissMobileNumber from './Component/Form/MissMobileNumber'; // ✅ Import this
 import { Toaster } from 'react-hot-toast';
+import AdminLayout from './Component/Pages/adminPanel/AdminLayeout';
+import AddProduct from './Component/Pages/adminPanel/AddProduct';
+import AddCatagory from './Component/Pages/adminPanel/AddCatagory';
+import ProductTable from './Component/Pages/adminPanel/ProductTable';
+import UserTable from './Component/Pages/adminPanel/UserTable';
+import EditProduct from './Component/Pages/adminPanel/EditProduct';
+import AdminDashboard from './Component/Pages/adminPanel/AdminDashboard';
+import AdminInquiry from './Component/Pages/adminPanel/AdminInquiry';
+import ScrollToHashElement from './ScrollToHashElement';
+import WhatsappLogo from './WhatsappLogo';
+
 
 function getUserFromCookie() {
   try {
@@ -28,40 +38,68 @@ function getUserFromCookie() {
   return null;
 }
 
-function App() {
+// This wrapper is needed to use useLocation inside App
+function AppWrapper() {
+  const location = useLocation();
   const user = getUserFromCookie();
   const isLoggedIn = !!user;
+
+  // Admin path condition
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
-      <BrowserRouter>
-        <Header />
-        <ScrollToTop />
-        <SendOtpWithNumber />
-        {/* {user && <MissMobileNumber user={user} />} ✅ Safe usage */}
+      {!isAdminRoute && <Header />}
+      <ScrollToTop />
+       <ScrollToHashElement />
+       <WhatsappLogo/>
+      {!isAdminRoute && <SendOtpWithNumber />}
 
-        <Routes>
-          <Route path="/" element={<MainPage />} />
-          <Route path="/catagory/:CatagoryName" element={<CatagroyProducts />} />
-          <Route path="/Product/:ProductId" element={<ViewProduct />} />
-          <Route path="/ViewAllProduct" element={<ViewAllProduct />} />
-          <Route path="/otp" element={<VerificationForm />} />
+      <Routes>
+        {/* Admin panel route */}
+        <Route path={`/admin-a9xK72rQ1m8vZpL0`} element={<AdminLayout />}>
+          <Route path="add-product" element={<AddProduct />} />
+          <Route path="add-category" element={<AddCatagory />} />
+          <Route path="view-products" element={<ProductTable />} />
+          <Route path="view-user" element={<UserTable />} />
+          <Route path="edit-product/:pid" element={<EditProduct />} />
+          <Route path="" element={<AdminDashboard/>} />
+          <Route path="admin-Inquiries" element={<AdminInquiry/>} />
+          {/* Add other admin routes */}
+        </Route>
+      
 
-          {/* ✅ Block login/signup if already logged in */}
-          <Route
-            path="/SignUpPage"
-            element={isLoggedIn ? <Navigate to="/" /> : <SignUpMain />}
-          />
-          <Route
-            path="/SignInPage"
-            element={isLoggedIn ? <Navigate to="/" /> : <LoginMain />}
-          />
-        </Routes>
+        {/* Normal user routes */}
+        <Route path="/" element={<MainPage />} />
+        <Route path="/catagory/:CatagoryName" element={<CatagroyProducts />} />
+        <Route path="/Product/:ProductId" element={<ViewProduct />} />
+        <Route path="/ViewAllProduct" element={<ViewAllProduct />} />
+        <Route path="/otp" element={<VerificationForm />} />
+        <Route
+          path="/SignUpPage"
+          element={isLoggedIn ? <Navigate to="/" /> : <SignUpMain />}
+        />
 
-        <Footer />
-      </BrowserRouter>
+        <Route
+          path="/SignInPage"
+          element={isLoggedIn ? <Navigate to="/" /> : <LoginMain />}
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+
+      </Routes>
+
+      {!isAdminRoute && <Footer />}
     </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppWrapper />
+      
+    </BrowserRouter>
   );
 }
 

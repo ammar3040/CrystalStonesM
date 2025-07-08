@@ -8,22 +8,15 @@ import { FreeMode, Pagination, Autoplay } from 'swiper/modules'; // Add Autoplay
 import ProductCatagory from './ProductCatagory';
 import BestProduct from './BestProducts';
 
+import ViewAllMainProduct from '../Pages/ViewAllMainProduct';
+
 export default function ProductMain() {
-    let allPath = [
-        "/img/ProductBraclate.webp",
-        "/img/ProdcutCrystalAngle.webp",
-        "/img/ProductCrystalTree.webp",
-        "/img/ProductPendulum.webp",
-        "/img/ProductWorryStone.webp",
-        "/img/ProductCrystalTree.webp",
-        "/img/ProductPendulum.webp",
-        "/img/ProductWorryStone.webp"
-    ];
 
     return (
         <>
         <ProductCatagory/>
         <BestProduct/>
+        <ViewAllMainProduct/>
         </>
     );
 }

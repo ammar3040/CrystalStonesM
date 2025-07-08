@@ -1,85 +1,97 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import { Pagination, Navigation, Autoplay } from 'swiper/modules';
-import SingleSlide from './SingleSlide';
+import ExtraSlides from "./ExtraSlides";
+import MainSlides from './MainSlides';
 
 export default function MainSection() {
-  const AllImgpath = [
-    "/img/girlWearbracelete.jpeg",
-    "/img/BG-crystalTree.jpeg",
-    "/img/astroimg.jpeg", // Add more as needed
-  ];
+  const [randomProducts, setRandomProducts] = useState([]);
+
+  const shuffleArray = (array) => [...array].sort(() => Math.random() - 0.5);
+
+  useEffect(() => {
+    const fetchAllProducts = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/all`);
+        const data = await response.json();
+
+        if (Array.isArray(data)) {
+          const shuffled = shuffleArray(data);
+          const selected = shuffled.slice(0, 6);
+          setRandomProducts(selected);
+        } else {
+          console.error('Invalid product data:', data);
+        }
+      } catch (err) {
+        console.error('Error fetching products:', err);
+      }
+    };
+
+    fetchAllProducts();
+  }, []);
 
   return (
-    <div className="relative w-full h-[500px] md:h-[500px] sm:h-[300px]">
+    <div className="relative w-full">
       <Swiper
-        slidesPerView={1}
-        spaceBetween={30}
-        loop={true}
-        autoplay={{
-          delay: 3000,
-          disableOnInteraction: false,
-        }}
-        pagination={{
-          clickable: true,
-          el: '.custom-pagination',
-        }}
-        navigation={{
-          nextEl: '.custom-next',
-          prevEl: '.custom-prev',
-        }}
         modules={[Pagination, Navigation, Autoplay]}
-        className="h-full w-full"
+        spaceBetween={0}
+        slidesPerView={1}
+        pagination={{ el: '.custom-pagination', clickable: true }}
+        navigation={{ nextEl: '.custom-next', prevEl: '.custom-prev' }}
+        autoplay={{ delay: 5000, disableOnInteraction: false }}
+        className="w-full h-[75vh] sm:h-[60vh]"
+        style={{
+          backgroundImage: "url(https://res.cloudinary.com/dioicxwct/image/upload/v1751947665/HERO_slider_2_bhtzay.jpg)",
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+        }}
       >
-        {AllImgpath.map((path, index) => (
-          <SwiperSlide key={index}>
-            <SingleSlide SlideImg={path} />
+        {/* Main static slide */}
+        <SwiperSlide>
+          <MainSlides />
+        </SwiperSlide>
+
+        {/* Dynamic product slides */}
+        {randomProducts.map((product, index) => (
+          <SwiperSlide key={product._id || index}>
+            <ExtraSlides
+              bgImg={product.mainImage?.url}
+              productName={product.productName}
+              description={product.description}
+              category={product.category}
+              productId={product._id}
+              index={index}
+            />
           </SwiperSlide>
         ))}
       </Swiper>
 
-      {/* Custom Navigation Buttons */}
-      <div className="custom-next absolute top-1/2 right-2 w-10 h-10 -mt-5 z-10 cursor-pointer flex items-center justify-center bg-white bg-opacity-70 rounded-full hover:bg-opacity-90 transition-all duration-300">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 44" className="w-6 h-6">
-          <path d="M27,22L5,44l-2.1-2.1L22.8,22L2.9,2.1L5,0L27,22z" fill="#000" />
-        </svg>
-      </div>
-      <div className="custom-prev absolute top-1/2 left-2 w-10 h-10 -mt-5 z-10 cursor-pointer flex items-center justify-center bg-white bg-opacity-70 rounded-full hover:bg-opacity-90 transition-all duration-300">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27 44" className="w-6 h-6">
-          <path d="M0,22L22,0l2.1,2.1L4.2,22l19.9,19.9L22,44L0,22z" fill="#000" />
-        </svg>
-      </div>
+      {/* Pagination */}
+      <div className="custom-pagination absolute bottom-4 left-0 w-full flex justify-center z-10 space-x-2"></div>
 
-      {/* Custom Pagination */}
-      <div className="custom-pagination absolute bottom-2 left-0 w-full flex justify-center z-10 space-x-2">
-        {/* Bullets will be injected here by Swiper */}
-      </div>
-
-      {/* Custom styles for pagination bullets that Swiper injects */}
+      {/* Style */}
       <style jsx="true">{`
         .custom-pagination .swiper-pagination-bullet {
           width: 12px;
           height: 12px;
           background: #000;
           opacity: 0.5;
-          border-radius: 50%;
-          cursor: pointer;
+          border-radius: 9999px;
           transition: all 0.3s ease;
         }
-        
         .custom-pagination .swiper-pagination-bullet-active {
+          background: #D4AF37;
           opacity: 1;
-          background: #D4AF37; /* Light gold color for active bullet */
+          transform: scale(1.2);
         }
-        
         @media (max-width: 768px) {
-          .custom-next,
-          .custom-prev {
-            width: 8;
-            height: 8;
+          .custom-pagination .swiper-pagination-bullet {
+            width: 10px;
+            height: 10px;
           }
         }
       `}</style>

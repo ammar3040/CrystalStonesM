@@ -27,7 +27,7 @@ const catagoryName=useParams().CatagoryName;
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <h2 className="text-2xl font-bold text-center mb-8">Explore Our Agate Collection</h2>
+      <h2 className="text-2xl font-bold text-center mb-8">Explore Our  Collection</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {products.map((product) => (
        
@@ -39,6 +39,7 @@ const catagoryName=useParams().CatagoryName;
               oldProductPrice={product.originalPrice}
               minQuentity={product.MinQuantity}
               pid={product._id}
+              ModelNumber={product.modelNumber}
             />
        
         ))}

@@ -1,20 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import VerificationForm from './VerificationForm';
-import "./otp.css";
-import SignUpMain from '../SignUpMain'; // ✅ Import SignUpPage component
+import './otp.css';
+import SignUpMain from '../SignUpMain';
+import toast from 'react-hot-toast';
+
 const SendOtpWithNumber = ({ forceOpen = false, onClose }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [showOtpForm, setShowOtpForm] = useState(false);
   const [serverOtp, setServerOtp] = useState(null);
-  const [showSignupPage, setShowSignupPage] = useState(false); // 🔸 store OTP if needed for testing
+  const [showSignupPage, setShowSignupPage] = useState(false);
+  const [verifiedUser, setVerifiedUser] = useState(null); // ✅ Store verified user
   const timerRef = useRef(null);
 
   useEffect(() => {
-     if (forceOpen) {
-    setShowPopup(true); // ✅ force open the modal immediately
-    return;
-  } // skip timer if opened manually
+    if (forceOpen) {
+      setShowPopup(true);
+      return;
+    }
 
     const userCookie = document.cookie
       .split('; ')
@@ -29,19 +32,19 @@ const SendOtpWithNumber = ({ forceOpen = false, onClose }) => {
     return () => clearTimeout(timerRef.current);
   }, [forceOpen]);
 
-
- const handleClose = () => {
+  const handleClose = () => {
     setShowPopup(false);
     if (onClose) onClose();
     clearTimeout(timerRef.current);
   };
+
   const handleSubmitNumber = async (e) => {
     e.preventDefault();
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/send-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: phoneNumber }),
       });
 
@@ -49,64 +52,72 @@ const SendOtpWithNumber = ({ forceOpen = false, onClose }) => {
 
       if (data.success) {
         setShowOtpForm(true);
-        setServerOtp(data.otp); // 👈 optional: for dev/testing only
+        setServerOtp(data.otp); // only for dev/debug
       } else {
-        alert("❌ Failed to send OTP");
+        toast.error(' Failed to send OTP');
       }
     } catch (err) {
-      alert("❌ Error: " + err.message);
+      toast.error('❌ Error: ' + err.message);
     }
   };
 
+  // 🔄 Conditional rendering
   if (!showPopup) return null;
 
   return (
-   
-<>
-         {showSignupPage ? (
-          <SignUpMain phoneNumber={phoneNumber} /> // ✅ Directly render SignUpPage
-        ) :(
-        !showOtpForm ? (
-           <div className="popup-overlay">
-      <div className="popup-content">
-        <button className="close-button" onClick={handleClose}>✕</button>
-          <form className="number-form" onSubmit={handleSubmitNumber}>
-            <h3 className="popup-title">Verify Your Account</h3>
-            <p className="popup-subtitle">Please enter your phone number to receive OTP</p>
+    <>
+      {showSignupPage ? (
+        <SignUpMain phoneNumber={phoneNumber} user={verifiedUser} />
+      ) : !showOtpForm ? (
+        <div className="popup-overlay">
+          <div className="popup-content">
+            <button className="close-button" onClick={handleClose}>✕</button>
+            <form className="number-form" onSubmit={handleSubmitNumber}>
+              <h3 className="popup-title">Verify Your Account</h3>
+              <p className="popup-subtitle">Please enter your phone number to receive OTP</p>
 
-            <div className="input-group">
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="Enter phone number"
-                required
-              />
-            </div>
+              <div className="input-group">
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="Enter phone number"
+                  required
+                />
+              </div>
 
-            <button type="submit" className="verify-button">
-              Send OTP
-            </button>
-          </form>
-           </div>
-    </div>
-        ) : (
-           <div className="popup-overlay">
-      <div className="popup-content">
-        <button className="close-button" onClick={handleClose}>✕</button>
-          <VerificationForm
-            phoneNumber={phoneNumber}
-            onClose={handleClose}
-            serverOtp={serverOtp} // 👈 pass OTP to VerificationForm (only during dev)
-             onVerified={() => {
-    setShowOtpForm(false);         // ✅ Hide OTP form
-    setShowSignupPage(true);       // ✅ Show signup page
-  }}
-          />
+              <button type="submit" className="verify-button">
+                Send OTP
+              </button>
+            </form>
           </div>
-    </div>
-        ))}
-     </>
+        </div>
+      ) : (
+        <div className="popup-overlay">
+          <div className="popup-content">
+            <button className="close-button" onClick={handleClose}>✕</button>
+            <VerificationForm
+              phoneNumber={phoneNumber}
+              onClose={handleClose}
+              serverOtp={serverOtp}
+             onVerified={(user) => {
+    setShowOtpForm(false);
+    setVerifiedUser(user);
+
+    if (user && user.name) {
+      // ✅ User exists, treat as login
+      setShowPopup(false);
+      if (onClose) onClose();
+    } else {
+      // 🔄 New user, show signup
+      setShowSignupPage(true);
+    }
+  }}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

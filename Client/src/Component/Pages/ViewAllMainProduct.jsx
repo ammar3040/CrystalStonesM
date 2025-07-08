@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ProductCard from '../Product/ProductCard';
 import { Link } from 'react-router-dom';
 
-function ViewAllProduct() {
+function ViewAllMainProduct() {
   const [allProducts, setAllProducts] = useState([]);
 
   // Shuffle function
@@ -36,9 +36,9 @@ function ViewAllProduct() {
     fetchAllProducts();
   }, []);
 
-  return (
-    <div className="px-4 sm:px-6 lg:px-8 py-8">
-            <h2 
+return (
+  <div className="px-4 sm:px-6 lg:px-8 py-8">
+               <h2 
   style={{
     textAlign: 'center',
     fontSize: '2.5rem',
@@ -67,12 +67,12 @@ Explore Handpicked Crystal & Agate Treasures
   ></span>
 </h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-        {allProducts.map((product) => (
-             <Link to={`/Product/${product._id}`} key={product._id}>
-          <div key={product._id} className="w-full">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+      {allProducts.slice(0, 8).map((product) => (
+        <Link to={`/Product/${product._id}`} key={product._id}>
+          <div className="w-full">
             <ProductCard
-              productImg={product?.mainImage?.url || '/fallback.png'} // Prevent crash
+              productImg={product?.mainImage?.url || '/fallback.png'}
               productName={product?.productName || 'No Name'}
               productAbout={product?.description || 'No description available'}
               ProductPrice={product?.discountedPrice || 0}
@@ -82,11 +82,24 @@ Explore Handpicked Crystal & Agate Treasures
               ModelNumber={product.modelNumber}
             />
           </div>
-          </Link>
-        ))}
-      </div>
+        </Link>
+      ))}
     </div>
-  );
+
+    {allProducts.length > 8 && (
+      <div className="flex justify-center mt-8">
+        <Link
+          to="/ViewAllProduct"
+     className="bg-[#fff8a8] hover:bg-black hover:!text-white font-semibold py-2 px-6 rounded-full transition duration-300"
+
+        >
+          View All Products
+        </Link>
+      </div>
+    )}
+  </div>
+);
+
 }
 
-export default ViewAllProduct;
+export default ViewAllMainProduct;

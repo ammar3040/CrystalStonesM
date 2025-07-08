@@ -207,9 +207,10 @@ const fetchCartItems = async (uid) => {
            <div className="flex-shrink-0 flex items-center" style={{ minWidth: "150px", maxWidth: "200px" }}>
   <Link to="/" className="flex items-center h-full">
     <img 
-      src={"/img/fullLogo.png"} 
+      src= 'https://res.cloudinary.com/dioicxwct/image/upload/v1751975090/fullLogo_tgcxoq.png'
       alt="Company Logo" 
-      className="h-14 object-contain w-auto" // Ensures proportional scaling
+      className=" object-contain "
+      style={{width:"150px"}} // Ensures proportional scaling
     />
   </Link>
 </div>

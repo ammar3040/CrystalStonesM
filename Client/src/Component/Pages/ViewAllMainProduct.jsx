@@ -69,7 +69,7 @@ Explore Handpicked Crystal & Agate Treasures
 
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
       {allProducts.slice(0, 8).map((product) => (
-        <Link to={`/Product/${product._id}`} key={product._id}>
+       
           <div className="w-full">
             <ProductCard
               productImg={product?.mainImage?.url || '/fallback.png'}
@@ -82,7 +82,7 @@ Explore Handpicked Crystal & Agate Treasures
               ModelNumber={product.modelNumber}
             />
           </div>
-        </Link>
+     
       ))}
     </div>
 

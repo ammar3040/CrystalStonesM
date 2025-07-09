@@ -202,23 +202,21 @@ module.exports.sendOtp = async (req, res) => {
   const otp = Math.floor(1000 + Math.random() * 9000); // 🔢 4-digit OTP
 
   try {
-    const response = await axios.post(
-      "https://www.fast2sms.com/dev/bulkV2",
-      {
-        route: `${process.env.FAST2SMS_ROUTE }`, // Use environment variable for route
-        message: `Crystal Stones Mart
-Your OTP is ${otp}.
-Thank you for logging in and trusting us with your crystal journey!`,
-        language: "english",
-        numbers: phone
-      },
-      {
-        headers: {
-          authorization: process.env.FAST2SMS_API_KEY,
-          "Content-Type": "application/json"
-        }
-      }
-    );
+ const response = await axios.post(
+  "https://www.fast2sms.com/dev/bulkV2",
+  {
+    route: "otp", // or use process.env.FAST2SMS_ROUTE if it's correctly set
+    variables_values: otp, // ✅ only numeric value
+    numbers: phone // no need to parseInt unless your number is numeric only
+  },
+  {
+    headers: {
+      authorization: process.env.FAST2SMS_API_KEY,
+      "Content-Type": "application/json"
+    }
+  }
+);
+
 
     otpStore.set(phone, otp); // ✅ Store OTP after sending
 
@@ -270,11 +268,13 @@ module.exports.verifyOtp = async (req, res) => {
           sameSite: 'none'
         });
 
-        return res.status(200).json({
-          success: true,
-          message: "✅ OTP verified, user already exists",
-          user: userData
-        });
+       return res.status(200).json({
+  success: true,
+  isNewUser: false,
+  message: "✅ OTP verified, user already exists",
+  user: userData
+});
+
       }
 
       // Create a new user with phone number
@@ -282,22 +282,30 @@ module.exports.verifyOtp = async (req, res) => {
       await newUser.save();
 
       return res.status(201).json({
-        success: true,
-        message: "✅ OTP verified and user created",
-        user: {
-          uid: newUser._id,
-          name: newUser.Uname,
-          email: newUser.email,
-          mobile: newUser.mobile,
-          address: newUser.address,
-          role: newUser.role
-        }
-      });
+  success: true,
+  isNewUser: true,
+  message: "✅ OTP verified and user created",
+  user: {
+    uid: newUser._id,
+    name: newUser.Uname,
+    email: newUser.email,
+    mobile: newUser.mobile,
+    address: newUser.address,
+    role: newUser.role
+  }
+});
 
-    } catch (error) {
-      console.error("Error during user creation:", error);
-      return res.status(500).json({ success: false, message: "Server error while creating user" });
-    }
+
+   } catch (error) {
+  console.error("Error during user creation:", error);
+ return res.status(500).json({
+  success: false,
+  message: "Something went wrong, please try again.",
+  debug: error.message  // Send this only in dev
+});
+;
+}
+
 
   } else {
     return res.status(400).json({ success: false, message: "❌ Invalid or expired OTP" });

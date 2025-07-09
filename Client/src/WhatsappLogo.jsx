@@ -11,7 +11,7 @@ function WhatsappLogo() {
             overflow:hidden;
             width: 60px;
             height: 60px;
-            bottom: 40px;
+            bottom: 60px;
             right: 40px;
             background-color: #25d366;
             color: #FFF;

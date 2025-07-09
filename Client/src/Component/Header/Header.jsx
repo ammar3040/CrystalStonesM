@@ -388,7 +388,7 @@ const fetchCartItems = async (uid) => {
       
       {/* Mobile Navigation (shown only on mobile) */}
       <div className="md:hidden">
-        <MobileNavbar catagory={catagorys} />
+        <MobileNavbar catagory={catagorys} MobilecartItems={cartItems} Mobileuser={user} />
       </div>
       
       <AddCart show={cartOpen} onClose={() => setCartOpen(false)} cartItems={cartItems} user={user}/>

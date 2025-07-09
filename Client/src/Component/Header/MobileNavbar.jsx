@@ -7,7 +7,7 @@ import { FaBoxOpen } from 'react-icons/fa';
 import Inquiry from './Inquiry'; // Make sure the path is correct
 
 
-const MobileNavbar = ({catagory}) => {
+const MobileNavbar = ({catagory ,MobilecartItems, Mobileuser}) => {
   const navigate = useNavigate();
   const [showInquiry, setShowInquiry] = useState(false);
 
@@ -141,7 +141,7 @@ const DockItem = ({ icon, label, onClick }) => (
       </div>
 
       {/* Cart Modal */}
-      <AddCart show={cartOpen} onClose={() => setCartOpen(false)} />
+      <AddCart show={cartOpen} onClose={() => setCartOpen(false)} cartItems={MobilecartItems} user={Mobileuser} />
 
       {/* Aside Slide Menu */}
       {showAside && (

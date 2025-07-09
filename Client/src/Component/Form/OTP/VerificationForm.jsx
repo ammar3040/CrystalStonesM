@@ -1,9 +1,12 @@
 import React, { useState, useRef } from 'react';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+
 
 const VerificationForm = ({ phoneNumber, onClose, onVerified }) => {
   const [otp, setOtp] = useState(["", "", "", ""]);
   const inputRefs = useRef([]);
+  const navigate = useNavigate(); // ✅ React Router navigation
 
   const handleChange = (index, value) => {
     const newOtp = [...otp];
@@ -11,13 +14,13 @@ const VerificationForm = ({ phoneNumber, onClose, onVerified }) => {
     setOtp(newOtp);
 
     if (value && index < 3) {
-      inputRefs.current[index + 1].focus();
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
   const handleKeyDown = (e, index) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs.current[index - 1].focus();
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
@@ -29,7 +32,7 @@ const VerificationForm = ({ phoneNumber, onClose, onVerified }) => {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // ✅ Include cookies for session support
+        credentials: "include",
         body: JSON.stringify({
           phone: phoneNumber,
           otp: fullOtp,
@@ -39,14 +42,20 @@ const VerificationForm = ({ phoneNumber, onClose, onVerified }) => {
       const data = await res.json();
 
       if (data.success) {
-        toast.success("✅ OTP verified successfully!"+data.user)
-        console.log("User data:", data.user); // ✅ Debug user data
-        if (onVerified) onVerified(data.user); // ✅ Send user data to parent
+        toast.success("✅ OTP verified successfully!");
+
+        // ✅ Redirect new user to signup
+        if (data.isNewUser) {
+          navigate("/signup", { state: { phone: phoneNumber } });
+        } else {
+          if (onVerified) onVerified(data.user);
+        }
       } else {
-        toast.error("❌ Invalid or expired OTP"+data);
+        toast.error("❌ Invalid number or expired OTP");
       }
     } catch (err) {
-      toast.error("❌ Verification failed: " + err.message);
+     toast.error("❌ Verification failed: " + (data.message || "Unexpected error"));
+
     }
   };
 
@@ -71,12 +80,12 @@ const VerificationForm = ({ phoneNumber, onClose, onVerified }) => {
         ))}
       </div>
 
-
       <button type="submit" className="verify-button">
         Verify OTP
       </button>
     </form>
   );
 };
+
 
 export default VerificationForm;

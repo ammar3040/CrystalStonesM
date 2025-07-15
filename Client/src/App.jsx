@@ -22,6 +22,7 @@ import AdminDashboard from './Component/Pages/adminPanel/AdminDashboard';
 import AdminInquiry from './Component/Pages/adminPanel/AdminInquiry';
 import ScrollToHashElement from './ScrollToHashElement';
 import WhatsappLogo from './WhatsappLogo';
+import SubscribeEmailModal from './Component/Form/OTP/SubscribeEmailModal';
 
 
 function getUserFromCookie() {
@@ -53,9 +54,9 @@ function AppWrapper() {
       {!isAdminRoute && <Header />}
       <ScrollToTop />
        <ScrollToHashElement />
-       <WhatsappLogo/>
-      {!isAdminRoute && <SendOtpWithNumber />}
-
+       
+ {!isAdminRoute && <SubscribeEmailModal  />}
+ {!isAdminRoute && <WhatsappLogo/>}
       <Routes>
         {/* Admin panel route */}
         <Route path={`/admin-a9xK72rQ1m8vZpL0`} element={<AdminLayout />}>

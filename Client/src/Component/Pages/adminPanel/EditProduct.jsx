@@ -329,10 +329,28 @@ const EditProduct = () => {
                   htmlFor="originalPrice"
                   className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1"
                 >
-                  Original Price (₹)
+                  Original Price ($)
                 </label>
               </div>
-
+ {/* Dollar Price */}
+              <div className="relative">
+                <input
+                  type="number"
+                  id="dollarPrice"
+                  name="dollarPrice"
+                  step="0.01"
+                  value={formData.dollarPrice}
+                  onChange={handleChange}
+                  className="block w-full px-4 py-3 text-sm text-gray-900 bg-white rounded-lg border border-gray-200 appearance-none focus:border-transparent focus:outline-none focus:ring-2 focus:ring-black peer"
+                  placeholder=" "
+                />
+                <label 
+                  htmlFor="dollarPrice"
+                  className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1"
+                >
+                  Price ($)
+                </label>
+              </div>
               {/* Discounted Price */}
               <div className="relative">
                 <input
@@ -353,25 +371,7 @@ const EditProduct = () => {
                 </label>
               </div>
 
-              {/* Dollar Price */}
-              <div className="relative">
-                <input
-                  type="number"
-                  id="dollarPrice"
-                  name="dollarPrice"
-                  step="0.01"
-                  value={formData.dollarPrice}
-                  onChange={handleChange}
-                  className="block w-full px-4 py-3 text-sm text-gray-900 bg-white rounded-lg border border-gray-200 appearance-none focus:border-transparent focus:outline-none focus:ring-2 focus:ring-black peer"
-                  placeholder=" "
-                />
-                <label 
-                  htmlFor="dollarPrice"
-                  className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1"
-                >
-                  Price ($)
-                </label>
-              </div>
+             
 
               {/* Quantity Unit */}
               <div className="relative">

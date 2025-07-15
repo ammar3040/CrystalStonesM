@@ -11,7 +11,6 @@ function ProductCategory() {
   const [catagory,setCatagory]=useState([]);
 
 
-  const [visibleCards, setVisibleCards] = useState(10);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -24,10 +23,7 @@ function ProductCategory() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const loadMore = () => {
-    setVisibleCards(prev => prev + (isMobile ? 3 : 5));
-  };
-  
+
   useEffect(() => {
 
 
@@ -79,45 +75,13 @@ function ProductCategory() {
           gap: '20px',
           padding: '20px'
         }}>
-          {catagory.slice(0, visibleCards).map((c, index) => (
-            <CategoryCard category={c} />
+        {catagory.map((c, index) => (
+  <CategoryCard key={index} category={c} />
+))}
 
-          ))}
         </div>
 
-        {visibleCards < catagory.length && (
-          <div style={{ textAlign: 'center', margin: '30px 0' }}>
-            <button 
-              onClick={loadMore}
-              style={{
-                padding: '12px 30px',
-                backgroundColor: '#fff8a8',
-                color: 'black',
-                border: 'none',
-                borderRadius: '25px',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: '600',
-                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                transition: 'all 0.3s ease',
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = 'black';
-                e.currentTarget.style.color = 'WHITE';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 12px rgba(0,0,0,0.15)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = '#fff8a8';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.color = 'black';
-                e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
-              }}
-            >
-              Load More
-            </button>
-          </div>
-        )}
+  
       </div>
     );
   }

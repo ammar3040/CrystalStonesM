@@ -75,7 +75,7 @@ Explore Handpicked Crystal & Agate Treasures
               productImg={product?.mainImage?.url || '/fallback.png'} // Prevent crash
               productName={product?.productName || 'No Name'}
               productAbout={product?.description || 'No description available'}
-              ProductPrice={product?.discountedPrice || 0}
+              ProductPrice={product?.dollarPrice|| 0}
               oldProductPrice={product?.originalPrice || 0}
               minQuentity={product?.MinQuantity || 1}
               pid={product?._id}

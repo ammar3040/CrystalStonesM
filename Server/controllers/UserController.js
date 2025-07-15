@@ -526,3 +526,52 @@ module.exports.updateInquiryStatus= async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
+
+
+// subscribe by email
+module.exports.subscribe = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // 1. Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      return res.status(400).json({ success: false, message: 'Invalid email format' });
+    }
+
+    // 2. Check if user exists
+    let user = await UserModel.findOne({ email });
+
+    if (user) {
+      // 3. If user exists, update subscription flag
+      if (user.isSubscribed) {
+        res.cookie('subscribed', 'true', {
+          httpOnly: true,
+          maxAge: 1000 * 60 * 60 * 24 * 30,
+          sameSite: 'Lax',
+        });
+        return res.status(200).json({ success: true, message: 'Already subscribed' });
+      }
+
+      user.isSubscribed = true;
+      await user.save();
+    } else {
+      // 4. If user doesn't exist, create minimal user with subscription
+      user = new UserModel({ email, isSubscribed: true });
+      await user.save();
+    }
+
+    // 5. Set cookie
+    res.cookie('subscribed', 'true', {
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+      sameSite: 'Lax',
+    });
+
+    return res.status(200).json({ success: true, message: 'Subscribed successfully' });
+  } catch (err) {
+    console.error('Subscribe error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};

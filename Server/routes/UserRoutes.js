@@ -32,10 +32,16 @@ routes.get('/google/callback',
   passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_LINK}` }),
   UserCtl.GoogleSignIn  // your controller to handle cookie setting & redirect
 );
+// get user email
+
+routes.post("/subscribe",UserCtl.subscribe)
+
+
+
+
 routes.get("/catagoryproduct",UserCtl.ShowCatagoryProducts)
 routes.post("/setbestproductlist",UserCtl.setBestProductList)
 routes.get("/getbestproductlist",UserCtl.getBestProductList)
-
 
 routes.post("/getCartItem", UserCtl.getCartItem);
 routes.post("/cartedItem", UserCtl.getCartedItem);

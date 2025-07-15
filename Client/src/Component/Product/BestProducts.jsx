@@ -60,7 +60,7 @@ function BestProduct() {
                 productImg={product.mainImage.url}
                 productName={product.productName}
                 productAbout={product.description}
-                ProductPrice={product.discountedPrice}
+                ProductPrice={product.dollarPrice}
                 oldProductPrice={product.originalPrice}
                 productQuentity={product.quantity}
                 productMinQuentity={product.MinQuantity}

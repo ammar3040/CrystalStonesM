@@ -5,7 +5,6 @@ const productSchema = new mongoose.Schema({
   description: { type: String, required: true },
   category: { type: String, required: true },
   originalPrice: { type: Number, required: true },
-  discountedPrice: { type: Number ,required: true},
   dollarPrice: { type: Number,required: true },
   benefits: { type: [String]  }, // Array of selected checkboxes
   crystalType: { type: String, required: true },

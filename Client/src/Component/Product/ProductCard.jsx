@@ -5,9 +5,15 @@ import Cookies from "js-cookie";
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from "react-router-dom";
 
-function ProductCard({ productImg, productName, productAbout, ProductPrice, oldProductPrice, minQuentity, pid,ModelNumber }) {
+function ProductCard({ productImg, productName, productAbout, ProductPrice, oldProductPrice, minQuentity, pid, ModelNumber }) {
   const navigate = useNavigate();
-  
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+
+  React.useEffect(() => {
+    const user = Cookies.get("user");
+    setIsLoggedIn(!!user);
+  }, []);
+
   const handleAddToCart = async () => {
     const user = Cookies.get("user");
     if (!user) {
@@ -37,10 +43,10 @@ function ProductCard({ productImg, productName, productAbout, ProductPrice, oldP
       <div className="card bg-white rounded-lg shadow-sm h-full flex flex-col overflow-hidden">
         {/* Image container with WhatsApp button */}
         <Link to={`/Product/${pid}`} className="block">
-          <figure className="relative aspect-[4/3] overflow-hidden">
+          <figure className="relative aspect-square overflow-hidden"> {/* Changed to aspect-square for better image display */}
             <img 
               src={productImg}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+              className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 p-2" /* Changed to object-contain and added padding */
               alt={productName} 
             />
             {/* WhatsApp inquiry button */}
@@ -52,7 +58,7 @@ function ProductCard({ productImg, productName, productAbout, ProductPrice, oldP
               rel="noopener noreferrer"
               className="absolute bottom-2 right-2 bg-green-500 text-white p-2 rounded-full shadow-md hover:bg-green-600 transition-colors duration-200"
               aria-label="Inquire via WhatsApp"
-              onClick={(e) => e.stopPropagation()} // Prevent link navigation
+              onClick={(e) => e.stopPropagation()}
             >
               <FaWhatsapp className="text-lg" />
             </a>
@@ -75,12 +81,30 @@ function ProductCard({ productImg, productName, productAbout, ProductPrice, oldP
           
           {/* Price and buttons */}
           <div className="mt-auto">
-            <Link to={`/Product/${pid}`} className="block">
-              <div className="flex justify-center items-center gap-2 mb-2 sm:mb-3">
-                <span className="text-gray-500 text-xs line-through">₹{oldProductPrice}</span>
-                <span className="text-sm sm:text-md font-bold text-gray-900">₹{ProductPrice}</span>
+            {isLoggedIn ? (
+              <>
+                <Link to={`/Product/${pid}`} className="block">
+                  <div className="flex justify-center items-center gap-2 mb-2 sm:mb-3">
+                    {oldProductPrice && (
+                      <span className="text-gray-500 text-xs line-through">${oldProductPrice}</span>
+                    )}
+                    <span className="text-sm sm:text-md font-bold text-gray-900">${ProductPrice}</span>
+                  </div>
+                  <div className="text-center">
+                    <span className="text-gray-500 text-xs">Min Qty: <b>{minQuentity}</b></span>
+                  </div>
+                </Link>
+              </>
+            ) : (
+              <div className="mb-3 text-center">
+                <button 
+                  onClick={() => navigate('/SignInPage')}
+                  className="text-blue-600 hover:underline text-xs font-medium"
+                >
+                  Login to see price
+                </button>
               </div>
-            </Link>
+            )}
             
             <div className="flex justify-between gap-2">
               <Link to={`/Product/${pid}`} className="block">

@@ -46,12 +46,20 @@ let allProductData = await Product.find();
 
 module.exports.AddProduct = async (req, res) => {
   try {
+    // Log all files for debugging
+    console.log("Received files:", Object.keys(req.files || {}));
+    console.log("Full files object:", req.files);
+
+    // Check if mainImage exists and is valid
+    if (!req.files?.mainImage || !req.files.mainImage[0]) {
+      return res.status(400).send("Main image is required.");
+    }
+
     const {
       productName,
       description,
       category,
       originalPrice,
-      discountedPrice,
       dollarPrice,
       crystalType,
       length,
@@ -89,14 +97,13 @@ module.exports.AddProduct = async (req, res) => {
       description,
       category,
       originalPrice,
-      discountedPrice,
       dollarPrice,
       benefits,
       quantityUnit,
       MinQuantity,
       modelNumber,
       crystalType,
-       bestproduct,
+      bestproduct,
       dimensions: {
         length,
         width,
@@ -109,14 +116,24 @@ module.exports.AddProduct = async (req, res) => {
 
     await product.save();
 
-    res.redirect("/admin/addform"); // Or show success message
-  } catch (err) {
-    console.error("AddProduct Error:", err);
-    res.status(500).send("Something went wrong while adding product.");
-  }
-};
+    res.status(200).json({
+  success: true,
+  message: "Product added successfully"
+});
+// Or respond with success JSON if needed
+  }catch (err) {
+  console.error("AddProduct Error:", err);
+  res.status(500).json({
+    success: false,
+    message: "Something went wrong while adding product.",
+    error: err.message,
+    stack: err.stack
+  });
+}
 
 
+
+}
 
 
 // admin Crud

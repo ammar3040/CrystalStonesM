@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SendOtpWithNumber from './OTP/SendOtpWithNumber';
 import toast from 'react-hot-toast'; // Import toast for notifications
+import SignUpMain from './SignUpMain';
 const LoginMain = ({ onLoginSuccess, onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const [showOtpModal, setShowOtpModal] = useState(false);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -143,8 +143,8 @@ const LoginMain = ({ onLoginSuccess, onClose }) => {
 
           <div className="mt-4 text-sm flex justify-between items-center container-mr">
             <p className="mr-3 md:mr-0">If you don't have an account..</p>
-            <button onClick={() => setShowOtpModal(true)} className="hover:border register text-white bg-[#002D74] hover:border-gray-400 rounded-xl py-2 px-5 hover:scale-110 hover:bg-[#002c7424] font-semibold duration-300"
-            >Register</button>
+            <Link to={"/SignUpPage"}> <button onClick={()=>onClose()} className="hover:border register text-white bg-[#002D74] hover:border-gray-400 rounded-xl py-2 px-5 hover:scale-110 hover:bg-[#002c7424] font-semibold duration-300"
+            >Register</button></Link>
           </div>
         </div>
         <div className="md:block hidden w-1/2">
@@ -157,7 +157,7 @@ const LoginMain = ({ onLoginSuccess, onClose }) => {
     
 
     </section>
-      {showOtpModal && <SendOtpWithNumber  forceOpen={true}  onClose={() => setShowOtpModal(false)} />}
+    
       </>
   );
 };

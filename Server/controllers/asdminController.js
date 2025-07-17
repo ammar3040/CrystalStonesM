@@ -1,6 +1,7 @@
 
 const moment = require("moment");
 
+const { validationResult } = require("express-validator");
 
 const path = require('path');
 const fs = require('fs');
@@ -46,11 +47,8 @@ let allProductData = await Product.find();
 
 module.exports.AddProduct = async (req, res) => {
   try {
-    // Log all files for debugging
-    console.log("Received files:", Object.keys(req.files || {}));
-    console.log("Full files object:", req.files);
+    console.log("body :", req.body);
 
-    // Check if mainImage exists and is valid
     if (!req.files?.mainImage || !req.files.mainImage[0]) {
       return res.status(400).send("Main image is required.");
     }
@@ -69,12 +67,24 @@ module.exports.AddProduct = async (req, res) => {
       specialNotes,
       quantityUnit,
       bestproduct,
-      MinQuantity
+      MinQuantity,
     } = req.body;
 
-    const benefits = Array.isArray(req.body.benefits)
-      ? req.body.benefits
-      : req.body.benefits ? [req.body.benefits] : [];
+    // ✅ Handle specifications
+    let specifications = [];
+    if (req.body.specifications) {
+      if (Array.isArray(req.body.specifications)) {
+        // In case frontend sends array of objects directly
+        specifications = req.body.specifications;
+      } else {
+        try {
+          // In case it's sent as a JSON string
+          specifications = JSON.parse(req.body.specifications);
+        } catch (e) {
+          console.error("Failed to parse specifications");
+        }
+      }
+    }
 
     // ✅ Extract mainImage
     const mainImage = req.files.mainImage[0];
@@ -91,14 +101,13 @@ module.exports.AddProduct = async (req, res) => {
         }))
       : [];
 
-    // ✅ Save to MongoDB
     const product = new Product({
       productName,
       description,
       category,
       originalPrice,
       dollarPrice,
-      benefits,
+      specifications, // ⬅ added here
       quantityUnit,
       MinQuantity,
       modelNumber,
@@ -117,23 +126,21 @@ module.exports.AddProduct = async (req, res) => {
     await product.save();
 
     res.status(200).json({
-  success: true,
-  message: "Product added successfully"
-});
-// Or respond with success JSON if needed
-  }catch (err) {
-  console.error("AddProduct Error:", err);
-  res.status(500).json({
-    success: false,
-    message: "Something went wrong while adding product.",
-    error: err.message,
-    stack: err.stack
-  });
-}
+      success: true,
+      message: "Product added successfully"
+    });
 
+  } catch (err) {
+    console.error("AddProduct Error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong while adding product.",
+      error: err.message,
+      stack: err.stack
+    });
+  }
+};
 
-
-}
 
 
 // admin Crud
@@ -211,40 +218,83 @@ module.exports.updateData = async (req, res) => {
   session.startTransaction();
 
   try {
+    // Validate request
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      await session.abortTransaction();
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
     const productId = req.body.id;
     if (!productId) {
       throw new Error("Product ID is required");
     }
 
+    // Check if product exists
     const existingProduct = await Product.findById(productId).session(session).lean();
     if (!existingProduct) {
       await session.abortTransaction();
-      return res.status(404).json({ success: false, message: "Product not found" });
+      return res.status(404).json({ 
+        success: false, 
+        message: "Product not found" 
+      });
     }
 
+    // Prepare update data
     const updateData = { ...req.body };
-    const { id, length, width, height, ...rest } = updateData;
+    const { id, length, width, height, removedAdditionalImages = [], ...rest } = updateData;
 
-    // Dimensions
+    // Process dimensions
     rest.dimensions = {
-      length: Math.max(0, Number(length) || 0),
-      width: Math.max(0, Number(width) || 0),
-      height: Math.max(0, Number(height) || 0)
+      length: Math.max(0, Number(length) || existingProduct.dimensions?.length || 0),
+      width: Math.max(0, Number(width) || existingProduct.dimensions?.width || 0),
+      height: Math.max(0, Number(height) || existingProduct.dimensions?.height || 0)
     };
 
-    // Benefits
+    // Process benefits
     rest.benefits = Array.isArray(req.body.benefits)
       ? req.body.benefits.filter(Boolean)
       : req.body.benefits
         ? [req.body.benefits].filter(Boolean)
-        : [];
+        : existingProduct.benefits || [];
 
-    // Main image
+    // Process specifications
+    if (req.body.specifications) {
+      try {
+        rest.specifications = Array.isArray(req.body.specifications)
+          ? req.body.specifications
+          : JSON.parse(req.body.specifications);
+        
+        if (!rest.specifications.every(spec => spec.key && spec.value)) {
+          throw new Error("Specifications must have both key and value");
+        }
+      } catch (e) {
+        throw new Error("Invalid specifications format");
+      }
+    } else {
+      rest.specifications = existingProduct.specifications || [];
+    }
+
+    // Process main image
     if (req.files?.mainImage?.[0]) {
-      if (existingProduct.mainImage?.public_id) {
-        await cloudinary.uploader.destroy(existingProduct.mainImage.public_id, { invalidate: true });
+      // Validate image type
+      const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!validImageTypes.includes(req.files.mainImage[0].mimetype)) {
+        throw new Error("Main image must be a JPEG, PNG, or WEBP file");
       }
 
+      // Delete old image if exists
+      if (existingProduct.mainImage?.public_id) {
+        await cloudinary.uploader.destroy(existingProduct.mainImage.public_id, { 
+          invalidate: true 
+        });
+      }
+
+      // Upload new image
       const mainImageFile = req.files.mainImage[0];
       const mainImageUpload = await cloudinary.uploader.upload(mainImageFile.path, {
         folder: 'CrystalStonsMart-Product',
@@ -258,18 +308,23 @@ module.exports.updateData = async (req, res) => {
       rest.mainImage = existingProduct.mainImage;
     }
 
-    // Additional images
+    // Process additional images
+    const additionalImagesToKeep = existingProduct.additionalImages?.filter(img => 
+      !removedAdditionalImages.includes(img.public_id)
+    ) || [];
+
     if (req.files?.additionalImages?.length > 0) {
-      if (existingProduct.additionalImages?.length > 0) {
-        for (const img of existingProduct.additionalImages) {
-          if (img?.public_id) {
-            await cloudinary.uploader.destroy(img.public_id, { invalidate: true });
-          }
+      // Validate image types
+      for (const file of req.files.additionalImages) {
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) {
+          throw new Error("Additional images must be JPEG, PNG, or WEBP files");
         }
       }
 
-      const uploadedImages = [];
+      // Upload new additional images in batches
       const batchSize = 3;
+      const uploadedImages = [];
+      
       for (let i = 0; i < req.files.additionalImages.length; i += batchSize) {
         const batch = req.files.additionalImages.slice(i, i + batchSize);
         const results = await Promise.allSettled(
@@ -290,17 +345,44 @@ module.exports.updateData = async (req, res) => {
           }
         }
       }
-      rest.additionalImages = uploadedImages;
+
+      rest.additionalImages = [...additionalImagesToKeep, ...uploadedImages];
     } else {
-      rest.additionalImages = existingProduct.additionalImages || [];
+      rest.additionalImages = additionalImagesToKeep;
+    }
+
+    // Delete removed images from Cloudinary
+    if (removedAdditionalImages.length > 0) {
+      await Promise.allSettled(
+        removedAdditionalImages.map(publicId => 
+          cloudinary.uploader.destroy(publicId, { invalidate: true })
+        )
+      );
+    }
+
+    // Process numeric fields
+    const numericFields = ['originalPrice', 'dollarPrice', 'discountedPrice'];
+    for (const field of numericFields) {
+      if (req.body[field]) {
+        const numValue = parseFloat(req.body[field]);
+        if (isNaN(numValue)) {
+          throw new Error(`${field} must be a valid number`);
+        }
+        rest[field] = numValue;
+      }
     }
 
     rest.updatedAt = new Date();
 
+    // Update product
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
       rest,
-      { new: true, runValidators: true, session }
+      { 
+        new: true, 
+        runValidators: true, 
+        session 
+      }
     );
 
     if (!updatedProduct) {
@@ -308,15 +390,22 @@ module.exports.updateData = async (req, res) => {
     }
 
     await session.commitTransaction();
-    return res.status(200).json({ success: true, message: "Product updated successfully" });
+    return res.status(200).json({ 
+      success: true, 
+      message: "Product updated successfully",
+      product: updatedProduct
+    });
   } catch (err) {
     await session.abortTransaction();
-    return res.status(500).json({ success: false, message: err.message });
+    console.error("Update Product Error:", err);
+    return res.status(500).json({ 
+      success: false, 
+      message: err.message || "Something went wrong while updating product"
+    });
   } finally {
     session.endSession();
   }
 };
-
 // admin panle user data table rander
 
 module.exports.UserTable = async (req, res) => {

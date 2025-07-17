@@ -15,7 +15,7 @@ routes.get("/all",UserCtl.ShowAllProduct);
 
 // Get product by ID (IMPORTANT: route must have a named param!)
 routes.get("/Product",UserCtl.ShowProduct);
-
+routes.get('/specifications-by-category',UserCtl.specific);
 
 // Registration Route
 routes.post("/register", UserCtl.SignUp);

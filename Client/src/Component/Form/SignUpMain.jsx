@@ -11,7 +11,7 @@ const SignUpMain = ({phoneNumber}) => {
   const [formData, setFormData] = useState({
     Uname:'',
     email: '',
-    mobile: phoneNumber,
+    mobile: phoneNumber || "",
     address: '',
     password: '',
     confirmPassword: ''
@@ -47,10 +47,16 @@ const handleSubmit = async (e) => {
     toast.success("Registration Successful!");
     navigate('/')
     
-  } catch (error) {
-    console.error("Registration Failed:", error);
-    toast.error("Registration failed. Please try again.");
-  }
+  }  catch (error) {
+ toast.error("Registration error:", error);
+  return res.status(500).json({
+    success: false,
+    message: "Registration failed. Please try again.",
+    error: error.message,
+    stack: error.stack, // This gives deeper info for debugging
+  });
+}
+
 };
 
 
@@ -84,9 +90,9 @@ const handleSubmit = async (e) => {
   type="tel"
   name="mobile"
   value={formData.mobile}
-  
+  placeholder='mobile number'
   className="w-full px-4 py-2 border rounded-xl"
-disabled
+onChange={handleChange}
   maxLength={10}
 />
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState , useRef } from 'react';
 import toast from 'react-hot-toast';
 
 function AddCart({ show, onClose, cartItems = [],user}) {
-  const [showInDollar, setShowInDollar] = useState(false);
+  const [showInDollar, setShowInDollar] = useState(true);
   const [localCart, setLocalCart] = useState([]);
   const [intervalId, setIntervalId] = useState(null);
 const intervalMap = useRef({});
@@ -210,16 +210,7 @@ const handleInquiry = async () => {
             </button>
           </div>
 
-          <div className="flex justify-end px-4 py-2">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={showInDollar}
-                onChange={() => setShowInDollar(!showInDollar)}
-              />
-              Show in Dollar
-            </label>
-          </div>
+       
 
           <div className="flex-1 overflow-y-auto px-4">
             {localCart.length === 0 ? (

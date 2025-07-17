@@ -363,7 +363,8 @@ const fetchCartItems = async (uid) => {
            {           catagorys.map((catagory) => (
                     <a 
                       key={catagory._id } 
-                      href={`/catagory/${catagory.category}`}
+                     href={`/catagory/${encodeURIComponent(catagory.category)}`}
+
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-700"
                     >
                       {catagory.category}

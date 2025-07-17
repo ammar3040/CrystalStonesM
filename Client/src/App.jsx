@@ -55,8 +55,8 @@ function AppWrapper() {
       <ScrollToTop />
        <ScrollToHashElement />
        
- {!isAdminRoute && <SubscribeEmailModal  />}
- {!isAdminRoute && <WhatsappLogo/>}
+ {!isAdminRoute &&  !user && <SubscribeEmailModal  />}
+ {!isAdminRoute&& <WhatsappLogo/>}
       <Routes>
         {/* Admin panel route */}
         <Route path={`/admin-a9xK72rQ1m8vZpL0`} element={<AdminLayout />}>
@@ -86,7 +86,7 @@ function AppWrapper() {
           path="/SignInPage"
           element={isLoggedIn ? <Navigate to="/" /> : <LoginMain />}
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+       <Route path="*" element={<Navigate to="/" replace />} /> 
 
       </Routes>
 

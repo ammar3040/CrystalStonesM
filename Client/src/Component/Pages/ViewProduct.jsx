@@ -8,6 +8,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from "js-cookie";
 import toast from 'react-hot-toast';
+import { FaWhatsapp } from 'react-icons/fa';
 
 const ViewProduct = () => {
   const { ProductId } = useParams();
@@ -81,6 +82,11 @@ const ViewProduct = () => {
     }
   };
 
+  const handleInquiry = () => {
+    const message = `Hi, I'm interested in this product:\n\n📌 Name: ${product.productName}\n🆔 Model: ${product.ModelNumber || 'N/A'}\n🖼️ Image: ${product.mainImage.url}`;
+    window.open(`https://wa.me/919016507258?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
   // Recommended products
   const recommendedProducts = allProduct
     ?.filter(p => p._id !== product._id)
@@ -147,20 +153,17 @@ const ViewProduct = () => {
               <div className="mb-8 p-4 bg-gray-50 rounded-lg">
                 {isLoggedIn ? (
                   <>
-                       <div className="flex items-center flex-wrap gap-3 mb-2">
-                   {product.originalPrice && (
+                    <div className="flex items-center flex-wrap gap-3 mb-2">
+                      {product.originalPrice && (
                         <span className="text-3xl text-gray-500 line-through">${product.originalPrice}</span>
                       )}
-               
                       <span className="text-3xl font-bold text-gray-900">${product.dollarPrice} </span>{product.quantityUnit}
-                     
                       {product.originalPrice && (
                         <span className="text-green-600 font-semibold text-lg">
                           ({Math.round((1 - product.dollarPrice/product.originalPrice)*100)}% OFF)
                         </span>
                       )}
                     </div>
-                
                     <p className="text-gray-700 mt-2">
                       <span className="font-medium">Minimum Quantity:</span> {product.MinQuantity} 
                     </p>
@@ -180,101 +183,83 @@ const ViewProduct = () => {
                 )}
               </div>
 
-              {/* Highlights */}
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Highlights</h2>
-                <ul className="space-y-3">
-                  <li className="flex items-start">
-                    <span className="text-gray-700 font-medium mr-2">• Crystal Type:</span>
-                    <span className="text-gray-700">{product.crystalType}</span>
-                  </li>
-                  {product.benefits.map((benefit, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-gray-700 font-medium mr-2">•</span>
-                      <span className="text-gray-700 capitalize">{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Add to Cart */}
+              {/* Action Buttons */}
               {isLoggedIn && (
-                <div className="mb-10">
-                  <div className="flex items-center mb-6">
-                    <div className="flex items-center border border-gray-300 rounded-lg mr-4">
-                      <button 
-                        onClick={decreaseQuantity}
-                        className="px-4 py-2 text-xl font-medium text-gray-600 hover:bg-gray-100"
-                      >
-                        -
-                      </button>
-                      <span className="px-6 py-2 text-center w-16 text-lg">{quantity}</span>
-                      <button 
-                        onClick={increaseQuantity}
-                        className="px-4 py-2 text-xl font-medium text-gray-600 hover:bg-gray-100"
-                      >
-                        +
-                      </button>
-                    </div>
-                    <button
-                      onClick={handleAddToCart}
-                      className="bg-black text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors duration-200 flex-1 text-lg font-medium"
+                <div className="mb-10 flex flex-col sm:flex-row gap-4">
+                  <div className="flex items-center border border-gray-300 rounded-lg">
+                    <button 
+                      onClick={decreaseQuantity}
+                      className="px-4 py-2 text-xl font-medium text-gray-600 hover:bg-gray-100"
                     >
-                      Add to Cart
+                      -
+                    </button>
+                    <span className="px-6 py-2 text-center w-16 text-lg">{quantity}</span>
+                    <button 
+                      onClick={increaseQuantity}
+                      className="px-4 py-2 text-xl font-medium text-gray-600 hover:bg-gray-100"
+                    >
+                      +
                     </button>
                   </div>
-                  <div className="flex items-center text-gray-600">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
-                    </svg>
-                    <span className="text-sm">Free shipping on orders over $50</span>
-                  </div>
+                  <button
+                    onClick={handleAddToCart}
+                    className="bg-black text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors duration-200 text-lg font-medium flex-1"
+                  >
+                    Add to Cart
+                  </button>
+                  <button
+                    onClick={handleInquiry}
+                    className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors duration-200 text-lg font-medium flex items-center justify-center gap-2 flex-1"
+                  >
+                    <FaWhatsapp className="text-xl" />
+                    Inquiry
+                  </button>
                 </div>
               )}
 
               {/* Product Description */}
               <div className="mb-10">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
-                <p className="text-gray-700 text-lg leading-relaxed">{product.description}</p>
-              </div>
-
-              {/* Benefits */}
-              <div className="mb-10">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Healing Benefits</h2>
-                <ul className="space-y-3">
-                  {product.benefits.map((benefit, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-gray-700 font-medium mr-2">•</span>
-                      <span className="text-gray-700 text-lg capitalize">{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
+                <h2 className="text-2xl font-bold text-black mb-4">Description</h2>
+                <p className="text-black font-medium leading-relaxed">{product.description}</p>
               </div>
 
               {/* Product Details */}
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Product Details</h2>
+                <h2 className="text-2xl font-bold text-black mb-4">Product Details</h2>
                 <div className="space-y-4">
                   <div className="flex">
-                    <span className="text-gray-600 font-medium w-40">Dimensions:</span>
-                    <span className="text-gray-800">
+                    <span className="text-black font-semibold w-40">Dimensions:</span>
+                    <span className="text-black font-medium">
                       {product.dimensions.length} × {product.dimensions.width} × {product.dimensions.height} mm
                     </span>
                   </div>
                   <div className="flex">
-                    <span className="text-gray-600 font-medium w-40">Crystal Type:</span>
-                    <span className="text-gray-800">{product.crystalType}</span>
+                    <span className="text-black font-semibold w-40">Crystal Type:</span>
+                    <span className="text-black font-medium">{product.crystalType}</span>
                   </div>
+                  {product.specifications && product.specifications.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      <span className="text-black font-semibold">Specifications:</span>
+                      <div className="grid gap-2">
+                        {product.specifications.map((spec, idx) => (
+                          <div key={idx} className="flex gap-2">
+                            <span className="font-semibold text-black">{spec.key}:</span>
+                            <span className="text-black font-medium">{spec.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="flex">
-                    <span className="text-gray-600 font-medium w-40">Quantity Unit:</span>
-                    <span className="text-gray-800 capitalize">
+                    <span className="text-black font-semibold w-40">Quantity Unit:</span>
+                    <span className="text-black font-medium capitalize">
                       {product.quantityUnit.replace('_', ' ')}
                     </span>
                   </div>
                   {product.specialNotes && (
                     <div className="flex">
-                      <span className="text-gray-600 font-medium w-40">Special Notes:</span>
-                      <span className="text-gray-800">{product.specialNotes}</span>
+                      <span className="text-black font-semibold w-40">Special Notes:</span>
+                      <span className="text-black font-medium">{product.specialNotes}</span>
                     </div>
                   )}
                 </div>
@@ -295,11 +280,11 @@ const ViewProduct = () => {
                       onClick={() => navigate(`/product/${product._id}`)}
                     >
                       <div className="flex">
-                        <div className="w-1/3">
+                        <div className="w-1/3 h-[100px] flex items-center justify-center">
                           <img 
                             src={product.mainImage.url} 
                             alt={product.productName}
-                            className="w-full h-full object-cover"
+                            className="max-h-full max-w-full object-contain"
                           />
                         </div>
                         <div className="w-2/3 p-4">
@@ -344,11 +329,13 @@ const ViewProduct = () => {
                   className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
                   onClick={() => navigate(`/product/${product._id}`)}
                 >
-                  <img 
-                    src={product.mainImage.url} 
-                    alt={product.productName}
-                    className="w-full h-48 object-cover"
-                  />
+                  <div className="w-full h-48 flex items-center justify-center bg-white">
+                    <img 
+                      src={product.mainImage.url} 
+                      alt={product.productName}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
                   <div className="p-4">
                     <h3 className="font-bold text-lg text-gray-900 mb-1 line-clamp-1">{product.productName}</h3>
                     <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>

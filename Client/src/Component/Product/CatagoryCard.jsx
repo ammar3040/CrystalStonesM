@@ -4,7 +4,7 @@ const CategoryCard = ({ category }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-     <a href={`/catagory/${category.category}`}>
+     <a href={`/catagory/${encodeURIComponent(category.category)}`} >
     <div 
       className="category-card"
       style={styles.card}

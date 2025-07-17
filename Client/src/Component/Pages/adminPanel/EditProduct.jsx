@@ -23,7 +23,7 @@ const EditProduct = () => {
     width: "",
     height: "",
   });
-
+  const [specifications, setSpecifications] = useState([{ key: "", value: "" }]);
   const [mainImage, setMainImage] = useState(null);
   const [existingMainImageUrl, setExistingMainImageUrl] = useState("");
   const [additionalImages, setAdditionalImages] = useState([]);
@@ -55,6 +55,7 @@ const EditProduct = () => {
             width: product.width || "",
             height: product.height || "",
           });
+          setSpecifications(product.specifications || [{ key: "", value: "" }]);
           setExistingMainImageUrl(product.mainImage?.url || "");
           setExistingAdditionalImages(product.additionalImages || []);
           setCategories(res.data.categories || []);
@@ -71,6 +72,13 @@ const EditProduct = () => {
 
     fetchProductDetails();
   }, [pid]);
+
+  useEffect(() => {
+    return () => {
+      if (mainImage) URL.revokeObjectURL(mainImage);
+      additionalImages.forEach(img => URL.revokeObjectURL(img));
+    };
+  }, [mainImage, additionalImages]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -108,8 +116,11 @@ const EditProduct = () => {
     });
 
     // Append product ID
-    form.append("id", pid); // ✅ backend expects 'id'
+    form.append("id", pid);
 
+    // Append specifications
+    const validSpecs = specifications.filter(spec => spec.key.trim() && spec.value.trim());
+    form.append('specifications', JSON.stringify(validSpecs));
 
     // Append main image if changed
     if (mainImage) {
@@ -255,39 +266,73 @@ const EditProduct = () => {
                 </label>
               </div>
 
-              {/* Astrological Benefits */}
+              {/* Product Specifications */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Astrological Benefits
+                  Product Specifications
                 </label>
-                <div className="grid grid-cols-2 gap-3">
-                  {["wealth", "happiness", "protection", "health", "love", "success", "peace"].map(
-                    (benefit) => (
-                      <label key={benefit} className="flex items-center space-x-2 cursor-pointer">
-                        <div className="relative">
-                          <input
-                            type="checkbox"
-                            name="benefits"
-                            value={benefit}
-                            checked={formData.benefits.includes(benefit)}
-                            onChange={handleChange}
-                            className="absolute opacity-0 h-0 w-0"
-                          />
-                          <div className={`w-5 h-5 border-2 rounded-md flex items-center justify-center 
-                            ${formData.benefits.includes(benefit) ? 'bg-black border-black' : 'border-gray-300'}`}>
-                            {formData.benefits.includes(benefit) && (
-                              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                            )}
-                          </div>
-                        </div>
-                        <span className="text-gray-700 capitalize">{benefit}</span>
+                {specifications.map((spec, index) => (
+                  <div key={index} className="flex gap-3 mb-3">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        value={spec.key}
+                        onChange={(e) => {
+                          const updated = [...specifications];
+                          updated[index].key = e.target.value;
+                          setSpecifications(updated);
+                        }}
+                        className="block w-full px-4 py-3 text-sm text-gray-900 bg-white rounded-lg border border-gray-200 appearance-none focus:border-transparent focus:outline-none focus:ring-2 focus:ring-black peer"
+                        placeholder=" "
+                      />
+                      <label className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                        Key
                       </label>
-                    )
-                  )}
-                </div>
+                    </div>
+                    
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        value={spec.value}
+                        onChange={(e) => {
+                          const updated = [...specifications];
+                          updated[index].value = e.target.value;
+                          setSpecifications(updated);
+                        }}
+                        className="block w-full px-4 py-3 text-sm text-gray-900 bg-white rounded-lg border border-gray-200 appearance-none focus:border-transparent focus:outline-none focus:ring-2 focus:ring-black peer"
+                        placeholder=" "
+                      />
+                      <label className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1">
+                        Value
+                      </label>
+                    </div>
+
+                    {index > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = specifications.filter((_, i) => i !== index);
+                          setSpecifications(updated);
+                        }}
+                        className="text-red-500 hover:text-red-700 text-sm px-2 py-1 self-center"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => setSpecifications([...specifications, { key: "", value: "" }])}
+                  className="mt-2 px-4 py-2 text-sm text-white bg-black rounded-lg hover:bg-gray-800"
+                >
+                  + Add Specification
+                </button>
               </div>
+
+              {/* Astrological Benefits */}
+   
 
               {/* Crystal Type */}
               <div className="relative">
@@ -332,7 +377,8 @@ const EditProduct = () => {
                   Original Price ($)
                 </label>
               </div>
- {/* Dollar Price */}
+
+              {/* Dollar Price */}
               <div className="relative">
                 <input
                   type="number"
@@ -351,6 +397,7 @@ const EditProduct = () => {
                   Price ($)
                 </label>
               </div>
+
               {/* Discounted Price */}
               <div className="relative">
                 <input
@@ -370,8 +417,6 @@ const EditProduct = () => {
                   Discounted Price (₹)
                 </label>
               </div>
-
-             
 
               {/* Quantity Unit */}
               <div className="relative">
@@ -410,7 +455,7 @@ const EditProduct = () => {
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="5">5</option>
-                 <option value="10">10</option>
+                  <option value="10">10</option>
                   <option value="15">15</option>
                   <option value="20">20</option>
                   <option value="25">25</option>

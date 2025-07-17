@@ -1,91 +1,75 @@
-import React, { useState, useRef } from 'react';
-import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import toast from "react-hot-toast";
 
+const VerifyForm = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [otp, setOtp] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [mobile, setMobile] = useState("");
 
-const VerificationForm = ({ phoneNumber, onClose, onVerified }) => {
-  const [otp, setOtp] = useState(["", "", "", ""]);
-  const inputRefs = useRef([]);
-  const navigate = useNavigate(); // ✅ React Router navigation
-
-  const handleChange = (index, value) => {
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    if (value && index < 3) {
-      inputRefs.current[index + 1]?.focus();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const mobileNumber = params.get("mobile");
+    if (!mobileNumber) {
+      toast.error("Mobile number is missing.");
+      navigate("/login");
+    } else {
+      setMobile(mobileNumber);
     }
-  };
+  }, [location, navigate]);
 
-  const handleKeyDown = (e, index) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleVerifyOtp = async (e) => {
+  const handleVerify = async (e) => {
     e.preventDefault();
-    const fullOtp = otp.join("");
+    if (!otp) return toast.error("Please enter OTP");
+    setLoading(true);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/verify-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          phone: phoneNumber,
-          otp: fullOtp,
-        }),
-      });
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/verifyOtp`,
+        { mobile, otp },
+        { withCredentials: true }
+      );
 
-      const data = await res.json();
-
-      if (data.success) {
-        toast.success("✅ OTP verified successfully!");
-
-        // ✅ Redirect new user to signup
-        if (data.isNewUser) {
-          navigate("/signup", { state: { phone: phoneNumber } });
+      if (data?.verified) {
+        if (data?.isNewUser) {
+          navigate(`/SignpPage?mobile=${mobile}`);
         } else {
-          if (onVerified) onVerified(data.user);
+          navigate("/login");
         }
       } else {
-        toast.error("❌ Invalid number or expired OTP");
+        toast.error(data?.message || "Invalid OTP");
       }
     } catch (err) {
-     toast.error("❌ Verification failed: " + (data.message || "Unexpected error"));
-
+      toast.error(err.response?.data?.message || "OTP verification failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form className="otp-form" onSubmit={handleVerifyOtp}>
-      <h3 className="popup-title">Enter OTP</h3>
-      <p className="popup-subtitle">We've sent a code to {phoneNumber}</p>
-
-      <div className="otp-inputs">
-        {otp.map((digit, index) => (
-          <input
-            key={index}
-            type="text"
-            maxLength="1"
-            value={digit}
-            onChange={(e) => handleChange(index, e.target.value)}
-            onKeyDown={(e) => handleKeyDown(e, index)}
-            ref={(el) => (inputRefs.current[index] = el)}
-            className="otp-input"
-            required
-          />
-        ))}
-      </div>
-
-      <button type="submit" className="verify-button">
-        Verify OTP
-      </button>
-    </form>
+    <div className="max-w-md mx-auto mt-10 p-6 border rounded">
+      <h2 className="text-xl font-bold mb-4">Verify OTP</h2>
+      <form onSubmit={handleVerify}>
+        <input
+          type="text"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          placeholder="Enter OTP"
+          className="w-full p-2 border rounded mb-4"
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-500 text-white p-2 rounded"
+        >
+          {loading ? "Verifying..." : "Verify"}
+        </button>
+      </form>
+    </div>
   );
 };
 
-
-export default VerificationForm;
+export default VerifyForm;

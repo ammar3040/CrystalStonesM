@@ -43,7 +43,7 @@ module.exports.SignUp = async (req, res) => {
     const { Uname, email, mobile, address, password, confirmPassword } = req.body;
 
     // Basic validation
-    if (!Uname || !email || !password || !confirmPassword) {
+    if (!Uname || !email || !password || !confirmPassword || !mobile) {
       return res.status(400).json({ success: false, message: "Required fields are missing" });
     }
 
@@ -51,33 +51,26 @@ module.exports.SignUp = async (req, res) => {
       return res.status(400).json({ success: false, message: "Passwords do not match" });
     }
 
-    const existingUser = await UserModel.findOne({ mobile });
+    // Check for existing user by email or mobile
+    const existingUser = await UserModel.findOne({ $or: [{ email }, { mobile }] });
 
-    if (!existingUser) {
-      return res.status(404).json({ success: false, message: "Mobile number not verified yet. Please verify OTP first." });
-    }
-
-    if (existingUser.email) {
-      return res.status(409).json({ success: false, message: "User already registered with this mobile number" });
+    if (existingUser) {
+      return res.status(409).json({ success: false, message: "User already registered with this email or mobile" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const updatedUser = await UserModel.findOneAndUpdate(
-      { mobile },
-      {
-        $set: {
-          Uname: Uname.trim(),
-          email: email.trim(),
-          address: address?.trim() || undefined,
-          password: hashedPassword,
-          // isVerified: true // Optional: use if you want a verification flag
-        },
-      },
-      { new: true }
-    );
+    const newUser = new UserModel({
+      Uname: Uname.trim(),
+      email: email.trim(),
+      mobile: mobile.trim(),
+      address: address?.trim(),
+      password: hashedPassword,
+    });
 
-    return res.status(200).json({ success: true, message: "User registered successfully", user: updatedUser });
+    await newUser.save();
+
+    return res.status(201).json({ success: true, message: "User registered successfully", user: newUser });
 
   } catch (error) {
     console.error("Registration error:", error);
@@ -88,6 +81,7 @@ module.exports.SignUp = async (req, res) => {
     });
   }
 };
+
 module.exports.SignIn = (req, res) => {
   const user = req.user;
  
@@ -268,49 +262,42 @@ module.exports.verifyOtp = async (req, res) => {
           sameSite: 'none'
         });
 
-       return res.status(200).json({
-  success: true,
-  isNewUser: false,
-  message: "✅ OTP verified, user already exists",
-  user: userData
-});
-
+        return res.status(200).json({
+          success: true,
+          isNewUser: false,
+          message: "✅ OTP verified, user already exists",
+          user: userData
+        });
       }
 
-      // Create a new user with phone number
+      // 🟡 Don't set cookie here for new user
       const newUser = new UserModel({ mobile: phone });
       await newUser.save();
 
       return res.status(201).json({
-  success: true,
-  isNewUser: true,
-  message: "✅ OTP verified and user created",
-  user: {
-    uid: newUser._id,
-    name: newUser.Uname,
-    email: newUser.email,
-    mobile: newUser.mobile,
-    address: newUser.address,
-    role: newUser.role
-  }
-});
+        success: true,
+        isNewUser: true,
+        message: "✅ OTP verified and new user created",
+        user: {
+          uid: newUser._id,
+          mobile: newUser.mobile
+        }
+      });
 
-
-   } catch (error) {
-  console.error("Error during user creation:", error);
- return res.status(500).json({
-  success: false,
-  message: "Something went wrong, please try again.",
-  debug: error.message  // Send this only in dev
-});
-;
-}
-
+    } catch (error) {
+      console.error("Error during user creation:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Something went wrong, please try again.",
+        debug: error.message
+      });
+    }
 
   } else {
     return res.status(400).json({ success: false, message: "❌ Invalid or expired OTP" });
   }
 };
+
 
 
 // goggle authentication 
@@ -334,7 +321,7 @@ module.exports.GoogleSignIn = (req, res) => {
   });
 
   if (user.role === 'admin') {
-    return res.redirect(`${process.env.BACKEND_LINK}/admin`);
+    return res.redirect(`${process.env.GOOGLE_ADMIN_AUTH}`);
   } else {
     return res.redirect(`${process.env.FRONTEND_LINK }/`);
   }
@@ -575,3 +562,18 @@ module.exports.subscribe = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
+// get specification 
+module.exports.specific= async (req, res) => {
+  const { category } = req.query;
+
+  try {
+    const product = await Product.findOne({ category }).sort({ createdAt: -1 });
+    if (product) {
+      return res.status(200).json({ specifications: product.specifications || [] });
+    }
+    res.status(404).json({ message: "No product found for this category" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+}

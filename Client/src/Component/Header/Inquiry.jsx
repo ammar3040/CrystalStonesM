@@ -39,7 +39,7 @@ function Inquiry({ show, onClose, user }) {
       {/* Backdrop */}
       {show && (
         <div
-          className="fixed inset-0  bg-opacity-40 z-40"
+          className="fixed inset-0 bg-opacity-40 z-40"
           onClick={onClose}
         ></div>
       )}
@@ -74,18 +74,27 @@ function Inquiry({ show, onClose, user }) {
                     <span className="text-sm text-gray-600">
                       Submitted: {formatDate(inq.submittedAt)}
                     </span>
-                   <span
-  className={`text-xs px-2 py-1 rounded ${
-    inq.status === "replied"
-      ? "bg-green-100 text-green-700"
-      : inq.status === "cancelled"
-      ? "bg-red-100 text-red-700"
-      : "bg-yellow-100 text-yellow-700"
-  }`}
->
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        inq.status === "replied"
+                          ? "bg-green-100 text-green-700"
+                          : inq.status === "cancelled"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
                       {inq.status}
                     </span>
                   </div>
+
+                  {inq.address && (
+                    <div className="mb-3 text-sm">
+                      <p className="font-medium">Shipping Address:</p>
+                      <p>{inq.address.street}, {inq.address.city}</p>
+                      <p>{inq.address.state}, {inq.address.postalCode}</p>
+                      <p>{inq.address.country}</p>
+                    </div>
+                  )}
 
                   <p className="text-sm text-gray-700 mb-3">
                     <strong>Message:</strong>{" "}
@@ -95,23 +104,39 @@ function Inquiry({ show, onClose, user }) {
                   <div className="mt-2 space-y-3">
                     {inq.products.map((prod, idx) => {
                       const product = prod.productId;
+                      const price = prod.selectedSize?.price || product?.dollarPrice || 0;
+                      const totalPrice = price * prod.quantity;
+                      
                       return (
                         <div
                           key={idx}
-                          className="flex items-center border border-gray-100 rounded-md p-2"
+                          className="flex items-start border border-gray-100 rounded-md p-2"
                         >
                           <img
                             src={product?.mainImage?.url || "/img/noimage.png"}
                             alt={product?.productName || "Product"}
                             className="w-12 h-12 object-cover rounded border"
                           />
-                          <div className="ml-3">
+                          <div className="ml-3 flex-1">
                             <p className="text-sm font-medium text-gray-800">
                               {product?.productName || "Unnamed Product"}
                             </p>
-                            <p className="text-xs text-gray-500">
-                              Quantity: {prod.quantity}
-                            </p>
+                            
+                            {/* Display selected size if available */}
+                        {prod.selectedSize&&(<p className="text-xs text-gray-600">
+                                Size: {prod.selectedSize}
+                              </p>)}
+                              
+                          
+                            
+                            <div className="flex justify-between items-center mt-1">
+                              <p className="text-xs text-gray-500">
+                                Qty: {prod.quantity}
+                              </p>
+                              <p className="text-xs font-medium">
+                                ${totalPrice.toFixed(2)}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       );

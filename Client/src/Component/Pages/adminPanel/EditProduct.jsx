@@ -22,6 +22,7 @@ const EditProduct = () => {
     length: "",
     width: "",
     height: "",
+    sizes: [{ size: "", price: "" }], // Added sizes array
   });
   const [specifications, setSpecifications] = useState([{ key: "", value: "" }]);
   const [mainImage, setMainImage] = useState(null);
@@ -51,9 +52,10 @@ const EditProduct = () => {
             crystalType: product.crystalType || "",
             benefits: product.benefits || [],
             specialNotes: product.specialNotes || "",
-            length: product.length || "",
-            width: product.width || "",
-            height: product.height || "",
+            length: product.dimensions?.length || "",
+            width: product.dimensions?.width || "",
+            height: product.dimensions?.height || "",
+            sizes: product.sizes?.length > 0 ? product.sizes : [{ size: "", price: "" }], // Initialize sizes
           });
           setSpecifications(product.specifications || [{ key: "", value: "" }]);
           setExistingMainImageUrl(product.mainImage?.url || "");
@@ -100,7 +102,7 @@ const EditProduct = () => {
     setExistingAdditionalImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     
@@ -110,6 +112,9 @@ const EditProduct = () => {
     Object.keys(formData).forEach((key) => {
       if (key === "benefits") {
         formData.benefits.forEach((b) => form.append("benefits", b));
+      } else if (key === "sizes") {
+        // Stringify the sizes array
+        form.append("sizes", JSON.stringify(formData.sizes));
       } else {
         form.append(key, formData[key]);
       }
@@ -409,14 +414,73 @@ const EditProduct = () => {
                   onChange={handleChange}
                   className="block w-full px-4 py-3 text-sm text-gray-900 bg-white rounded-lg border border-gray-200 appearance-none focus:border-transparent focus:outline-none focus:ring-2 focus:ring-black peer"
                   placeholder=" "
+                  hidden
                 />
-                <label 
+                {/* <label 
                   htmlFor="discountedPrice"
                   className="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1"
                 >
-                  Discounted Price (₹)
-                </label>
+                  Discounted Price ($)
+                </label> */}
               </div>
+            
+    <div className="mt-4">
+      <label className="block text-sm font-medium text-gray-700 mb-3">
+        Product Sizes & Prices
+      </label>
+      {formData.sizes.map((item, index) => (
+        <div key={index} className="flex gap-3 mb-3">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={item.size}
+              onChange={(e) => {
+                const updated = [...formData.sizes];
+                updated[index].size = e.target.value;
+                setFormData({ ...formData, sizes: updated });
+              }}
+              className="block w-full px-4 py-3 text-sm text-gray-900 bg-white rounded-lg border border-gray-200 focus:ring-2 focus:ring-black peer"
+              placeholder="Size (e.g. S / M / L / 10cm)"
+            />
+          </div>
+          <div className="relative flex-1">
+            <input
+              type="number"
+              value={item.price}
+              onChange={(e) => {
+                const updated = [...formData.sizes];
+                updated[index].price = e.target.value;
+                setFormData({ ...formData, sizes: updated });
+              }}
+              className="block w-full px-4 py-3 text-sm text-gray-900 bg-white rounded-lg border border-gray-200 focus:ring-2 focus:ring-black peer"
+              placeholder="Price ($)"
+            />
+          </div>
+          {index > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                const updated = formData.sizes.filter((_, i) => i !== index);
+                setFormData({ ...formData, sizes: updated });
+              }}
+              className="text-red-500 hover:text-red-700 text-sm px-2 py-1 self-center"
+            >
+              Remove
+            </button>
+          )}
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() =>
+          setFormData({ ...formData, sizes: [...formData.sizes, { size: "", price: "" }] })
+        }
+        className="mt-2 px-4 py-2 text-sm text-white bg-black rounded-lg hover:bg-gray-800"
+      >
+        + Add Size & Price
+      </button>
+    </div>
+  
 
               {/* Quantity Unit */}
               <div className="relative">

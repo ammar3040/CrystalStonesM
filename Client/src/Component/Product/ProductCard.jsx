@@ -5,9 +5,24 @@ import Cookies from "js-cookie";
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from "react-router-dom";
 
-function ProductCard({ productImg, productName, productAbout, ProductPrice, oldProductPrice, minQuentity, pid, ModelNumber }) {
+function ProductCard({ 
+  productImg, 
+  productName, 
+  productAbout, 
+  ProductPrice, 
+  oldProductPrice, 
+  dollarPrice, 
+  minQuentity, 
+  pid, 
+  ModelNumber,
+  size // Added size prop
+}) {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+
+  // Determine final price and size
+  const finalPrice = size ? size.price : ProductPrice;
+  const finalSize = size ? size.size : null;
 
   React.useEffect(() => {
     const user = Cookies.get("user");
@@ -26,7 +41,9 @@ function ProductCard({ productImg, productName, productAbout, ProductPrice, oldP
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/getCartItem`, {
         pid: pid,
         quantity: minQuentity,
-        uid: uid
+        uid: uid,
+        selectedSize: finalSize, // Added size to cart data
+        price: finalPrice       // Added correct price for size
       }, { withCredentials: true });
 
       if (res.status === 200) {
@@ -43,10 +60,10 @@ function ProductCard({ productImg, productName, productAbout, ProductPrice, oldP
       <div className="card bg-white rounded-lg shadow-sm h-full flex flex-col overflow-hidden">
         {/* Image container with WhatsApp button */}
         <Link to={`/Product/${pid}`} className="block">
-          <figure className="relative aspect-square overflow-hidden"> {/* Changed to aspect-square for better image display */}
+          <figure className="relative aspect-square overflow-hidden">
             <img 
               src={productImg}
-              className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 p-2" /* Changed to object-contain and added padding */
+              className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 p-2"
               alt={productName} 
             />
             {/* WhatsApp inquiry button */}
@@ -88,7 +105,10 @@ function ProductCard({ productImg, productName, productAbout, ProductPrice, oldP
                     {oldProductPrice && (
                       <span className="text-gray-500 text-xs line-through">${oldProductPrice}</span>
                     )}
-                    <span className="text-sm sm:text-md font-bold text-gray-900">${ProductPrice}</span>
+                    <span className="text-sm sm:text-md font-bold text-gray-900">${finalPrice?finalPrice:dollarPrice}</span>
+                    {finalSize && (
+                      <span className="text-[10px] text-gray-600">({finalSize})</span>
+                    )}
                   </div>
                   <div className="text-center">
                     <span className="text-gray-500 text-xs">Min Qty: <b>{minQuentity}</b></span>

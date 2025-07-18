@@ -1,14 +1,27 @@
 import React from 'react';
-import { FaHeart, FaShoppingCart, FaEye, FaWhatsapp } from 'react-icons/fa';
+import { FaShoppingCart, FaEye, FaWhatsapp } from 'react-icons/fa';
 import "./Product.css";
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from "js-cookie";
 import toast from 'react-hot-toast';
 
-function BestProductCard({ productImg, productName, productAbout, ProductPrice, oldProductPrice, pid, productMinQuentity, ModelNumber }) {
+function BestProductCard({
+  productImg,
+  productName,
+  productAbout,
+  ProductPrice,
+  oldProductPrice,
+  pid,
+  productMinQuentity,
+  ModelNumber,
+  size
+}) {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+
+  const finalPrice = size? size.price : ProductPrice;
+  const finalSize = size ? size.size : null;
 
   React.useEffect(() => {
     const user = Cookies.get("user");
@@ -23,11 +36,14 @@ function BestProductCard({ productImg, productName, productAbout, ProductPrice, 
     }
 
     const uid = JSON.parse(user).uid;
+
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/getCartItem`, {
         pid: pid,
         quantity: productMinQuentity,
-        uid: uid
+        uid: uid,
+        selectedSize: finalSize,        // ✅ Send selected size
+        price: finalPrice       // ✅ Send correct price for size
       }, { withCredentials: true });
 
       if (res.status === 200) {
@@ -39,18 +55,11 @@ function BestProductCard({ productImg, productName, productAbout, ProductPrice, 
     }
   };
 
-  const handleWhatsAppInquiry = () => {
-    const phoneNumber = '911234567890';
-    const message = `Hi, I'm interested in ${productName} (Product ID: ${pid}). Can you tell me more about it?`;
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
   return (
     <div className="group prdcard w-full max-w-[280px] mx-auto transition-transform duration-300 bg-transparent shadow-none sm:scale-100 scale-[0.95]">
-      {/* Capsule-shaped container */}
       <div className="bg-white rounded-full overflow-hidden h-full flex flex-col hover:shadow-md" style={{border:"5px solid rgb(193,172,98)"}}>
-        {/* Image container (top half of capsule) */}
+        
+        {/* Image */}
         <div className="relative h-[220px] overflow-hidden">
           <Link to={`/Product/${pid}`}>
             <img 
@@ -59,23 +68,22 @@ function BestProductCard({ productImg, productName, productAbout, ProductPrice, 
               alt={productName} 
             />
           </Link>
-          {/* WhatsApp inquiry button */}
+
+          {/* WhatsApp */}
           <a
             href={`https://wa.me/919016507258?text=${encodeURIComponent(
               `Hi, I'm interested in this product:\n\n📌 Name: ${productName}\n🆔 Model: ${ModelNumber}\n🖼️ Image: ${productImg}`
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="absolute bottom-2 right-2 bg-green-500 text-white p-2 rounded-full shadow-md hover:bg-green-600 transition-colors duration-200"
-            aria-label="Inquire via WhatsApp"
+            className="absolute bottom-2 right-2 bg-green-500 text-white p-2 rounded-full shadow-md hover:bg-green-600"
           >
             <FaWhatsapp className="text-lg" />
           </a>
         </div>
-        
-        {/* Content container (bottom half of capsule) */}
+
+        {/* Content */}
         <div className="bg-[#fff8a8] flex-grow p-4 flex flex-col">
-          {/* Title and description */}
           <Link to={`/Product/${pid}`}>
             <div className="text-center mb-2 flex-1">
               <h2 className="card-title text-[9px] text-gray-900 justify-center mb-1 line-clamp-1 tracking-tighter leading-none">
@@ -86,37 +94,41 @@ function BestProductCard({ productImg, productName, productAbout, ProductPrice, 
               </p>
             </div>
           </Link>
-          
-        
-            {/* Price - Only shown when logged in */}
-            {isLoggedIn ? (
-              <>
-                <Link to={`/Product/${pid}`}>
+
+          {/* Price */}
+          {isLoggedIn ? (
+            <>
+              <Link to={`/Product/${pid}`}>
                 <div className="flex justify-center items-center gap-2 mb-3">
                   {oldProductPrice && (
                     <span className="text-gray-500 text-xs line-through">${oldProductPrice}</span>
                   )}
-                  <span className="text-sm md:text-base font-bold text-gray-900">${ProductPrice}</span>
+                  <span className="text-sm md:text-base font-bold text-gray-900">
+                    ${finalPrice}
+                  </span>
+                
+                  {finalSize && (
+                    <span className="text-[10px] ml-2 text-gray-600">({finalSize})</span>
+                  )}
                 </div>
                 <div>
                   <p>
-                    <span className="text-gray-500 text-xs">Min Quantity: <b>{productMinQuentity}</b> </span>
+                    <span className="text-gray-500 text-xs">Min Quantity: <b>{productMinQuentity}</b></span>
                   </p>
                 </div>
-                  </Link>
-              </>
-            ) : (
-              <div className="mb-3 text-center">
-                <button 
-                  onClick={() => navigate('/SignInPage')}
-                  className="text-blue-600 hover:underline text-xs font-medium"
-                >
-                  Login to see price
-                </button>
-              </div>
-            )}
-        
-          
+              </Link>
+            </>
+          ) : (
+            <div className="mb-3 text-center">
+              <button 
+                onClick={() => navigate('/SignInPage')}
+                className="text-blue-600 hover:underline text-xs font-medium"
+              >
+                Login to see price
+              </button>
+            </div>
+          )}
+
           {/* Buttons */}
           <div className="flex justify-center gap-0">     
             <Link to={`/Product/${pid}`}> 

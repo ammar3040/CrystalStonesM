@@ -36,6 +36,9 @@ routes.get('/google/callback',
 
 routes.post("/subscribe",UserCtl.subscribe)
 
+// complete logine info
+routes.post("/updateProfile",UserCtl.completeProfile)
+
 
 
 

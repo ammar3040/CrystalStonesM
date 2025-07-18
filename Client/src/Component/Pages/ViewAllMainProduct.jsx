@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 
 function ViewAllMainProduct() {
   const [allProducts, setAllProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Shuffle function
   const shuffleArray = (array) => {
@@ -27,79 +29,96 @@ function ViewAllMainProduct() {
           setAllProducts(shuffledProducts);
         } else {
           console.error('Invalid product data:', data);
+          setError('Invalid product data received');
         }
       } catch (err) {
         console.error('Error fetching products:', err);
+        setError('Failed to load products. Please try again later.');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchAllProducts();
   }, []);
 
-return (
-  <div className="px-4 sm:px-6 lg:px-8 py-8">
-               <h2 
-  style={{
-    textAlign: 'center',
-    fontSize: '2.5rem',
-    fontWeight: '700',
-    color: '#2d3748',
-    margin: '40px 0 30px',
-    paddingBottom: '15px',
-    position: 'relative',
-    textTransform: 'uppercase',
-    letterSpacing: '1px'
-  }}
->
-Explore Handpicked Crystal & Agate Treasures
-  <span 
-    style={{
-      content: '""',
-      position: 'absolute',
-      bottom: '0',
-      left: '50%',
-      transform: 'translateX(-50%)',
-      width: '80px',
-      height: '4px',
-      backgroundColor: 'rgba(255, 248, 168, 0.7)',
-      borderRadius: '2px'
-    }}
-  ></span>
-</h2>
+  if (loading) return <div className="text-center py-8">Loading...</div>;
+  if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
+  if (allProducts.length === 0) return <div className="text-center py-8">No products found</div>;
 
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-      {allProducts.slice(0, 8).map((product) => (
-       
-          <div className="w-full">
-            <ProductCard
-              productImg={product?.mainImage?.url || '/fallback.png'}
-              productName={product?.productName || 'No Name'}
-              productAbout={product?.description || 'No description available'}
-              ProductPrice={product?.dollarPrice || 0}
-              oldProductPrice={product?.originalPrice || 0}
-              minQuentity={product?.MinQuantity || 1}
-              pid={product?._id}
-              ModelNumber={product.modelNumber}
-            />
-          </div>
-     
-      ))}
-    </div>
+  return (
+    <div className="px-4 sm:px-6 lg:px-8 py-8">
+      <h2 
+        style={{
+          textAlign: 'center',
+          fontSize: '2.5rem',
+          fontWeight: '700',
+          color: '#2d3748',
+          margin: '40px 0 30px',
+          paddingBottom: '15px',
+          position: 'relative',
+          textTransform: 'uppercase',
+          letterSpacing: '1px'
+        }}
+      >
+        Explore Handpicked Crystal & Agate Treasures
+        <span 
+          style={{
+            content: '""',
+            position: 'absolute',
+            bottom: '0',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '80px',
+            height: '4px',
+            backgroundColor: 'rgba(255, 248, 168, 0.7)',
+            borderRadius: '2px'
+          }}
+        ></span>
+      </h2>
 
-    {allProducts.length > 8 && (
-      <div className="flex justify-center mt-8">
-        <Link
-          to="/ViewAllProduct"
-     className="bg-[#fff8a8] hover:bg-black hover:!text-white font-semibold py-2 px-6 rounded-full transition duration-300"
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        {allProducts.slice(0, 8).map((product) => {
+          // Handle size data
+          let firstSizePrice = product.dollarPrice;
+          let sizeLabel = null;
 
-        >
-          View All Products
-        </Link>
+          if (product.sizes && product.sizes.length > 0) {
+            firstSizePrice = product.sizes[0].price;
+            sizeLabel = product.sizes[0];
+          }
+
+          return (
+            <div key={product._id} className="w-full">
+              <ProductCard
+                productImg={product?.mainImage?.url || '/fallback.png'}
+                productName={product?.productName || 'No Name'}
+                productAbout={product?.description || 'No description available'}
+                ProductPrice={firstSizePrice}
+                dollarPrice={product.dollarPrice}
+                oldProductPrice={product?.originalPrice || 0}
+                minQuentity={product?.MinQuantity || 1}
+                pid={product?._id}
+                ModelNumber={product?.modelNumber || ''}
+                size={sizeLabel} // Pass the size data to ProductCard
+              />
+            </div>
+          );
+        })}
       </div>
-    )}
-  </div>
-);
 
+      {allProducts.length > 8 && (
+        <div className="flex justify-center mt-8">
+          <Link
+            to="/ViewAllProduct"
+            className="bg-[#fff8a8] hover:bg-black hover:!text-white font-semibold py-2 px-6 rounded-full transition duration-300"
+          >
+            View All Products
+          </Link>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default ViewAllMainProduct;

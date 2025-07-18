@@ -332,7 +332,7 @@ module.exports.GoogleSignIn = (req, res) => {
 
 
 module.exports.getCartItem = async (req, res) => {
-  const { pid, uid } = req.body;
+  const { pid, uid, selectedSize, price } = req.body;
   let quantity = req.body.quantity || 1;
 
   if (!pid || !uid) {
@@ -340,20 +340,23 @@ module.exports.getCartItem = async (req, res) => {
   }
 
   try {
+    // Check if cart item already exists with same product and size
     let existingCartItem = await CartModel.findOne({
       userId: uid,
-      productId: pid
+      productId: pid,
+      selectedSize: selectedSize || null
     });
 
     if (existingCartItem) {
-      // ✅ Correctly increase quantity and save
       existingCartItem.quantity += 1;
       await existingCartItem.save();
     } else {
       const newCartItem = new CartModel({
         userId: uid,
         productId: pid,
-        quantity
+        quantity,
+        selectedSize: selectedSize || null,
+        price: price || 0
       });
       await newCartItem.save();
     }
@@ -363,7 +366,7 @@ module.exports.getCartItem = async (req, res) => {
     console.error("Error adding to cart:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
-}
+};
 
 
 // show perticular user carted item
@@ -429,29 +432,59 @@ module.exports.updatePhone = async (req, res) => {
 
 
 // submit inquiry from user
-
-
 module.exports.submitInquiry = async (req, res) => {
-  const { uid, products, message, contactPhone } = req.body;
-
-  if (!uid || !products || products.length === 0) {
-    return res.status(400).json({ success: false, message: "Missing required fields" });
-  }
-
   try {
+const { uid, contactPhone, message, address, products } = req.body;
+
+    if (!uid || !products || products.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: user ID or products."
+      });
+    }
+
+    // Step 1: Find user
+    const user = await UserModel.findById(uid).lean();
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    // Step 2: Check if user has email or contactPhone
+    if ((!user.email || user.email.trim() === '') && (!contactPhone || contactPhone.trim() === '')) {
+      return res.status(400).json({
+        success: false,
+        message: "User must have an email or contact phone to submit inquiry."
+      });
+    }
+
+    // Step 3: Create inquiry
+
+
+
+
+
     const inquiry = new InquiryModel({
       userId: uid,
-      products,
       message,
-      contactPhone
+      products,
+      address,
+      contactPhone: contactPhone || user.contactPhone || ''  // fallback if needed
     });
 
     await inquiry.save();
 
-    res.status(201).json({ success: true, message: "Inquiry submitted", inquiry });
+    return res.status(201).json({
+      success: true,
+      message: "Inquiry submitted successfully.",
+      inquiry
+    });
+
   } catch (err) {
-    console.error("Inquiry error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error."
+    });
   }
 };
 
@@ -575,5 +608,24 @@ module.exports.specific= async (req, res) => {
     res.status(404).json({ message: "No product found for this category" });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
+  }
+}
+
+// complete profile details
+module.exports.completeProfile = async (req, res) => {
+  const { uid, address, mobile, password } = req.body;
+
+  try {
+    const updateFields = { address, mobile };
+    if (password) {
+      const hashed = await bcrypt.hash(password, 10);
+      updateFields.password = hashed;
+    }
+
+    await UserModel.findOneAndUpdate({ uid }, updateFields);
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Failed to update profile");
   }
 }

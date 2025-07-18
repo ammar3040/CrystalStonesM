@@ -51,24 +51,34 @@ function BestProduct() {
       
       {/* Responsive Grid with Consistent Card Sizes */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-        {bestProducts.map((product) => (
-          <div key={product._id} className="w-full">
-            
-              <BestProductCard
-              pid={product._id}
-                product={product}
-                productImg={product.mainImage.url}
-                productName={product.productName}
-                productAbout={product.description}
-                ProductPrice={product.dollarPrice}
-                oldProductPrice={product.originalPrice}
-                productQuentity={product.quantity}
-                productMinQuentity={product.MinQuantity}
-                ModelNumber={product.modelNumber}
-              />
-          
-          </div>
-        ))}
+   {bestProducts.map((product) => {
+  let firstSizePrice = product.dollarPrice;
+  let sizeLabel = null;
+
+  if (product.sizes && product.sizes.length > 0) {
+    firstSizePrice = product.sizes[0].price;
+    sizeLabel = product.sizes[0];
+  }
+
+  return (
+    <div key={product._id} className="w-full">
+      <BestProductCard
+        pid={product._id}
+        product={product}
+        productImg={product.mainImage.url}
+        productName={product.productName}
+        productAbout={product.description}
+        ProductPrice={firstSizePrice}
+        oldProductPrice={product.originalPrice}
+        productQuentity={product.quantity}
+        productMinQuentity={product.MinQuantity}
+        ModelNumber={product.modelNumber}
+        size={sizeLabel}
+      />
+    </div>
+  );
+})}
+
       </div>
     </div>
   )

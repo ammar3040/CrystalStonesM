@@ -18,6 +18,7 @@ const ViewProduct = () => {
   const [allProduct, setAllProduct] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+   const [selectedSize, setSelectedSize] = useState(null);
 
   useEffect(() => {
     const user = Cookies.get("user");
@@ -38,15 +39,26 @@ const ViewProduct = () => {
     fetchAllProducts();
   }, []);
 
-  useEffect(() => {
+   useEffect(() => {
     axios.get(`${import.meta.env.VITE_API_URL}/api/product/?id=${ProductId}`)
       .then((res) => {
         setProduct(res.data);
         setQuantity(parseInt(res.data.MinQuantity));
+        // Set default selected size if product has sizes
+        if (res.data.sizes && res.data.sizes.length > 0) {
+          setSelectedSize(res.data.sizes[0]);
+        }
       })
       .catch((err) => console.error("Error fetching product:", err));
   }, [ProductId]);
+   // Update displayed price when size changes
+  const displayedPrice = selectedSize 
+    ? selectedSize.price 
+    : product?.dollarPrice;
 
+  const handleSizeSelection = (size) => {
+    setSelectedSize(size);
+  };
   if (!product) return (
     <div className="flex justify-center items-center h-screen">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
@@ -61,26 +73,29 @@ const ViewProduct = () => {
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => quantity > product.MinQuantity && setQuantity(prev => prev - 1);
 
-  const handleAddToCart = async () => {
-    const user = Cookies.get("user");
-    if (!user) {
-      navigate("/SignInPage");
-      return;
-    }
+const handleAddToCart = async () => {
+  const user = Cookies.get("user");
+  if (!user) {
+    navigate("/SignInPage");
+    return;
+  }
 
-    try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/getCartItem`, {
-        pid: product._id,
-        quantity: quantity,
-        uid: JSON.parse(user).uid
-      }, { withCredentials: true });
+  try {
+    const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/getCartItem`, {
+      pid: product._id,
+      quantity: quantity,
+      uid: JSON.parse(user).uid,
+      selectedSize: selectedSize?.size || null,
+      price: displayedPrice
+    }, { withCredentials: true });
 
-      if (res.status === 200) toast.success('🛒 Product added to cart!');
-    } catch (err) {
-      console.error('Add to cart error:', err);
-      toast.error('Failed to add product to cart');
-    }
-  };
+    if (res.status === 200) toast.success('🛒 Product added to cart!');
+  } catch (err) {
+    console.error('Add to cart error:', err);
+    toast.error('Failed to add product to cart');
+  }
+};
+
 
   const handleInquiry = () => {
     const message = `Hi, I'm interested in this product:\n\n📌 Name: ${product.productName}\n🆔 Model: ${product.modelNumber || 'N/A'}\n🖼️ Image: ${product.mainImage.url}`;
@@ -150,38 +165,64 @@ const ViewProduct = () => {
               <div className="text-lg text-gray-600 mb-6 capitalize">{product.category}</div>
               
               {/* Price Section */}
-              <div className="mb-8 p-4 bg-gray-50 rounded-lg">
-                {isLoggedIn ? (
-                  <>
-                    <div className="flex items-center flex-wrap gap-3 mb-2">
-                      {product.originalPrice && (
-                        <span className="text-3xl text-gray-500 line-through">${product.originalPrice}</span>
-                      )}
-                      <span className="text-3xl font-bold text-gray-900">${product.dollarPrice} </span>{product.quantityUnit}
-                      {product.originalPrice && (
-                        <span className="text-green-600 font-semibold text-lg">
-                          ({Math.round((1 - product.dollarPrice/product.originalPrice)*100)}% OFF)
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-gray-700 mt-2">
-                      <span className="font-medium">Minimum Quantity:</span> {product.MinQuantity} 
-                    </p>
-                  </>
-                ) : (
-                  <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
-                    <p className="text-yellow-800 text-lg">
-                      To see prices, please{' '}
-                      <button 
-                        onClick={() => navigate('/SignInPage')} 
-                        className="text-blue-600 hover:underline font-semibold"
+           {/* Price Section - Modified to show size price */}
+        <div className="mb-8 p-4 bg-gray-50 rounded-lg">
+          {isLoggedIn ? (
+            <>
+              {/* Size Selection (if product has sizes) */}
+              {product.sizes && product.sizes.length > 0 && (
+                <div className="mb-4">
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Select Size:</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {product.sizes.map((size, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleSizeSelection(size)}
+                        className={`px-4 py-2 border rounded-lg transition-colors ${
+                          selectedSize?.size === size.size
+                            ? 'bg-black text-white border-black'
+                            : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100'
+                        }`}
                       >
-                        login
+                        {size.size}
                       </button>
-                    </p>
+                    ))}
                   </div>
+                </div>
+              )}
+
+              <div className="flex items-center flex-wrap gap-3 mb-2">
+                {product.originalPrice && (
+                  <span className="text-3xl text-gray-500 line-through">${product.originalPrice}</span>
+                )}
+                <span className="text-3xl font-bold text-gray-900">${displayedPrice?displayedPrice:product.dollarPrice}</span>
+                {product.quantityUnit && !product.sizes?.length && (
+                  <span className="text-gray-600">{product.quantityUnit}</span>
+                )}
+                {product.originalPrice && (
+                  <span className="text-green-600 font-semibold text-lg">
+                    ({Math.round((1 - displayedPrice/product.originalPrice)*100)}% OFF)
+                  </span>
                 )}
               </div>
+              <p className="text-gray-700 mt-2">
+                <span className="font-medium">Minimum Quantity:</span> {product.MinQuantity} 
+              </p>
+            </>
+          ) : (
+            <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
+              <p className="text-yellow-800 text-lg">
+                To see prices, please{' '}
+                <button 
+                  onClick={() => navigate('/SignInPage')} 
+                  className="text-blue-600 hover:underline font-semibold"
+                >
+                  login
+                </button>
+              </p>
+            </div>
+          )}
+        </div>
 
               {/* Action Buttons */}
               {isLoggedIn && (

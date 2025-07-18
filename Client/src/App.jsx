@@ -23,6 +23,7 @@ import AdminInquiry from './Component/Pages/adminPanel/AdminInquiry';
 import ScrollToHashElement from './ScrollToHashElement';
 import WhatsappLogo from './WhatsappLogo';
 import SubscribeEmailModal from './Component/Form/OTP/SubscribeEmailModal';
+import CompleteProfile from './Component/Form/CompleteProfile';
 
 
 function getUserFromCookie() {
@@ -81,7 +82,7 @@ function AppWrapper() {
           path="/SignUpPage"
           element={isLoggedIn ? <Navigate to="/" /> : <SignUpMain />}
         />
-
+<Route path="/CompleteProfile" element={<CompleteProfile />} />
         <Route
           path="/SignInPage"
           element={isLoggedIn ? <Navigate to="/" /> : <LoginMain />}

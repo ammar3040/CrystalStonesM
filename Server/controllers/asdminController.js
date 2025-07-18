@@ -58,42 +58,51 @@ module.exports.AddProduct = async (req, res) => {
       description,
       category,
       originalPrice,
+      discountedPrice,
       dollarPrice,
       crystalType,
       length,
-      modelNumber,
       width,
       height,
       specialNotes,
       quantityUnit,
-      bestproduct,
       MinQuantity,
+      modelNumber,
+      benefits = [],
+      sizes = []
     } = req.body;
 
-    // ✅ Handle specifications
+    // Handle specifications
     let specifications = [];
     if (req.body.specifications) {
-      if (Array.isArray(req.body.specifications)) {
-        // In case frontend sends array of objects directly
-        specifications = req.body.specifications;
-      } else {
-        try {
-          // In case it's sent as a JSON string
-          specifications = JSON.parse(req.body.specifications);
-        } catch (e) {
-          console.error("Failed to parse specifications");
-        }
+      try {
+        specifications = Array.isArray(req.body.specifications) 
+          ? req.body.specifications 
+          : JSON.parse(req.body.specifications);
+      } catch (e) {
+        console.error("Failed to parse specifications", e);
       }
     }
 
-    // ✅ Extract mainImage
+    // Handle sizes
+    let parsedSizes = [];
+    if (sizes) {
+      try {
+        parsedSizes = Array.isArray(sizes) 
+          ? sizes.filter(size => size.size && size.price) // Filter out empty entries
+          : JSON.parse(sizes);
+      } catch (e) {
+        console.error("Failed to parse sizes", e);
+      }
+    }
+
+    // Process images
     const mainImage = req.files.mainImage[0];
     const mainImageData = {
       url: mainImage.path,
       public_id: mainImage.filename
     };
 
-    // ✅ Extract additionalImages
     const additionalImages = req.files.additionalImages
       ? req.files.additionalImages.map(file => ({
           url: file.path,
@@ -101,18 +110,21 @@ module.exports.AddProduct = async (req, res) => {
         }))
       : [];
 
+    // Create new product
     const product = new Product({
       productName,
       description,
       category,
       originalPrice,
       dollarPrice,
-      specifications, // ⬅ added here
+      discountedPrice: discountedPrice || originalPrice, // Fallback to originalPrice if not provided
+      specifications,
       quantityUnit,
       MinQuantity,
       modelNumber,
       crystalType,
-      bestproduct,
+      benefits: Array.isArray(benefits) ? benefits : [benefits].filter(Boolean),
+      sizes: parsedSizes,
       dimensions: {
         length,
         width,
@@ -125,22 +137,21 @@ module.exports.AddProduct = async (req, res) => {
 
     await product.save();
 
-    res.status(200).json({
+    res.status(201).json({
       success: true,
-      message: "Product added successfully"
+      message: "Product added successfully",
+      product
     });
 
   } catch (err) {
     console.error("AddProduct Error:", err);
     res.status(500).json({
       success: false,
-      message: "Something went wrong while adding product.",
-      error: err.message,
-      stack: err.stack
+      message: "Failed to add product",
+      error: err.message
     });
   }
 };
-
 
 
 // admin Crud
@@ -277,6 +288,26 @@ module.exports.updateData = async (req, res) => {
       }
     } else {
       rest.specifications = existingProduct.specifications || [];
+    }
+
+    // Process sizes
+    if (req.body.sizes) {
+      try {
+        rest.sizes = Array.isArray(req.body.sizes)
+          ? req.body.sizes
+          : JSON.parse(req.body.sizes);
+        
+        // Validate and transform sizes
+        rest.sizes = rest.sizes.map(size => ({
+          size: String(size.size || '').trim(),
+          price: parseFloat(size.price) || 0
+        })).filter(size => size.size && !isNaN(size.price));
+      } catch (e) {
+        console.error("Error parsing sizes:", e);
+        throw new Error("Invalid sizes format");
+      }
+    } else {
+      rest.sizes = existingProduct.sizes || [];
     }
 
     // Process main image

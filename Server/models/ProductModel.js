@@ -36,6 +36,13 @@ const productSchema = new mongoose.Schema({
   modelNumber:{type:String,require:true},
   MinQuantity:{type:String,require:true}
   ,
+  //sizes of product
+   sizes: [
+    {
+      size: { type: String }, // e.g., S, M, L, XL
+      price: { type: Number },
+    }
+  ],
   createdAt: { type: Date, default: Date.now }
 });
 

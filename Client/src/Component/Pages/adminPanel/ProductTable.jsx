@@ -24,7 +24,6 @@ const ProductTable = () => {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/all`);
         const data = await response.json();
         setAllProducts(data);
-        // Initialize selected best products
         const bestProducts = data
           .filter(product => product.bestproduct)
           .map(product => product._id);
@@ -62,24 +61,23 @@ const ProductTable = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this product?');
+    if (!confirmDelete) return;
 
-const handleDelete = async (id) => {
-  const confirmDelete = window.confirm('Are you sure you want to delete this product?');
-  if (!confirmDelete) return;
-
-  try {
-    const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/deleteProduct/?id=${id}`);
-    if (res.data.success) {
-      toast.success('Product deleted successfully!');
-      window.location.reload(); // Or refresh data instead of reload
-    } else {
-      toast.error(res.data.message || 'Failed to delete product.');
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/deleteProduct/?id=${id}`);
+      if (res.data.success) {
+        toast.success('Product deleted successfully!');
+        window.location.reload();
+      } else {
+        toast.error(res.data.message || 'Failed to delete product.');
+      }
+    } catch (err) {
+      toast.error('Server error while deleting product.');
+      console.error(err);
     }
-  } catch (err) {
-    toast.error('Server error while deleting product.');
-    console.error(err);
-  }
-};
+  };
 
   // Sorting function
   const sortProducts = (column) => {
@@ -125,10 +123,9 @@ const handleDelete = async (id) => {
       case 1: return product.modelNumber?.toLowerCase() || '';
       case 2: return product.productName?.toLowerCase() || '';
       case 3: return product.category?.toLowerCase() || '';
-      case 4: return product.discountedPrice || 0;
-      case 5: return product.dollarPrice || 0;
-      case 6: return product.originalPrice || 0;
-      case 7: return product.crystalType?.toLowerCase() || '';
+      case 4: return product.dollarPrice || 0;
+      case 5: return product.originalPrice || 0;
+      case 6: return product.crystalType?.toLowerCase() || '';
       default: return '';
     }
   };
@@ -204,12 +201,12 @@ const handleDelete = async (id) => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Best <button type="submit" className="ml-2 px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">Save</button>
+                  <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Best <button type="submit" className="ml-1 px-1 py-0.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">Save</button>
                   </th>
                   <th 
                     scope="col" 
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => sortProducts(1)}
                   >
                     <div className="flex items-center">
@@ -217,12 +214,12 @@ const handleDelete = async (id) => {
                       <i className={`fas ${getSortIcon(1)} ml-1`}></i>
                     </div>
                   </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Image
                   </th>
                   <th 
                     scope="col" 
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 w-48"
                     onClick={() => sortProducts(2)}
                   >
                     <div className="flex items-center">
@@ -232,7 +229,7 @@ const handleDelete = async (id) => {
                   </th>
                   <th 
                     scope="col" 
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => sortProducts(3)}
                   >
                     <div className="flex items-center">
@@ -242,45 +239,35 @@ const handleDelete = async (id) => {
                   </th>
                   <th 
                     scope="col" 
-                    className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => sortProducts(4)}
                   >
                     <div className="flex items-center justify-end">
-                      Discounted (₹)
+                      Price ($)
                       <i className={`fas ${getSortIcon(4)} ml-1`}></i>
                     </div>
                   </th>
                   <th 
                     scope="col" 
-                    className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => sortProducts(5)}
                   >
                     <div className="flex items-center justify-end">
-                      Price ($)
+                      Original (₹)
                       <i className={`fas ${getSortIcon(5)} ml-1`}></i>
                     </div>
                   </th>
                   <th 
                     scope="col" 
-                    className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                     onClick={() => sortProducts(6)}
-                  >
-                    <div className="flex items-center justify-end">
-                      Original (₹)
-                      <i className={`fas ${getSortIcon(6)} ml-1`}></i>
-                    </div>
-                  </th>
-                  <th 
-                    scope="col" 
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => sortProducts(7)}
                   >
                     <div className="flex items-center">
                       Crystal
-                      <i className={`fas ${getSortIcon(7)} ml-1`}></i>
+                      <i className={`fas ${getSortIcon(6)} ml-1`}></i>
                     </div>
                   </th>
-                  <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -289,7 +276,7 @@ const handleDelete = async (id) => {
                 {paginatedProducts.length > 0 ? (
                   paginatedProducts.map((product) => (
                     <tr key={product._id} className="hover:bg-gray-50">
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-2 py-3 whitespace-nowrap">
                         <div className="flex justify-center">
                           <input
                             type="checkbox"
@@ -299,10 +286,10 @@ const handleDelete = async (id) => {
                           />
                         </div>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-2 py-3 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{product.modelNumber}</div>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-2 py-3 whitespace-nowrap">
                         <div className="flex-shrink-0 h-10 w-10">
                           <img 
                             className="h-10 w-10 rounded-md object-cover" 
@@ -311,45 +298,42 @@ const handleDelete = async (id) => {
                           />
                         </div>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="text-sm font-semibold text-gray-900">{product.productName}</div>
+                      <td className="px-2 py-3">
+                        <div className="text-sm font-semibold text-gray-900 truncate max-w-xs">{product.productName}</div>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-2 py-3 whitespace-nowrap">
                         <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                           {product.category}
                         </span>
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        {product.discountedPrice ? (
-                          <span className="text-red-600 font-bold">{product.discountedPrice}</span>
+                      <td className="px-2 py-3 whitespace-nowrap text-right text-sm font-medium">
+                        {product.dollarPrice ? (
+                          <span className="text-red-600 font-bold">${product.dollarPrice}</span>
                         ) : (
                           <span className="text-gray-500">-</span>
                         )}
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-gray-500">
-                        {product.dollarPrice || '-'}
+                      <td className="px-2 py-3 whitespace-nowrap text-right text-sm text-gray-900">
+                        ₹{product.originalPrice}
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-right text-sm text-gray-900">
-                        {product.originalPrice}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-500">
                         {product.crystalType}
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-center text-sm font-medium">
+                      <td className="px-2 py-3 whitespace-nowrap text-center text-sm font-medium">
                         <div className="flex justify-center space-x-2">
                           <button
                             onClick={() => navigate(`/admin-a9xK72rQ1m8vZpL0/edit-product/${product._id}`)}
-                            className="text-blue-600 hover:text-blue-900  me-3"
+                            className="text-blue-600 hover:text-blue-900 me-2"
                             title="Edit"
                           >
                             <FontAwesomeIcon icon={faPen} />
                           </button>
                           <button
-                             onClick={() => handleDelete(product._id)}
+                            onClick={() => handleDelete(product._id)}
                             className="text-red-600 hover:text-red-900"
                             title="Delete"
                           >
-                           <FontAwesomeIcon icon={faTrashCan} />
+                            <FontAwesomeIcon icon={faTrashCan} />
                           </button>
                         </div>
                       </td>
@@ -357,7 +341,7 @@ const handleDelete = async (id) => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="10" className="px-4 py-12 text-center">
+                    <td colSpan="9" className="px-4 py-12 text-center">
                       <div className="flex flex-col items-center justify-center">
                         <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

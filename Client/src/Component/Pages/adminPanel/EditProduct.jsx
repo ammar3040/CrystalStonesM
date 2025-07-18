@@ -511,76 +511,94 @@ const EditProduct = () => {
               </div>
 
               {/* Additional Product Images */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Additional Product Images
-                </label>
-                <div className="flex items-center">
-                  <label className="flex flex-col items-center px-4 py-6 bg-white rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50">
-                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span className="mt-2 text-sm text-gray-600">Click to upload</span>
-                    <input
-                      type="file"
-                      name="additionalImages"
-                      accept="image/*"
-                      className="hidden"
-                      multiple
-                      onChange={(e) => {
-                        const files = Array.from(e.target.files);
-                        setAdditionalImages((prev) => [...prev, ...files]);
-                      }}
-                    />
-                  </label>
-                  <span className="ml-4 text-sm text-gray-500">
-                    {additionalImages.length > 0 
-                      ? `${additionalImages.length} new files selected` 
-                      : "No new files chosen"}
-                  </span>
-                </div>
-                
-                {/* Existing additional images */}
-                {existingAdditionalImages.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-sm text-gray-500 mb-2">Existing Images (click to remove)</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {existingAdditionalImages.map((img, index) => (
-                        <div key={index} className="relative">
-                          <img
-                            src={img.url}
-                            alt={`Product ${index}`}
-                            className="w-24 h-24 object-cover rounded border cursor-pointer"
-                            onClick={() => handleRemoveAdditionalImage(index)}
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 bg-black bg-opacity-50 transition-opacity">
-                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+          <div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Additional Product Images
+  </label>
 
-                {/* New additional images preview */}
-                {additionalImages.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-sm text-gray-500 mb-2">New Images to be added</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {additionalImages.map((file, index) => (
-                        <img
-                          key={index}
-                          src={URL.createObjectURL(file)}
-                          alt={`Preview ${index}`}
-                          className="w-24 h-24 object-cover rounded border"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+  <div className="flex items-center">
+    <label className="flex flex-col items-center px-4 py-6 bg-white rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50">
+      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+      </svg>
+      <span className="mt-2 text-sm text-gray-600">Click to upload</span>
+      <input
+        type="file"
+        name="additionalImages"
+        accept="image/*"
+        className="hidden"
+        multiple
+        onChange={(e) => {
+          const files = Array.from(e.target.files);
+          setAdditionalImages((prev) => [...prev, ...files]);
+        }}
+      />
+    </label>
+
+    <span className="ml-4 text-sm text-gray-500">
+      {additionalImages.length > 0
+        ? `${additionalImages.length} new files selected`
+        : "No new files chosen"}
+    </span>
+  </div>
+
+  {/* Existing additional images */}
+  {existingAdditionalImages.length > 0 && (
+    <div className="mt-4">
+      <p className="text-sm text-gray-500 mb-2">Existing Images (click ✖ to remove)</p>
+      <div className="grid grid-cols-3 gap-2">
+        {existingAdditionalImages.map((img, index) => (
+          <div key={index} className="relative w-24 h-24 border rounded overflow-hidden">
+            <img
+              src={img.url}
+              alt={`Product ${index}`}
+              className="w-full h-full object-cover"
+            />
+            <button
+              type="button"
+              onClick={() => handleRemoveAdditionalImage(index)}
+              className="absolute top-1 right-1 bg-black text-white rounded-full w-5 h-5 text-xs flex items-center justify-center z-10"
+              title="Remove Image"
+            >
+              ✖
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+
+  {/* New additional images preview */}
+  {additionalImages.length > 0 && (
+    <div className="mt-4">
+      <p className="text-sm text-gray-500 mb-2">New Images to be added (click ✖ to remove)</p>
+      <div className="grid grid-cols-3 gap-2">
+        {additionalImages.map((file, index) => (
+          <div key={index} className="relative w-24 h-24 border rounded overflow-hidden">
+            <img
+              src={URL.createObjectURL(file)}
+              alt={`Preview ${index}`}
+              className="w-full h-full object-cover"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setAdditionalImages((prev) =>
+                  prev.filter((_, i) => i !== index)
+                );
+              }}
+              className="absolute top-1 right-1 bg-black text-white rounded-full w-5 h-5 text-xs flex items-center justify-center z-10"
+              title="Remove Image"
+            >
+              ✖
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+</div>
+
 
               {/* Product Dimensions */}
               <div>

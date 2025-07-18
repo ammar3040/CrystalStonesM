@@ -476,18 +476,29 @@ const AddProduct = () => {
                       : "No files chosen"}
                   </span>
                 </div>
-                {additionalImages.length > 0 && (
-                  <div className="mt-4 grid grid-cols-3 gap-2">
-                    {additionalImages.map((file, index) => (
-                      <img
-                        key={index}
-                        src={URL.createObjectURL(file)}
-                        alt={`Preview ${index}`}
-                        className="w-24 h-24 object-cover rounded border"
-                      />
-                    ))}
-                  </div>
-                )}
+ {additionalImages.length > 0 && (
+  <div className="mt-4 grid grid-cols-3 gap-2">
+    {additionalImages.map((file, index) => (
+      <div key={index} className="relative group">
+        <img
+          src={URL.createObjectURL(file)}
+          alt={`Preview ${index}`}
+          className="w-24 h-24 object-cover rounded border"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            setAdditionalImages((prev) => prev.filter((_, i) => i !== index));
+          }}
+          className="absolute top-0 right-0 bg-transparent !text-black hover:!text-black text-xs rounded-full p-1 hover:bg-gray-200 focus:outline-none focus:ring-0 focus:text-black active:text-black"
+          title="Remove Image"
+        >
+          ✖
+        </button>
+      </div>
+    ))}
+  </div>
+)}
               </div>
 
               {/* Product Dimensions */}

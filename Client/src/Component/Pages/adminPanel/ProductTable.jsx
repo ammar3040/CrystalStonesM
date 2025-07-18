@@ -253,7 +253,7 @@ const ProductTable = () => {
                     onClick={() => sortProducts(5)}
                   >
                     <div className="flex items-center justify-end">
-                      Original (₹)
+                      Original ($)
                       <i className={`fas ${getSortIcon(5)} ml-1`}></i>
                     </div>
                   </th>
@@ -314,7 +314,7 @@ const ProductTable = () => {
                         )}
                       </td>
                       <td className="px-2 py-3 whitespace-nowrap text-right text-sm text-gray-900">
-                        ₹{product.originalPrice}
+                        ${product.originalPrice}
                       </td>
                       <td className="px-2 py-3 whitespace-nowrap text-sm text-gray-500">
                         {product.crystalType}

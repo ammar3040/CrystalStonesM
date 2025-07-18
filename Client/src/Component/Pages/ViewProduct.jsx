@@ -83,7 +83,7 @@ const ViewProduct = () => {
   };
 
   const handleInquiry = () => {
-    const message = `Hi, I'm interested in this product:\n\n📌 Name: ${product.productName}\n🆔 Model: ${product.ModelNumber || 'N/A'}\n🖼️ Image: ${product.mainImage.url}`;
+    const message = `Hi, I'm interested in this product:\n\n📌 Name: ${product.productName}\n🆔 Model: ${product.modelNumber || 'N/A'}\n🖼️ Image: ${product.mainImage.url}`;
     window.open(`https://wa.me/919016507258?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -224,7 +224,7 @@ const ViewProduct = () => {
               </div>
 
               {/* Product Details */}
-              <div>
+              <div className="mb-10">
                 <h2 className="text-2xl font-bold text-black mb-4">Product Details</h2>
                 <div className="space-y-4">
                   <div className="flex">
@@ -237,19 +237,7 @@ const ViewProduct = () => {
                     <span className="text-black font-semibold w-40">Crystal Type:</span>
                     <span className="text-black font-medium">{product.crystalType}</span>
                   </div>
-                  {product.specifications && product.specifications.length > 0 && (
-                    <div className="flex flex-col gap-2">
-                      <span className="text-black font-semibold">Specifications:</span>
-                      <div className="grid gap-2">
-                        {product.specifications.map((spec, idx) => (
-                          <div key={idx} className="flex gap-2">
-                            <span className="font-semibold text-black">{spec.key}:</span>
-                            <span className="text-black font-medium">{spec.value}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                
                   <div className="flex">
                     <span className="text-black font-semibold w-40">Quantity Unit:</span>
                     <span className="text-black font-medium capitalize">
@@ -263,6 +251,22 @@ const ViewProduct = () => {
                     </div>
                   )}
                 </div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-black mb-4">Specifications:</h2>
+                  {product.specifications && product.specifications.length > 0 && (
+                    <div className="flex flex-col gap-2">
+              
+                      <div className="grid gap-2">
+                        {product.specifications.map((spec, idx) => (
+                          <div key={idx} className="flex gap-2">
+                            <span className="font-bold text-black">{spec.key}:</span>
+                            <span className="text-black font-medium">{spec.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
               </div>
             </div>
           </div>

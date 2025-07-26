@@ -17,13 +17,17 @@ function ExtraSlides({ bgImg, productName, category, productId, index, descripti
           {/* Changed to only stack on mobile (below md breakpoint) */}
           <div className="flex flex-col md:flex-row items-center justify-center gap-8 lg:gap-12 xl:gap-16">
             {/* Product Image */}
+          
             <div className="md:w-1/2 flex justify-center">
+              <Link to={`/catagory/${ encodeURIComponent(category)}`}>
               <img
                 src={bgImg}
                 className="w-[220px] sm:w-[280px] md:w-full max-w-[320px] rounded-2xl border-[3px] border-white/20 shadow-xl transition-transform duration-300 hover:scale-105"
                 alt={`${productName} - ${category}`}
               />
+             </Link>
             </div>
+           
             
             {/* Text content */}
             <div className="md:w-1/2 text-center md:text-left px-4">
@@ -38,7 +42,7 @@ function ExtraSlides({ bgImg, productName, category, productId, index, descripti
               </p>
               
               {/* View More Button */}
-              <Link to={`/catagory/${category}`}>
+              <Link to={`/catagory/${ encodeURIComponent(category)}`}>
                 <button className="btn btn-primary text-sm sm:text-base">
                   View More
                 </button>

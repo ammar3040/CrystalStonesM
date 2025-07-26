@@ -150,7 +150,7 @@ const LoginMain = ({ onLoginSuccess, onClose }) => {
         <div className="md:block hidden w-1/2">
           <img 
             className="rounded-2xl max-h-[1600px]" 
-          src={"https://res.cloudinary.com/dioicxwct/image/upload/v1752046684/loginpage_cyj0ql.jpg"}
+          src={"https://res.cloudinary.com/dioicxwct/image/upload/v1753539190/pqf3ybaexutwltwndjgi_w300gz.jpg"}
           />
         </div>
       </div>

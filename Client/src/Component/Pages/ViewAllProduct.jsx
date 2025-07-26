@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ProductCard from '../Product/ProductCard';
 import { Link } from 'react-router-dom';
-
+import { Helmet } from 'react-helmet';
 function ViewAllProduct() {
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,6 +47,11 @@ function ViewAllProduct() {
   if (allProducts.length === 0) return <div className="text-center py-8">No products found</div>;
 
   return (
+    <>
+     <Helmet>
+        <title>All Products | Crystal Stone Smart</title>
+        <link rel="canonical" href="https://crystalstonesmart.com/ViewAllProduct" />
+      </Helmet>
     <div className="px-4 sm:px-6 lg:px-8 py-8">
       <h2 
         style={{
@@ -107,6 +112,7 @@ function ViewAllProduct() {
         })}
       </div>
     </div>
+    </>
   );
 }
 

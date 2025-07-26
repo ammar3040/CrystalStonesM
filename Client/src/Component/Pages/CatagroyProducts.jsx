@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ProductCard from '../Product/ProductCard';
 import axios from 'axios';
-
+import { Helmet } from 'react-helmet';
 function CatagoryProducts() {
   const { CatagoryName } = useParams();
   const catagoryName = decodeURIComponent(CatagoryName);
@@ -33,6 +33,19 @@ function CatagoryProducts() {
   if (products.length === 0) return <div className="text-center py-8">No products found in this category</div>;
 
   return (
+    <>
+     <Helmet>
+        <title>{catagoryName} | Crystal Stone Smart</title>
+        <link rel="canonical" href={`https://crystalstonesmart.com/catagory/${CatagoryName}`} />
+        <meta
+          name="description"
+          content={`Explore our premium ${catagoryName} collection. Shop unique crystal designs, high-quality stones, and more.`}
+        />
+        <meta
+    name="keywords"
+    content={`${catagoryName}, Khambhat ${catagoryName}, handmade ${catagoryName}, agate, healing stone, crystal product`}
+  />
+      </Helmet>
     <div className="container mx-auto px-4 py-12">
       <h2 className="text-2xl font-bold text-center mb-8">Explore Our {catagoryName} Collection</h2>
       
@@ -74,6 +87,7 @@ function CatagoryProducts() {
         </Link>
       </div>
     </div>
+    </>
   );
 }
 

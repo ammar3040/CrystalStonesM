@@ -44,7 +44,7 @@ export default function MainSection() {
         autoplay={{ delay: 5000, disableOnInteraction: false }}
         className="w-full h-[75vh] sm:h-[60vh]"
         style={{
-          backgroundImage: "url(https://res.cloudinary.com/dioicxwct/image/upload/v1751947665/HERO_slider_2_bhtzay.jpg)",
+          backgroundImage: "url(https://res.cloudinary.com/dioicxwct/image/upload/v1753539191/hmhyu80yzltr0lahjlli_i1gjpl.jpg)",
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
@@ -57,12 +57,13 @@ export default function MainSection() {
 
         {/* Dynamic product slides */}
         {randomProducts.map((product, index) => (
+          
           <SwiperSlide key={product._id || index}>
             <ExtraSlides
               bgImg={product.mainImage?.url}
               productName={product.productName}
               description={product.description}
-              category={product.category}
+              category={ decodeURIComponent(product.category)}
               productId={product._id}
               index={index}
             />

@@ -9,6 +9,7 @@ import axios from 'axios';
 import Cookies from "js-cookie";
 import toast from 'react-hot-toast';
 import { FaWhatsapp } from 'react-icons/fa';
+import { Helmet } from 'react-helmet';
 
 const ViewProduct = () => {
   const { ProductId } = useParams();
@@ -109,6 +110,11 @@ const handleAddToCart = async () => {
     .slice(0, 4);
 
   return (
+    <>
+     <Helmet>
+        <title>Product | Crystal Stone Smart</title>
+        <link rel="canonical" href={`https://crystalstonesmart.com/Product/${ProductId}`} />
+      </Helmet>
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-8 font-sans">
         {/* Main Product Section */}
@@ -410,6 +416,7 @@ const handleAddToCart = async () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

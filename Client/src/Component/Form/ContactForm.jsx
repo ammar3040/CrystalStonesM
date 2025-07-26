@@ -7,10 +7,11 @@ const ContactForm = () => {
       position: "relative",
       
       minHeight: "90vh",
-      backgroundImage: "url('/img/Contact-formbg.png')",
+      backgroundImage: "url('https://res.cloudinary.com/dioicxwct/image/upload/v1753539192/rokqumh7qsqlgiiptvml_hagqdt.png')",
       backgroundSize: "cover",
       backgroundPosition: "center",
       backgroundAttachment: "fixed",
+      
       display: "flex",
       alignItems: "center",
       justifyContent: "center",

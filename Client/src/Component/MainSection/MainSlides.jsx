@@ -43,7 +43,7 @@ function MainSlides() {
             {/* Image */}
             <div className="hidden lg:block lg:w-5/12">
               <img
-                src="https://res.cloudinary.com/dioicxwct/image/upload/v1752046677/mainSlide_pqhwur.png"
+                src="https://res.cloudinary.com/dioicxwct/image/upload/v1753539192/tehc6gmmwkqxc1jelcp1_rvhjnz.png"
                 className="w-[220px] sm:w-[280px] md:w-[320px] rounded-2xl border-[3px] border-white/20 shadow-xl"
                 alt="Crystal Product"
               />

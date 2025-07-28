@@ -53,6 +53,16 @@ const ViewProduct = () => {
       })
       .catch((err) => console.error("Error fetching product:", err));
   }, [ProductId]);
+  useEffect(() => {
+  const timeout = setTimeout(() => {
+    if (!product) {
+      navigate('/ViewAllProduct');
+    }
+  }, 20000); // 20 seconds
+
+  return () => clearTimeout(timeout);
+}, [product, navigate]);
+
    // Update displayed price when size changes
   const displayedPrice = selectedSize 
     ? selectedSize.price 

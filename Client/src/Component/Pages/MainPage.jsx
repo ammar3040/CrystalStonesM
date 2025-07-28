@@ -4,6 +4,7 @@ import MainSection from "../MainSection/MainSection"
 import ProductMain from "../Product/ProductMain"
 import ContactForm from '../Form/ContactForm'
 import { Helmet } from 'react-helmet';
+import ProductRichSnippet from './ProductRichSnippet';
 
 
 
@@ -11,6 +12,7 @@ import { Helmet } from 'react-helmet';
 function MainPage() {
   return (
     <>
+    <ProductRichSnippet/>
      <Helmet>
         <title>Home | Crystal Stone Smart</title>
         <link rel="canonical" href="https://crystalstonesmart.com/" />

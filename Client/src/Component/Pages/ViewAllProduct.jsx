@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ProductCard from '../Product/ProductCard';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import ProductRichSnippet from './ProductRichSnippet';
 function ViewAllProduct() {
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +49,7 @@ function ViewAllProduct() {
 
   return (
     <>
+      <ProductRichSnippet/>
      <Helmet>
         <title>All Products | Crystal Stone Smart</title>
         <link rel="canonical" href="https://crystalstonesmart.com/ViewAllProduct" />

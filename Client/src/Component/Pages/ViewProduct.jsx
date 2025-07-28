@@ -10,6 +10,7 @@ import Cookies from "js-cookie";
 import toast from 'react-hot-toast';
 import { FaWhatsapp } from 'react-icons/fa';
 import { Helmet } from 'react-helmet';
+import ProductRichSnippet from './ProductRichSnippet';
 
 const ViewProduct = () => {
   const { ProductId } = useParams();
@@ -111,6 +112,7 @@ const handleAddToCart = async () => {
 
   return (
     <>
+      <ProductRichSnippet/>
      <Helmet>
         <title>Product | Crystal Stone Smart</title>
         <link rel="canonical" href={`https://crystalstonesmart.com/Product/${ProductId}`} />

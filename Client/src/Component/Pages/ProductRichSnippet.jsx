@@ -18,7 +18,7 @@ const ProductRichSnippet = () => {
           "name": p.productName ,
           "image": p.mainImage.url,
           "description": p.description || "Crystal Product by Crystal Stones Mart",
-          "sku": p.sku || p._id,
+          "sku": p._id,
           "brand": {
             "@type": "Brand",
             "name": "Crystal Stones Mart"
@@ -26,7 +26,7 @@ const ProductRichSnippet = () => {
           "offers": {
             "@type": "Offer",
             "priceCurrency": "INR",
-            "price": p.price,
+            "price": p.dollarPrice,
             "availability": "https://schema.org/InStock",
             "url": `https://www.crystalstonesmart.com/Product/${p._id}`
           }

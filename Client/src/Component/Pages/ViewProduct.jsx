@@ -11,6 +11,8 @@ import toast from 'react-hot-toast';
 import { FaWhatsapp } from 'react-icons/fa';
 import { Helmet } from 'react-helmet';
 import ProductRichSnippet from './ProductRichSnippet';
+import ReactImageMagnify from 'react-image-magnify';
+import ProtectedImage from '../../ProtectedImage';
 
 const ViewProduct = () => {
   const { ProductId } = useParams();
@@ -20,7 +22,7 @@ const ViewProduct = () => {
   const [allProduct, setAllProduct] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
-   const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
 
   useEffect(() => {
     const user = Cookies.get("user");
@@ -41,29 +43,28 @@ const ViewProduct = () => {
     fetchAllProducts();
   }, []);
 
-   useEffect(() => {
+  useEffect(() => {
     axios.get(`${import.meta.env.VITE_API_URL}/api/product/?id=${ProductId}`)
       .then((res) => {
         setProduct(res.data);
         setQuantity(parseInt(res.data.MinQuantity));
-        // Set default selected size if product has sizes
         if (res.data.sizes && res.data.sizes.length > 0) {
           setSelectedSize(res.data.sizes[0]);
         }
       })
       .catch((err) => console.error("Error fetching product:", err));
   }, [ProductId]);
+
   useEffect(() => {
-  const timeout = setTimeout(() => {
-    if (!product) {
-      navigate('/ViewAllProduct');
-    }
-  }, 20000); // 20 seconds
+    const timeout = setTimeout(() => {
+      if (!product) {
+        navigate('/ViewAllProduct');
+      }
+    }, 20000);
 
-  return () => clearTimeout(timeout);
-}, [product, navigate]);
+    return () => clearTimeout(timeout);
+  }, [product, navigate]);
 
-   // Update displayed price when size changes
   const displayedPrice = selectedSize 
     ? selectedSize.price 
     : product?.dollarPrice;
@@ -71,6 +72,7 @@ const ViewProduct = () => {
   const handleSizeSelection = (size) => {
     setSelectedSize(size);
   };
+
   if (!product) return (
     <div className="flex justify-center items-center h-screen">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
@@ -85,36 +87,34 @@ const ViewProduct = () => {
   const increaseQuantity = () => setQuantity(prev => prev + 1);
   const decreaseQuantity = () => quantity > product.MinQuantity && setQuantity(prev => prev - 1);
 
-const handleAddToCart = async () => {
-  const user = Cookies.get("user");
-  if (!user) {
-    navigate("/SignInPage");
-    return;
-  }
+  const handleAddToCart = async () => {
+    const user = Cookies.get("user");
+    if (!user) {
+      navigate("/SignInPage");
+      return;
+    }
 
-  try {
-    const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/getCartItem`, {
-      pid: product._id,
-      quantity: quantity,
-      uid: JSON.parse(user).uid,
-      selectedSize: selectedSize?.size || null,
-      price: displayedPrice
-    }, { withCredentials: true });
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/getCartItem`, {
+        pid: product._id,
+        quantity: quantity,
+        uid: JSON.parse(user).uid,
+        selectedSize: selectedSize?.size || null,
+        price: displayedPrice
+      }, { withCredentials: true });
 
-    if (res.status === 200) toast.success('🛒 Product added to cart!');
-  } catch (err) {
-    console.error('Add to cart error:', err);
-    toast.error('Failed to add product to cart');
-  }
-};
-
+      if (res.status === 200) toast.success('🛒 Product added to cart!');
+    } catch (err) {
+      console.error('Add to cart error:', err);
+      toast.error('Failed to add product to cart');
+    }
+  };
 
   const handleInquiry = () => {
     const message = `Hi, I'm interested in this product:\n\n📌 Name: ${product.productName}\n🆔 Model: ${product.modelNumber || 'N/A'}\n🖼️ Image: ${product.mainImage.url}`;
     window.open(`https://wa.me/919016507258?text=${encodeURIComponent(message)}`, '_blank');
   };
 
-  // Recommended products
   const recommendedProducts = allProduct
     ?.filter(p => p._id !== product._id)
     .sort(() => 0.5 - Math.random())
@@ -123,59 +123,143 @@ const handleAddToCart = async () => {
   return (
     <>
       <ProductRichSnippet/>
-     <Helmet>
-        <title>Product | Crystal Stone Smart</title>
+      <Helmet>
+        <title>{product.productName} | Crystal Stone Smart</title>
+        <meta name="description" content={product.description.substring(0, 160)} />
         <link rel="canonical" href={`https://crystalstonesmart.com/Product/${ProductId}`} />
       </Helmet>
-    <div className="bg-gray-50 min-h-screen">
-      <div className="container mx-auto px-4 py-8 font-sans">
-        {/* Main Product Section */}
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Column - Product Details */}
-          <div className="lg:w-2/3 bg-white rounded-xl shadow-sm p-6">
+      <div className="bg-gray-50 min-h-screen">
+        <div className="container mx-auto px-4 py-8 font-sans">
+          {/* Main Product Section */}
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Left Column - Product Details */}
+            <div className="lg:w-2/3 bg-white rounded-xl shadow-sm p-6">
+              {/* Product Images */}
             {/* Product Images */}
-            <div className="mb-8">
-              <Swiper
-                loop={true}
-                spaceBetween={10}
-                navigation={true}
-                modules={[Navigation, Thumbs]}
-                grabCursor={true}
-                thumbs={{ swiper: activeThumb }}
-                className="h-96 w-full rounded-lg mb-4 border border-gray-200"
-              >
-                {allImages.map((img, index) => (
-                  <SwiperSlide key={index}>
-                    <img 
-                      src={img} 
-                      alt={`Product ${index + 1}`} 
-                      className="w-full h-full object-contain"
-                    />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-              
-              <Swiper
-                onSwiper={setActiveThumb}
-                loop={true}
-                spaceBetween={10}
-                slidesPerView={4}
-                freeMode={true}
-                watchSlidesProgress={true}
-                modules={[Navigation, Thumbs]}
-                className="h-24 w-full"
-              >
-                {allImages.map((img, index) => (
-                  <SwiperSlide key={index}>
-                    <img 
-                      src={img} 
-                      alt={`Thumbnail ${index + 1}`} 
-                      className="w-full h-full object-cover cursor-pointer border border-gray-200 rounded"
-                    />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </div>
+<div className="mb-8">
+  <div className="flex flex-col lg:flex-row gap-4">
+    {/* Thumbnail Column (left side) */}
+    <div className="hidden lg:flex flex-col gap-2 w-20">
+      {allImages.map((img, index) => (
+        <button 
+          key={index}
+          onClick={() => setActiveThumb(index)}
+          className={`relative h-20 w-20 border rounded-md overflow-hidden transition-all ${
+            activeThumb === index ? 'border-black ring-2 ring-black' : 'border-gray-200'
+          }`}
+        >
+          <ProtectedImage 
+            src={img} 
+            alt={`Thumbnail ${index + 1}`}
+            className="w-full h-full object-contain"
+          />
+        </button>
+      ))}
+    </div>
+
+    {/* Main Image with Amazon-style Zoom */}
+    <div className="relative w-full lg:w-[calc(100%-6rem)] h-96 bg-white rounded-lg overflow-hidden">
+      <div className="relative w-full h-full group">
+        <Swiper
+          loop={true}
+          spaceBetween={10}
+          navigation={true}
+          modules={[Navigation, Thumbs]}
+          grabCursor={true}
+          initialSlide={activeThumb || 0}
+          onSlideChange={(swiper) => setActiveThumb(swiper.realIndex)}
+          className="h-full w-full"
+        >
+          {allImages.map((img, index) => (
+            <SwiperSlide key={index}>
+              <div className="relative w-full h-full flex items-center justify-center bg-white">
+                <ReactImageMagnify
+                  {...{
+                    smallImage: {
+                      alt: "Product Image",
+                      isFluidWidth: true,
+                      src: img,
+                      sizes: '(max-width: 480px) 100vw, (max-width: 1200px) 30vw, 360px'
+                    },
+                    largeImage: {
+                      src: img,
+                      width: 1200,
+                      height: 1800
+                    },
+                    lensStyle: {
+                      backgroundColor: 'rgba(0,0,0,.1)',
+                      border: '1px solid rgba(0,0,0,.2)'
+                    },
+                    lensComponent: ({ style }) => (
+                      <div style={{
+                        ...style,
+                        backgroundColor: 'rgba(0,0,0,.1)',
+                        border: '1px solid rgba(0,0,0,.2)',
+                        borderRadius: '50%',
+                        cursor: 'crosshair'
+                      }} />
+                    ),
+                    enlargedImageContainerStyle: {
+                      zIndex: 100000,
+                      
+                      top: 0,
+                      left:"0",
+                      position:"fixed",
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                      background: 'white'
+                    },
+                    enlargedImageContainerDimensions: {
+                      width: '150%',
+                      height: '150%'
+                    },
+                    enlargedImagePosition: "beside",
+                    isHintEnabled: true,
+                    shouldUsePositiveSpaceLens: true,
+                    imageClassName: "object-contain",
+                    enlargedImageClassName: "object-contain"
+                  }}
+                />
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
+    </div>
+  </div>
+
+  {/* Thumbnail Slider (Mobile) */}
+  <div className="lg:hidden mt-4">
+    <Swiper
+      loop={true}
+      spaceBetween={10}
+      slidesPerView={4}
+      freeMode={true}
+      watchSlidesProgress={true}
+      modules={[Navigation, Thumbs]}
+      className="thumbnail-slider h-24"
+    >
+      {allImages.map((img, index) => (
+        <SwiperSlide key={index}>
+          <button 
+            onClick={() => setActiveThumb(index)}
+            className={`relative h-full w-full border rounded-md overflow-hidden transition-all ${
+              activeThumb === index ? 'border-black ring-2 ring-black' : 'border-gray-200'
+            }`}
+          >
+            <ProtectedImage 
+              src={img} 
+              alt={`Thumbnail ${index + 1}`}
+              className="w-full h-full object-contain "
+              style={{zIndex:1000000}}
+            />
+          </button>
+        </SwiperSlide>
+      ))}
+    </Swiper>
+  </div>
+</div>
 
             {/* Product Info */}
             <div>
@@ -332,102 +416,104 @@ const handleAddToCart = async () => {
 
           {/* Right Column - Recommended Products (Desktop) */}
           {recommendedProducts && recommendedProducts.length > 0 && (
-            <div className="lg:w-1/3 lg:block hidden">
-              <div className="sticky top-4">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">You May Also Like</h2>
-                <div className="space-y-6">
-                  {recommendedProducts.map(product => (
-                    <div 
-                      key={product._id}
-                      className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
-                      onClick={() => navigate(`/product/${product._id}`)}
-                    >
-                      <div className="flex">
-                        <div className="w-1/3 h-[100px] flex items-center justify-center">
-                          <img 
-                            src={product.mainImage.url} 
-                            alt={product.productName}
-                            className="max-h-full max-w-full object-contain"
-                          />
-                        </div>
-                        <div className="w-2/3 p-4">
-                          <h3 className="font-bold text-lg text-gray-900 mb-1 line-clamp-1">{product.productName}</h3>
-                          <p className="text-gray-600 text-sm mb-2 line-clamp-2">{product.description}</p>
-                          {isLoggedIn ? (
-                            <div>
-                              <span className="text-xl font-bold text-gray-900">${product.dollarPrice}</span>
-                              {product.originalPrice && (
-                                <span className="text-gray-500 line-through ml-2">${product.originalPrice}</span>
-                              )}
-                            </div>
-                          ) : (
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate('/SignInPage');
-                              }}
-                              className="text-blue-600 hover:underline text-sm font-medium"
-                            >
-                              Login to see price
-                            </button>
-                          )}
+              <div className="lg:w-1/3 lg:block hidden">
+                <div className="sticky top-4">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">You May Also Like</h2>
+                  <div className="space-y-6">
+                    {recommendedProducts.map(product => (
+                      <div 
+                        key={product._id}
+                        className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                        onClick={() => navigate(`/product/${product._id}`)}
+                      >
+                        <div className="flex">
+                          <div className="w-1/3 h-[100px] flex items-center justify-center bg-gray-50 p-2">
+                            <img 
+                              src={product.mainImage.url} 
+                              alt={product.productName}
+                              className="max-h-full max-w-full object-contain"
+                              loading="lazy"
+                            />
+                          </div>
+                          <div className="w-2/3 p-4">
+                            <h3 className="font-bold text-lg text-gray-900 mb-1 line-clamp-1">{product.productName}</h3>
+                            <p className="text-gray-600 text-sm mb-2 line-clamp-2">{product.description}</p>
+                            {isLoggedIn ? (
+                              <div>
+                                <span className="text-xl font-bold text-gray-900">${product.dollarPrice}</span>
+                                {product.originalPrice && (
+                                  <span className="text-gray-500 line-through ml-2">${product.originalPrice}</span>
+                                )}
+                              </div>
+                            ) : (
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate('/SignInPage');
+                                }}
+                                className="text-blue-600 hover:underline text-sm font-medium"
+                              >
+                                Login to see price
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* Recommended Products (Mobile) */}
+          {recommendedProducts && recommendedProducts.length > 0 && (
+            <div className="lg:hidden mt-12">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">You May Also Like</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {recommendedProducts.map(product => (
+                  <div 
+                    key={product._id}
+                    className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                    onClick={() => navigate(`/product/${product._id}`)}
+                  >
+                    <div className="w-full h-48 flex items-center justify-center bg-gray-50 p-4">
+                      <img 
+                        src={product.mainImage.url} 
+                        alt={product.productName}
+                        className="max-h-full max-w-full object-contain"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-bold text-lg text-gray-900 mb-1 line-clamp-1">{product.productName}</h3>
+                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+                      {isLoggedIn ? (
+                        <div>
+                          <span className="text-xl font-bold text-gray-900">${product.dollarPrice}</span>
+                          {product.originalPrice && (
+                            <span className="text-gray-500 line-through ml-2">${product.originalPrice}</span>
+                          )}
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate('/SignInPage');
+                          }}
+                          className="text-blue-600 hover:underline text-sm font-medium"
+                        >
+                          Login to see price
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
         </div>
-
-        {/* Recommended Products (Mobile) */}
-        {recommendedProducts && recommendedProducts.length > 0 && (
-          <div className="lg:hidden mt-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">You May Also Like</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {recommendedProducts.map(product => (
-                <div 
-                  key={product._id}
-                  className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
-                  onClick={() => navigate(`/product/${product._id}`)}
-                >
-                  <div className="w-full h-48 flex items-center justify-center bg-white">
-                    <img 
-                      src={product.mainImage.url} 
-                      alt={product.productName}
-                      className="max-h-full max-w-full object-contain"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-lg text-gray-900 mb-1 line-clamp-1">{product.productName}</h3>
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-                    {isLoggedIn ? (
-                      <div>
-                        <span className="text-xl font-bold text-gray-900">${product.dollarPrice}</span>
-                        {product.originalPrice && (
-                          <span className="text-gray-500 line-through ml-2">${product.originalPrice}</span>
-                        )}
-                      </div>
-                    ) : (
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate('/SignInPage');
-                        }}
-                        className="text-blue-600 hover:underline text-sm font-medium"
-                      >
-                        Login to see price
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
-    </div>
     </>
   );
 };

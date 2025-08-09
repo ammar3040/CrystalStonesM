@@ -4,6 +4,7 @@ import { FaShoppingCart, FaEye, FaWhatsapp } from 'react-icons/fa';
 import Cookies from "js-cookie";
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from "react-router-dom";
+import ProtectedImage from '../../ProtectedImage';
 
 function ProductCard({ 
   productImg, 
@@ -61,11 +62,9 @@ function ProductCard({
         {/* Image container with WhatsApp button */}
         <Link to={`/Product/${pid}`} className="block">
           <figure className="relative aspect-square overflow-hidden">
-            <img 
-              src={productImg}
-              className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 p-2"
-              alt={productName} 
-            />
+          <ProtectedImage src={productImg} alt={productName}   className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 p-2" />
+                 
+            
             {/* WhatsApp inquiry button */}
             <a
               href={`https://wa.me/919016507258?text=${encodeURIComponent(

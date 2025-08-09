@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from "js-cookie";
 import toast from 'react-hot-toast';
+import ProtectedImage from '../../ProtectedImage';
 
 function BestProductCard({
   productImg,
@@ -61,13 +62,11 @@ function BestProductCard({
         
         {/* Image */}
         <div className="relative h-[220px] overflow-hidden">
-          <Link to={`/Product/${pid}`}>
-            <img 
-              src={productImg}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-              alt={productName} 
-            />
+           <Link to={`/Product/${pid}`}>
+          
+            <ProtectedImage src={productImg} alt={productName}  className=" w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
           </Link>
+
 
           {/* WhatsApp */}
           <a

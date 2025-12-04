@@ -14,7 +14,7 @@ function MainPage() {
     <>
     <ProductRichSnippet/>
      <Helmet>
-        <title>Home | Crystal Stone Smart</title>
+        <title>Home | Crystal Stones mart</title>
         <link rel="canonical" href="https://crystalstonesmart.com/" />
          <meta
     name="keywords"

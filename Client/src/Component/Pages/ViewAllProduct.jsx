@@ -50,9 +50,14 @@ function ViewAllProduct() {
   return (
     <>
       <ProductRichSnippet/>
+     <ProductRichSnippet/>
      <Helmet>
-        <title>All Products | Crystal Stone Smart</title>
+        <title>All Products | Crystal Stones mart</title>
         <link rel="canonical" href="https://crystalstonesmart.com/ViewAllProduct" />
+       <meta
+          name="keywords"
+          content="Khambhat agate, handmade agate, agate stones, crystal products, healing stones, chakra stones, gemstone, crystal jewelry"
+        />
       </Helmet>
     <div className="px-4 sm:px-6 lg:px-8 py-8">
       <h2 

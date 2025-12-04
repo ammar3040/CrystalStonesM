@@ -123,10 +123,15 @@ const ViewProduct = () => {
   return (
     <>
       <ProductRichSnippet/>
+     <ProductRichSnippet />
       <Helmet>
-        <title>{product.productName} | Crystal Stone Smart</title>
+        <title>{product.productName} | Crystal Stones mart</title>
         <meta name="description" content={product.description.substring(0, 160)} />
         <link rel="canonical" href={`https://crystalstonesmart.com/Product/${ProductId}`} />
+        <meta
+          name="keywords"
+          content="Khambhat agate, handmade agate, agate stones, crystal products, healing stones, chakra stones, gemstone, crystal jewelry"
+        />
       </Helmet>
       <div className="bg-gray-50 min-h-screen">
         <div className="container mx-auto px-4 py-8 font-sans">

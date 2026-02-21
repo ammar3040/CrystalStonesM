@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 
+                            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://crystalstonesmart.com/</loc>
+    <lastmod>2025-07-18T20:39:41+00:00</lastmod>
+  </url>
+
+  <!-- View All Products -->
+  <url>
+    <loc>https://www.crystalstonesmart.com/ViewAllProduct</loc>
+    <lastmod>2025-07-18T20:39:41+00:00</lastmod>
+  </url>
+
+  <!-- Worry Stones / Thumb Stones -->
+  <url>
+    <loc>https://www.crystalstonesmart.com/catagory/Worry%20Stones%2FThumb%20Stones</loc>
+    <lastmod>2025-07-18T20:39:41+00:00</lastmod>
+  </url>
+
+  <!-- Heart -->
+  <url>
+    <loc>https://www.crystalstonesmart.com/catagory/Heart</loc>
+    <lastmod>2025-07-18T20:39:41+00:00</lastmod>
+  </url>
+
+  <!-- Gemstone Egg -->
+  <url>
+    <loc>https://www.crystalstonesmart.com/catagory/Gemstone%20Egg</loc>
+    <lastmod>2025-07-18T20:39:41+00:00</lastmod>
+  </url>
+
+  <!-- Stretchable Bracelets -->
+  <url>
+    <loc>https://www.crystalstonesmart.com/catagory/Stretchable%20Bracelets</loc>
+    <lastmod>2025-07-18T20:39:41+00:00</lastmod>
+  </url>
+
+</urlset>

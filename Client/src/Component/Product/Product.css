@@ -1,0 +1,10 @@
+/* Product Card Styles — Minimal overrides, Tailwind handles everything */
+
+.addCartbtn:hover {
+  background-color: #18181b;
+  color: white !important;
+}
+
+.addCartbtn {
+  border-radius: 12px;
+}

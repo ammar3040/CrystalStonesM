@@ -1,0 +1,1 @@
+{"name":"your-project","version":"1.0.0","scripts":{"client":"npm run build --prefix client","server":"node Server/app.js","dev":"concurrently \"npm run server\" \"npm run client\""},"devDependencies":{"concurrently":"^9.2.0"},"dependencies":{"react-image-magnify":"^2.7.4"}}

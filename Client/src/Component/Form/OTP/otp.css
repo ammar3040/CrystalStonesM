@@ -1,0 +1,134 @@
+
+        .popup-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+          animation: fadeIn 0.3s ease-out;
+        }
+        
+        .popup-content {
+          position: relative;
+          background-color: white;
+          border-radius: 12px;
+          width: 90%;
+          max-width: 400px;
+          padding: 30px 25px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .close-button {
+          position: absolute;
+          top: 15px;
+          right: 15px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 5px;
+        }
+        
+        .popup-title {
+          color: black;
+          font-size: 1.4rem;
+          margin-bottom: 8px;
+          text-align: center;
+        }
+        
+        .popup-subtitle {
+          color: #555;
+          font-size: 0.9rem;
+          text-align: center;
+          margin-bottom: 25px;
+        }
+        
+        .input-group {
+          margin-bottom: 25px;
+        }
+        
+        .input-group input {
+          width: 100%;
+          padding: 12px 15px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 1rem;
+          background-color: rgb(255, 248, 168);
+          transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+          outline: none;
+          border-color: black;
+          box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .verify-button {
+          width: 100%;
+          padding: 12px;
+          background-color: black;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+        
+        .verify-button:hover {
+          background-color: #333;
+        }
+        
+        .otp-form {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        
+        .otp-inputs {
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+          margin-bottom: 25px;
+        }
+        
+        .otp-input {
+          width: 50px;
+          height: 50px;
+          text-align: center;
+          font-size: 1.2rem;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          background-color: rgb(255, 248, 168);
+        }
+        
+        .otp-input:focus {
+          outline: none;
+          border-color: black;
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @media (max-width: 480px) {
+          .popup-content {
+            padding: 25px 20px;
+          }
+          
+          .popup-title {
+            font-size: 1.2rem;
+          }
+          
+          .otp-input {
+            width: 45px;
+            height: 45px;
+          }
+        }
+      

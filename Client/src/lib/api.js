@@ -1,15 +1,39 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+// Helper to get cookie by name
+const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+};
+
+const getBaseURL = () => {
+    let url = import.meta.env.VITE_API_URL || '';
+    if (url.endsWith('/')) url = url.slice(0, -1);
+    // Ensure it ends with /api but not /api/api
+    if (!url.endsWith('/api')) {
+        url += '/api';
+    }
+    return url;
+};
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: getBaseURL(),
     withCredentials: true,
 });
 
 // Request interceptor for JWT
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('token');
+        let token = localStorage.getItem('token');
+
+        // Fallback to cookie if localStorage is empty (e.g., after Google Login)
+        if (!token) {
+            token = getCookie('token');
+        }
+
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }

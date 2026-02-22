@@ -11,8 +11,17 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
+    const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    };
+
     const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem('token'));
+    const [token, setToken] = useState(() => {
+        return localStorage.getItem('token') || getCookie('token');
+    });
 
     const getUserFromCookie = () => {
         try {
@@ -44,6 +53,12 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const initialUser = getUserFromCookie();
         setUser(initialUser);
+
+        // If we found a token in cookie but not in localStorage, sync it
+        const cookieToken = getCookie('token');
+        if (cookieToken && !localStorage.getItem('token')) {
+            localStorage.setItem('token', cookieToken);
+        }
     }, []);
 
     // Function to handle login
@@ -64,6 +79,8 @@ export const AuthProvider = ({ children }) => {
     // Function to handle logout
     const logout = () => {
         localStorage.removeItem('token');
+        // Also clear the token cookie
+        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         setToken(null);
         setUser(null);
         // Redirect will be handled by window.location.href in components if needed,
@@ -76,6 +93,8 @@ export const AuthProvider = ({ children }) => {
         const handleCookieChange = () => {
             const currentUser = getUserFromCookie();
             setUser(currentUser);
+            const currentToken = localStorage.getItem('token') || getCookie('token');
+            setToken(currentToken);
         };
 
         // Since there's no native cookie change listener, we can poll or rely on actions.
@@ -87,8 +106,24 @@ export const AuthProvider = ({ children }) => {
             }
         });
 
-        return () => window.removeEventListener('storage', handleCookieChange);
-    }, []);
+        // Add a small interval to check for cookie changes (e.g., after Google auth redirect)
+        const interval = setInterval(() => {
+            const currentUser = getUserFromCookie();
+            if (JSON.stringify(currentUser) !== JSON.stringify(user)) {
+                setUser(currentUser);
+            }
+            const currentToken = localStorage.getItem('token') || getCookie('token');
+            if (currentToken !== token) {
+                setToken(currentToken);
+                if (currentToken) localStorage.setItem('token', currentToken);
+            }
+        }, 2000);
+
+        return () => {
+            window.removeEventListener('storage', handleCookieChange);
+            clearInterval(interval);
+        };
+    }, [user, token]);
 
     const value = {
         user,

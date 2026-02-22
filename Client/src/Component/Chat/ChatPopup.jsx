@@ -18,7 +18,7 @@ const ChatPopup = () => {
     const { data: chatData, isLoading: isChatLoading, isError: isChatError } = useQuery({
         queryKey: ['chat-id'],
         queryFn: async () => {
-            const { data } = await api.get('/api/chat/help-center');
+            const { data } = await api.get('chat/help-center');
             return data;
         },
         enabled: isOpen && isLoggedIn,
@@ -31,7 +31,7 @@ const ChatPopup = () => {
     const { data: messagesData, isLoading: isMessagesLoading } = useQuery({
         queryKey: ['messages', chatId],
         queryFn: async () => {
-            const { data } = await api.get(`/api/chat/${chatId}/messages`);
+            const { data } = await api.get(`chat/${chatId}/messages`);
             return data;
         },
         enabled: !!chatId,

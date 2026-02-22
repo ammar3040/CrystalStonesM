@@ -100,7 +100,7 @@ const LoginMain = ({ onLoginSuccess, onClose }) => {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials) => {
-      const { data } = await api.post('/api/login', credentials);
+      const { data } = await api.post('login', credentials);
       return data;
     },
     onSuccess: (data) => {

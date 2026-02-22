@@ -12,6 +12,7 @@ import { MdLocationOn } from 'react-icons/md';
 import axios from 'axios';
 import { FaBoxOpen, FaClipboardList } from 'react-icons/fa';
 import Inquiry from './Inquiry';
+import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 
 
@@ -100,12 +101,11 @@ function Header({ onCartClick }) {
     return () => clearTimeout(timeout);
   }, [placeholder, placeholderIndex]);
   useEffect(() => {
-    if (user) {
-      setIsProfileOpen(true);
-      setIsLoginOpen(false);
-    } else {
+    if (!user) {
       setIsProfileOpen(false);
       setIsLoginOpen(true);
+    } else {
+      setIsLoginOpen(false);
     }
   }, [user]);
 
@@ -133,8 +133,7 @@ function Header({ onCartClick }) {
       }
 
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/all?search=${encodeURIComponent(searchQuery)}&limit=5`);
-        const data = await response.json();
+        const { data } = await api.get(`all?search=${encodeURIComponent(searchQuery)}&limit=5`);
         setSearchResults(data.products || []);
       } catch (error) {
         console.error('Error fetching search results:', error);
@@ -155,12 +154,7 @@ function Header({ onCartClick }) {
   useEffect(() => {
     const fetchCatagorys = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/getCatagory`);
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
-        const data = await response.json();
+        const { data } = await api.get('getCatagory');
         setCatagorys(data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -177,10 +171,8 @@ function Header({ onCartClick }) {
   // Fetch cart items when user is set
   const fetchCartItems = async (uid) => {
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/cartedItem`, {
+      const res = await api.post('cartedItem', {
         uid: uid
-      }, {
-        withCredentials: true
       });
 
       setCartItems(res.data); // assuming your API returns the cart array directly

@@ -21,7 +21,7 @@ function AddCart({ show, onClose, cartItems = [], user }) {
   // Mutation for updating cart quantity
   const updateCartMutation = useMutation({
     mutationFn: async ({ cartId, action }) => {
-      const { data } = await api.put('/api/updateCart', { cartId, action });
+      const { data } = await api.put('updateCart', { cartId, action });
       return data;
     },
     onMutate: async ({ cartId, action }) => {
@@ -62,7 +62,7 @@ function AddCart({ show, onClose, cartItems = [], user }) {
 
   const deleteCartMutation = useMutation({
     mutationFn: async ({ cartId, uid, productId }) => {
-      const { data } = await api.delete('/api/deleteCart', {
+      const { data } = await api.delete('deleteCart', {
         data: { cartId, uid, productId }
       });
       return data;
@@ -184,27 +184,18 @@ function AddCart({ show, onClose, cartItems = [], user }) {
     };
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/submitInquiry`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(inquiryData),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        await fetch(`${import.meta.env.VITE_API_URL}/api/clearCart`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ uid }),
-        });
-        setLocalCart([]);
-        setShowAddressModal(false);
-        toast.success("Inquiry submitted and cart cleared!");
-        onClose();
-      } else {
-        toast.error(data.message || "Failed to submit inquiry");
-      }
+      const { data } = await api.post('submitInquiry', inquiryData);
+
+      await api.delete('clearCart', { data: { uid } });
+
+      setLocalCart([]);
+      setShowAddressModal(false);
+      toast.success("Inquiry submitted and cart cleared!");
+      onClose();
     } catch (err) {
-      toast.error("Something went wrong while sending inquiry");
+      console.error("Inquiry error:", err);
+      const errorMessage = err.response?.data?.message || "Something went wrong while sending inquiry";
+      toast.error(errorMessage);
     }
   };
 

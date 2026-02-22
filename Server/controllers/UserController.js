@@ -589,6 +589,14 @@ module.exports.verifyOtp = async (req, res) => {
 module.exports.GoogleSignIn = (req, res) => {
   const user = req.user;
 
+  // Generate JWT token
+  const token = jwt.sign(
+    { uid: user._id, name: user.Uname, email: user.email, role: user.role },
+    SECRET_KEY,
+    { expiresIn: '7d' }
+  );
+
+  // Set user cookie (non-httpOnly for frontend to read identity)
   res.cookie('user', JSON.stringify({
     uid: user._id,
     name: user.Uname,
@@ -597,7 +605,15 @@ module.exports.GoogleSignIn = (req, res) => {
     address: user.address,
     role: user.role
   }), {
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    httpOnly: false,
+    secure: true,
+    sameSite: 'none'
+  });
+
+  // Set token cookie (can be read by frontend to initialize localStorage or use directly)
+  res.cookie('token', token, {
+    maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: false,
     secure: true,
     sameSite: 'none'
@@ -606,6 +622,8 @@ module.exports.GoogleSignIn = (req, res) => {
   if (user.role === 'admin') {
     return res.redirect(`${process.env.GOOGLE_ADMIN_AUTH}`);
   } else {
+    // If FRONTEND_LINK is https://crystalstonesmart.com/ (with trailing slash)
+    // and it's already there, redirecting works fine.
     return res.redirect(`${process.env.FRONTEND_LINK}/`);
   }
 };

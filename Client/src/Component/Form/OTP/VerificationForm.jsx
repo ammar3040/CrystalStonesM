@@ -10,7 +10,7 @@ const VerificationForm = ({ phoneNumber, registrationData, onVerified, onClose }
   const verifyMutation = useMutation({
     mutationFn: async (otpData) => {
       // API expects { phone, otp, registrationData }
-      const { data } = await api.post('/api/verify-otp', otpData);
+      const { data } = await api.post('verify-otp', otpData);
       return data;
     },
     onSuccess: (data) => {

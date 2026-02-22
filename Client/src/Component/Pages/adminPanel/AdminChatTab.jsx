@@ -15,7 +15,7 @@ const AdminChatTab = () => {
     const { data: chatsData, isLoading: isChatsLoading } = useQuery({
         queryKey: ['admin-chats'],
         queryFn: async () => {
-            const { data } = await api.get('/api/chat/admin/chats');
+            const { data } = await api.get('chat/admin/chats');
             return data; // { success, chats: [...], totalCount, ... }
         }
     });
@@ -26,7 +26,7 @@ const AdminChatTab = () => {
     const { data: messagesData, isLoading: isMessagesLoading } = useQuery({
         queryKey: ['messages', selectedChatId],
         queryFn: async () => {
-            const { data } = await api.get(`/api/chat/${selectedChatId}/messages`);
+            const { data } = await api.get(`chat/${selectedChatId}/messages`);
             return data; // { success, messages: [...] }
         },
         enabled: !!selectedChatId,

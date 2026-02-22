@@ -9,6 +9,7 @@ import axios from 'axios';
 import Cookies from "js-cookie";
 import toast from 'react-hot-toast';
 import { FaWhatsapp } from 'react-icons/fa';
+import api from '../../lib/api';
 import { Helmet } from 'react-helmet';
 import ProductRichSnippet from './ProductRichSnippet';
 import ReactImageMagnify from 'react-image-magnify';
@@ -32,8 +33,7 @@ const ViewProduct = () => {
   useEffect(() => {
     const fetchAllProducts = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/all?limit=20`);
-        const data = await response.json();
+        const { data } = await api.get('all?limit=20');
         setAllProduct(data.products || []);
       } catch (err) {
         console.error('Error fetching products:', err);
@@ -44,7 +44,7 @@ const ViewProduct = () => {
   }, []);
 
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_URL}/api/product/?id=${ProductId}`)
+    api.get(`product/?id=${ProductId}`)
       .then((res) => {
         const productData = res.data.product || res.data; // Handle both old and new format
         setProduct(productData);
@@ -179,13 +179,13 @@ const ViewProduct = () => {
     }
 
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/getCartItem`, {
+      const res = await api.post('getCartItem', {
         pid: product._id,
         quantity: quantity,
         uid: JSON.parse(user).uid,
         selectedSize: selectedSize?.size || null,
         price: displayedPrice
-      }, { withCredentials: true });
+      });
 
       if (res.status === 200) toast.success('🛒 Product added to cart!');
     } catch (err) {

@@ -83,7 +83,7 @@ const CompleteProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await api.post('/api/updateProfile', {
+      const { data } = await api.post('updateProfile', {
         uid: user.uid,
         ...formData
       });

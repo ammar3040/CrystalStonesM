@@ -52,7 +52,7 @@ function CatagoryProducts() {
         }
 
         const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/catagoryproduct?${params.toString()}`
+          `${import.meta.env.VITE_API_URL}/catagoryproduct?${params.toString()}`
         );
 
         const data = res.data;

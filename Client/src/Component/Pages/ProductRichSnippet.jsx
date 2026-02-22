@@ -5,7 +5,7 @@ const ProductRichSnippet = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/all?limit=20`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/all?limit=20`);
         const products = res.data.products || [];
 
         // Randomly pick 4 products

@@ -10,7 +10,7 @@ function BestProduct() {
 
   useEffect(() => {
     setLoading(true);
-    axios.get(`${import.meta.env.VITE_API_URL}/api/getbestproductlist`)
+    axios.get(`${import.meta.env.VITE_API_URL}/getbestproductlist`)
       .then((res) => {
         setBestProducts(res.data);
       })

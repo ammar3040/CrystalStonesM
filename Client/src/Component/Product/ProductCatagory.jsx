@@ -24,7 +24,7 @@ function ProductCategory() {
 
   useEffect(() => {
     setLoading(true);
-    axios.get(`${import.meta.env.VITE_API_URL}/api/getCatagory`)
+    axios.get(`${import.meta.env.VITE_API_URL}/getCatagory`)
       .then((res) => {
         setCatagory(res.data);
       })

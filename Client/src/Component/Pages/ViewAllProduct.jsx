@@ -29,7 +29,7 @@ function ViewAllProduct() {
   const fetchAllProducts = async (page = 1, search = '') => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/all?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`);
       const data = await response.json();
 
       if (data.products && Array.isArray(data.products)) {

@@ -26,7 +26,7 @@ export default function MainSection() {
   useEffect(() => {
     const fetchAllProducts = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/all?limit=12`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/all?limit=12`);
         const data = await response.json();
         const products = data.products || [];
 

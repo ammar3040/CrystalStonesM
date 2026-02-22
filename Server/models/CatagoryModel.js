@@ -1,12 +1,13 @@
 const mongoose = require("mongoose");
 
-const CatagorySchema= new mongoose.Schema({
+const CatagorySchema = new mongoose.Schema({
   category: { type: String, required: true },
   mainImage: {
     url: { type: String, required: true },
     public_id: { type: String, required: true }
   }
   ,
+  is_deleted: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 

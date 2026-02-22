@@ -206,12 +206,7 @@ const AdminSidebar = ({
             )}
           </div>
 
-          {sidebarOpen && (
-            <button className="w-full mt-4 flex items-center gap-3 px-4 py-3 text-xs font-black text-zinc-400 hover:text-indigo-600 hover:bg-zinc-50 rounded-2xl transition-all uppercase tracking-widest group">
-              <HelpCircle size={18} className="group-hover:rotate-12 transition-transform" />
-              <span>Support Center</span>
-            </button>
-          )}
+
         </div>
       </aside>
 

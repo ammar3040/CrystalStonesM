@@ -210,33 +210,51 @@ const MobileNavbar = ({ catagory, MobilecartItems, Mobileuser }) => {
 
           {user ? (
             <div className="flex items-center justify-center min-h-screen p-4">
-              <div className="relative bg-white rounded-lg shadow-xl w-full max-w-xs p-6">
-                <div className="flex flex-col items-center">
-                  <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-4">
-                    <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
+              <div className="relative w-full max-w-xs rounded-2xl overflow-hidden shadow-2xl shadow-black/50" style={{ backdropFilter: 'blur(40px)' }}>
+                {/* Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-900 to-amber-950/30 z-0" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-[60px] z-0" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-amber-600/8 rounded-full blur-[50px] z-0" />
+
+                {/* Close Button */}
+                <button
+                  onClick={() => setShowProfile(false)}
+                  className="absolute top-3 right-3 z-20 p-1.5 rounded-full bg-white/[0.06] border border-white/[0.1] text-zinc-400 hover:text-white hover:bg-white/[0.12] transition-all duration-200"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+
+                <div className="relative z-10 p-6 border border-white/[0.08] rounded-2xl">
+                  <div className="flex flex-col items-center">
+                    {/* Avatar */}
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20 flex items-center justify-center mb-3">
+                      <svg className="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+
+                    <h3 className="text-base font-bold text-white">{user.name}</h3>
+
+                    <div className="mt-2 space-y-1 text-center">
+                      <p className="text-xs text-zinc-400 flex items-center gap-1.5"><MdEmail className="text-amber-500" /> {user.email}</p>
+                      <p className="text-xs text-zinc-400 flex items-center gap-1.5"><MdLocationOn className="text-amber-500" /> {user.address || 'Not set'}</p>
+                      {user.mobile && <p className="text-xs text-zinc-400 flex items-center gap-1.5"><MdPhoneAndroid className="text-amber-500" /> {user.mobile}</p>}
+                    </div>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900">{user.name}</h3>
-                  <p className="text-sm text-gray-500 flex items-center gap-1"><MdEmail /> {user.email}</p>
-                  <p className="text-sm text-gray-500 flex items-center gap-1"><MdLocationOn /> {user.address}</p>
-                  {user.mobile && <p className="text-sm text-gray-500 flex items-center gap-1"><MdPhoneAndroid /> {user.mobile}</p>}
-                </div>
-                <div className="mt-6 border-t border-gray-200 pt-4 space-y-2">
-                  <button onClick={() => { setShowProfile(false); navigate('/'); }} className="w-full py-2 text-sm font-medium text-yellow-600 hover:bg-yellow-50 rounded-md">
-                    View Products
-                  </button>
-                  {(!user.address || !user.mobile) && (
-                    <button
-                      onClick={() => { setShowProfile(false); navigate('/CompleteProfile'); }}
-                      className="w-full py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-md"
-                    >
-                      Complete Profile
+
+                  <div className="mt-5 pt-4 border-t border-white/[0.08] space-y-2">
+                    <button onClick={() => { setShowProfile(false); navigate('/'); }} className="w-full py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-amber-400 text-xs font-bold uppercase tracking-widest hover:bg-white/[0.08] transition-all duration-200">
+                      View Products
                     </button>
-                  )}
-                  <button onClick={handleLogout} className="w-full py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md">
-                    Sign Out
-                  </button>
+                    {(!user.address || !user.mobile) && (
+                      <button onClick={() => { setShowProfile(false); navigate('/CompleteProfile'); }} className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl text-white text-xs font-bold uppercase tracking-widest shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all duration-200">
+                        Complete Profile
+                      </button>
+                    )}
+                    <button onClick={handleLogout} className="w-full py-2.5 bg-white/[0.04] border border-red-500/20 rounded-xl text-red-400 text-xs font-bold uppercase tracking-widest hover:bg-red-500/10 transition-all duration-200">
+                      Sign Out
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

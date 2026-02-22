@@ -150,6 +150,12 @@ function Header({ onCartClick }) {
     setSearchQuery(query);
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      navigate(`/ViewAllProduct?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   useEffect(() => {
     const fetchSearchResults = async () => {
       if (!searchQuery.trim()) {
@@ -221,30 +227,30 @@ function Header({ onCartClick }) {
       <nav className={`bg-white shadow-sm sticky top-0 transition-all duration-300 z-50 border-b border-gray-100 ${headerVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 flex ">
           {/* Logo */}
-          <div className="flex-shrink-0 flex items-center" style={{ minWidth: "180px", maxWidth: "240px" }}>
+          <div className="flex-shrink-0 flex items-center min-w-[140px] sm:min-w-[180px] max-w-[200px] sm:max-w-[240px]">
             <Link to="/" className="flex items-center h-full py-2">
               <img
                 src='https://res.cloudinary.com/dioicxwct/image/upload/v1771661574/crystal_stones_mart_logo-removebg-preview_f5fkqc_c_crop_ar_16_9_sbzdm9.png'
                 alt="Company Logo"
-                className="object-contain"
-                style={{ width: "200px" }} // Increased from 150px for better prominence
+                className="object-contain w-[140px] sm:w-[200px]"
               />
             </Link>
           </div>
 
-          <div className='lex-1 w-full sm:w-auto mt-2 sm:mt-0' style={{ width: "87%" }} >
+          <div className='flex-1 w-full sm:w-auto mt-2 sm:mt-0'>
             {/* First Row - Logo, Search, Icons */}
             <div className="flex justify-between items-center h-16  transition-all duration-300" style={{}}>
 
 
               {/* Animated Search */}
-              <div className="flex-grow flex justify-center px-4">
+              <div className="flex-grow flex justify-center px-2 sm:px-4">
                 <div className="relative w-full max-w-md">
                   <input
                     placeholder={placeholder}
                     id="input"
                     value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     onFocus={() => setShowSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                     className="w-full pl-10 pr-4 py-2 border border-amber-200/40 rounded-full bg-white/60 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-300 placeholder-gray-400 transition-all"
@@ -349,8 +355,8 @@ function Header({ onCartClick }) {
 
             {/* Second Row - Desktop Navigation */}
             <div className="hidden md:flex justify-center items-center h-12 border-t border-amber-200/10">
-              <div className="flex space-x-12">
-                <a href="/" className="text-gray-700 hover:text-amber-600 text-xs font-bold uppercase tracking-[0.2em] transition-all hover:scale-110">
+              <div className="flex space-x-12 items-center h-full">
+                <a href="/" className="flex items-center h-full text-gray-700 hover:text-amber-600 text-xs font-bold uppercase tracking-[0.2em] transition-all hover:scale-110">
                   Home
                 </a>
 
@@ -360,10 +366,10 @@ function Header({ onCartClick }) {
                   onMouseLeave={() => setIsShopOpen(false)}
                 >
                   <button
-                    className="text-gray-700 hover:text-amber-600 text-xs font-bold uppercase tracking-[0.2em] transition-all flex items-center gap-1 hover:scale-110"
+                    className="text-gray-700 hover:text-amber-600 text-sm font-bold uppercase tracking-[0.2em] transition-all flex items-center h-full gap-1 hover:scale-110"
                     onClick={() => setIsShopOpen(!isShopOpen)}
                   >
-                    Shop
+                    SHOP
                     <svg
                       className={`h-3 w-3 transition-transform duration-300 transform ${isShopOpen ? 'rotate-180' : ''}`}
                       fill="none"
@@ -406,12 +412,12 @@ function Header({ onCartClick }) {
                   )}
                 </div>
 
-                <Link to={"/ViewAllProduct"}>
-                  <p className="text-gray-700 hover:text-amber-600 text-xs font-bold uppercase tracking-[0.2em] transition-all hover:scale-110">
+                <Link to={"/ViewAllProduct"} className="flex items-center h-full">
+                  <span className="text-gray-700 hover:text-amber-600 text-xs font-bold uppercase tracking-[0.2em] transition-all hover:scale-110">
                     Collections
-                  </p>
+                  </span>
                 </Link>
-                <a href="/#contactForm" className="text-gray-700 hover:text-amber-600 text-xs font-bold uppercase tracking-[0.2em] transition-all hover:scale-110">
+                <a href="/#contactForm" className="flex items-center h-full text-gray-700 hover:text-amber-600 text-xs font-bold uppercase tracking-[0.2em] transition-all hover:scale-110">
                   About
                 </a>
               </div>
@@ -441,52 +447,58 @@ function Header({ onCartClick }) {
             </button>
             {user ? (
               <div className="flex items-center justify-center min-h-screen p-4">
-                <div className="relative bg-white rounded-lg shadow-xl w-full max-w-xs">
+                <div className="relative w-full max-w-xs rounded-2xl overflow-hidden shadow-2xl shadow-black/50" style={{ backdropFilter: 'blur(40px)' }}>
+                  {/* Background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-900 to-amber-950/30 z-0" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-[60px] z-0" />
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-amber-600/8 rounded-full blur-[50px] z-0" />
 
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setIsProfileOpen(false)}
+                    className="absolute top-3 right-3 z-20 p-1.5 rounded-full bg-white/[0.06] border border-white/[0.1] text-zinc-400 hover:text-white hover:bg-white/[0.12] transition-all duration-200"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
 
-
-                  <div className="p-6">
+                  <div className="relative z-10 p-6 border border-white/[0.08] rounded-2xl">
                     <div className="flex flex-col items-center">
-                      <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-4">
-                        <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {/* Avatar */}
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20 flex items-center justify-center mb-4">
+                        <svg className="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                       </div>
 
-                      <h3 className="text-lg font-medium text-gray-900">{user.name}</h3>
+                      <h3 className="text-lg font-bold text-white">{user.name}</h3>
 
-
-
-                      <p className="text-sm text-gray-500 flex items-center gap-1">
-                        <MdEmail /> {user.email}
-                      </p>
-
-                      <p className="text-sm text-gray-500 flex items-center gap-1">  <MdLocationOn />{user.address}</p>
-
-                      {user.mobile && (
-                        <p className="text-sm text-gray-500 flex items-center gap-1"><MdPhoneAndroid />{user.mobile}</p>
-                      )}
+                      <div className="mt-2 space-y-1 text-center">
+                        <p className="text-xs text-zinc-400 flex items-center gap-1.5">
+                          <MdEmail className="text-amber-500" /> {user.email}
+                        </p>
+                        <p className="text-xs text-zinc-400 flex items-center gap-1.5">
+                          <MdLocationOn className="text-amber-500" /> {user.address || 'Not set'}
+                        </p>
+                        {user.mobile && (
+                          <p className="text-xs text-zinc-400 flex items-center gap-1.5">
+                            <MdPhoneAndroid className="text-amber-500" /> {user.mobile}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="mt-6 border-t border-gray-200 pt-4">
+                    <div className="mt-5 pt-4 border-t border-white/[0.08] space-y-2">
                       <button
-                        onClick={() => {
-                          setIsProfileOpen(false)
-                          navigate("/")
-                        }}
-                        className="w-full flex justify-center items-center px-4 py-2 text-sm font-medium text-yellow-600 hover:bg-yellow-50 rounded-md"
+                        onClick={() => { setIsProfileOpen(false); navigate("/"); }}
+                        className="w-full py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-amber-400 text-xs font-bold uppercase tracking-widest hover:bg-white/[0.08] transition-all duration-200"
                       >
-                        View product
+                        View Products
                       </button>
 
-                      {/* ✅ NEW: Complete Profile Button */}
                       {(!user.address || !user.mobile || !user.password) && (
                         <button
-                          onClick={() => {
-                            setIsProfileOpen(false);
-                            navigate("/CompleteProfile");
-                          }}
-                          className="w-full mt-2 flex justify-center items-center px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-md"
+                          onClick={() => { setIsProfileOpen(false); navigate("/CompleteProfile"); }}
+                          className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl text-white text-xs font-bold uppercase tracking-widest shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all duration-200"
                         >
                           Complete Profile
                         </button>
@@ -494,13 +506,12 @@ function Header({ onCartClick }) {
 
                       <button
                         onClick={handleLogout}
-                        className="w-full mt-2 flex justify-center items-center px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md"
+                        className="w-full py-2.5 bg-white/[0.04] border border-red-500/20 rounded-xl text-red-400 text-xs font-bold uppercase tracking-widest hover:bg-red-500/10 transition-all duration-200"
                       >
-                        Sign out
+                        Sign Out
                       </button>
                     </div>
                   </div>
-
                 </div>
               </div>
             ) : (

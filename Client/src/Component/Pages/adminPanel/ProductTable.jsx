@@ -38,15 +38,31 @@ const ProductTable = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBestProducts, setSelectedBestProducts] = useState([]);
   const [isSavingBest, setIsSavingBest] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [crystalTypes, setCrystalTypes] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCrystalType, setSelectedCrystalType] = useState('');
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (pageToFetch = currentPage) => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/all?page=${currentPage}&limit=${rowsPerPage}&search=${encodeURIComponent(searchQuery)}`);
+      const params = new URLSearchParams({
+        page: pageToFetch,
+        limit: rowsPerPage,
+        search: searchQuery.trim(),
+        category: selectedCategory,
+        crystalType: selectedCrystalType,
+        sortBy: sortColumn === -1 ? 'createdAt' : getSortKey(sortColumn),
+        sortOrder: sortDirection
+      });
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/show-all-products?${params}`);
       const data = await response.json();
+
       setAllProducts(data.products || []);
       setTotalRows(data.totalCount || 0);
       setTotalPages(data.totalPages || 0);
+      setCurrentPage(data.currentPage || pageToFetch);
     } catch (err) {
       setError(err.message);
       toast.error("Failed to fetch products");
@@ -55,28 +71,60 @@ const ProductTable = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, [currentPage, rowsPerPage]);
+  const getSortKey = (column) => {
+    switch (column) {
+      case 1: return 'modelNumber';
+      case 2: return 'productName';
+      case 3: return 'category';
+      case 4: return 'dollarPrice';
+      case 5: return 'originalPrice';
+      case 6: return 'crystalType';
+      default: return 'createdAt';
+    }
+  };
 
   useEffect(() => {
-    const fetchBestProducts = async () => {
+    fetchProducts();
+  }, [currentPage, rowsPerPage, sortColumn, sortDirection, selectedCategory, selectedCrystalType]);
+
+  useEffect(() => {
+    const fetchFilterData = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/all?bestproduct=true&limit=1000`);
-        const data = await response.json();
-        const bestProducts = (data.products || []).map(product => product._id);
-        setSelectedBestProducts(bestProducts);
+        const [catRes, typeRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/admin/categories`),
+          fetch(`${import.meta.env.VITE_API_URL}/admin/crystal-types`)
+        ]);
+        const catData = await catRes.json();
+        const typeData = await typeRes.json();
+        if (catData.success) setCategories(catData.categories);
+        if (typeData.success) setCrystalTypes(typeData.crystalTypes);
       } catch (err) {
-        console.error("Error fetching best products:", err);
+        console.error("Error fetching filter data:", err);
       }
     };
-    fetchBestProducts();
+    fetchFilterData();
   }, []);
+
+  // Handle local state for best products based on fetched items
+  useEffect(() => {
+    if (allProducts.length > 0) {
+      const currentBest = allProducts
+        .filter(p => p.bestproduct)
+        .map(p => p._id);
+
+      setSelectedBestProducts(prev => {
+        // Merge current best status into selection without losing other pages' selections
+        // Note: For a true large-scale app, we'd need a multi-page selection strategy,
+        // but for now we'll just track what we have.
+        const combined = new Set([...prev, ...currentBest]);
+        return Array.from(combined);
+      });
+    }
+  }, [allProducts]);
 
   const handleSearchSubmit = (e) => {
     if (e) e.preventDefault();
-    setCurrentPage(1);
-    fetchProducts();
+    fetchProducts(1);
   };
 
   const handleBestProductChange = (productId) => {
@@ -130,30 +178,7 @@ const ProductTable = () => {
     }
   };
 
-  const getSortedProducts = () => {
-    if (sortColumn < 0) return allProducts;
-    return [...allProducts].sort((a, b) => {
-      const aValue = getSortValue(a, sortColumn);
-      const bValue = getSortValue(b, sortColumn);
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-  };
-
-  const getSortValue = (product, column) => {
-    switch (column) {
-      case 1: return product.modelNumber?.toLowerCase() || '';
-      case 2: return product.productName?.toLowerCase() || '';
-      case 3: return product.category?.toLowerCase() || '';
-      case 4: return product.dollarPrice || 0;
-      case 5: return product.originalPrice || 0;
-      case 6: return product.crystalType?.toLowerCase() || '';
-      default: return '';
-    }
-  };
-
-  const displayProducts = getSortedProducts();
+  const displayProducts = allProducts;
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = Math.min(startIndex + allProducts.length, totalRows);
 
@@ -209,29 +234,64 @@ const ProductTable = () => {
               <input
                 type="text"
                 placeholder="Search by name, model, category..."
-                className="w-full pl-10 pr-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                className="w-full pl-10 pr-10 py-2 bg-white border border-zinc-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyUp={(e) => e.key === 'Enter' && handleSearchSubmit()}
               />
+              <button
+                onClick={() => handleSearchSubmit()}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-zinc-100 rounded-lg transition-colors text-indigo-600"
+                title="Clear Search"
+              >
+                <Search size={18} />
+              </button>
             </div>
-            <button className="p-2 text-zinc-500 hover:bg-white border border-transparent hover:border-zinc-200 rounded-xl transition-all">
+            <button
+              onClick={() => {
+                setSelectedCategory('');
+                setSelectedCrystalType('');
+                setSearchQuery('');
+                fetchProducts(1);
+              }}
+              className="p-2 text-zinc-500 hover:bg-white border border-transparent hover:border-zinc-200 rounded-xl transition-all"
+              title="Reset Filters"
+            >
               <Filter size={20} />
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-zinc-500 font-medium">Show</span>
+          <div className="flex flex-wrap items-center gap-3">
+
             <select
-              value={rowsPerPage}
+              value={selectedCrystalType}
               onChange={(e) => {
-                setRowsPerPage(Number(e.target.value));
+                setSelectedCrystalType(e.target.value);
                 setCurrentPage(1);
               }}
-              className="bg-white border border-zinc-200 rounded-lg px-2 py-1 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
+              className="bg-white border border-zinc-200 rounded-xl px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none w-48"
             >
-              {[10, 25, 50, 100].map(v => <option key={v} value={v}>{v}</option>)}
+              <option value="">All Crystals</option>
+              {crystalTypes.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
             </select>
+
+            <div className="h-8 w-[1px] bg-zinc-200 mx-1 hidden sm:block" />
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-zinc-500 font-medium">Show</span>
+              <select
+                value={rowsPerPage}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="bg-white border border-zinc-200 rounded-xl px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none w-24"
+              >
+                {[10, 25, 50, 100].map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
           </div>
         </div>
 

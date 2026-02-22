@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import ProductCard, { ProductCardSkeleton } from '../Product/ProductCard';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import ProductRichSnippet from './ProductRichSnippet';
 
 function ViewAllProduct() {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialSearch = queryParams.get('search') || '';
+
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const limit = 12;
 
   const shuffleArray = (array) => {
@@ -110,7 +114,7 @@ function ViewAllProduct() {
             ? [...Array(limit)].map((_, i) => <ProductCardSkeleton key={i} />)
             : allProducts.length === 0
               ? <div className="col-span-full text-center py-8 text-gray-500">No products found</div>
-              : allProducts.map((product) => {
+              : allProducts.map((product, index) => {
                 let firstSizePrice = product.dollarPrice;
                 let sizeLabel = null;
 
@@ -132,6 +136,7 @@ function ViewAllProduct() {
                       pid={product?._id}
                       ModelNumber={product?.modelNumber || ''}
                       size={sizeLabel}
+                      index={index}
                     />
                   </div>
                 );
@@ -160,8 +165,8 @@ function ViewAllProduct() {
                     key={page}
                     onClick={() => setCurrentPage(page)}
                     className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${currentPage === page
-                        ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
-                        : 'bg-white border border-amber-200 text-gray-700 hover:bg-amber-50'
+                      ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                      : 'bg-white border border-amber-200 text-gray-700 hover:bg-amber-50'
                       }`}
                   >
                     {page}

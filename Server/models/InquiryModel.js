@@ -20,7 +20,7 @@ const InquirySchema = new mongoose.Schema({
       },
       selectedSize: {
         type: String,
-        
+
       },
       price: {
         type: Number,
@@ -40,7 +40,7 @@ const InquirySchema = new mongoose.Schema({
   submittedAt: {
     type: Date,
     default: Date.now
-  }, 
+  },
   address: {
     street: { type: String, trim: true },
     city: { type: String, trim: true },
@@ -50,7 +50,7 @@ const InquirySchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "replied"],
+    enum: ["pending", "processed", "rejected"],
     default: "pending"
   }
 }, {

@@ -11,7 +11,12 @@ module.exports = (passport) => {
     try {
       const existingUser = await UserModel.findOne({ email: profile.emails[0].value });
 
-      if (existingUser) return done(null, existingUser);
+      if (existingUser) {
+        if (existingUser.is_deleted) {
+          return done(null, false, { message: 'Account is deleted' });
+        }
+        return done(null, existingUser);
+      }
 
       const newUser = new UserModel({
         Uname: profile.displayName,

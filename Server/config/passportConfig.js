@@ -7,8 +7,8 @@ module.exports = (passport) => {
   passport.use(
     new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
       try {
-        const user = await UserModel.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
-        if (!user) return done(null, false, { message: 'User not found' });
+        const user = await UserModel.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') }, is_deleted: { $ne: true } });
+        if (!user) return done(null, false, { message: 'User not found or account deleted' });
 
         let isMatch = false;
         try {

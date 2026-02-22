@@ -3,16 +3,24 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles } from 'lucide-react';
 
+const optimizeImageUrl = (url) => {
+  if (!url || !url.includes('cloudinary.com')) return url;
+  // Insert f_auto,q_auto into the path for automatic format and quality
+  return url.replace('/upload/', '/upload/f_auto,q_auto/');
+};
+
 function ExtraSlides({ bgImg, productName, category, productId, index, description }) {
   // Hexagonal Crystal Shape
   const crystalShape = 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)';
+
+  const optimizedBgImg = optimizeImageUrl(bgImg);
 
   return (
     <section className='relative w-full h-full overflow-hidden bg-zinc-900'>
       {/* Background with zoom effect overlay */}
       <div
         className="absolute inset-0 bg-cover bg-center z-0 scale-110 opacity-55 blur-sm"
-        style={{ backgroundImage: `url(${bgImg})` }}
+        style={{ backgroundImage: `url(${optimizedBgImg})` }}
       ></div>
       <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/90 via-zinc-900/50 to-transparent z-10"></div>
 
@@ -38,10 +46,12 @@ function ExtraSlides({ bgImg, productName, category, productId, index, descripti
                 style={{ clipPath: crystalShape }}
               >
                 <img
-                  src={bgImg}
+                  src={optimizedBgImg}
                   className="w-[240px] sm:w-[300px] md:w-[360px] aspect-square object-cover bg-zinc-900"
                   alt={productName}
                   style={{ clipPath: crystalShape }}
+                  loading="lazy"
+                  fetchpriority={index === 0 ? "high" : "low"}
                 />
 
                 {/* Shimmer Effect */}

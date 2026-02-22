@@ -110,7 +110,7 @@ function BestProductCard({
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="group w-full max-w-[280px] mx-auto"
+      className="group w-full max-w-[220px] sm:max-w-[260px] mx-auto"
     >
       {/* Featured Gradient Wrapper */}
       <div
@@ -122,14 +122,14 @@ function BestProductCard({
           style={{ clipPath: pillarShape }}
         >
           {/* Best Seller Badge */}
-          <div className="absolute top-8 left-0 right-0 z-10 flex justify-center pointer-events-none">
+          <div className="absolute top-6 left-0 right-0 z-10 flex justify-center pointer-events-none">
             <div className="bg-black text-amber-400 text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 shadow-lg border border-amber-500/30 flex items-center gap-1">
               <Star size={8} fill="currentColor" /> Best Seller
             </div>
           </div>
 
           {/* Image */}
-          <div className="relative h-[220px] overflow-hidden bg-gradient-to-br from-amber-50/20 to-zinc-50">
+          <div className="relative h-[180px] sm:h-[200px] overflow-hidden bg-gradient-to-br from-amber-50/20 to-zinc-50">
             <Link to={`/Product/${pid}`} className="block h-full">
               {!imgLoaded && (
                 <div className="absolute inset-0 bg-white animate-pulse" />
@@ -137,7 +137,8 @@ function BestProductCard({
               <ProtectedImage
                 src={productImg}
                 alt={productName}
-                className={`w-full h-full object-contain p-6 transition-transform duration-1000 group-hover:scale-110 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                className={`w-full h-full object-contain p-3 sm:p-5 transition-transform duration-1000 group-hover:scale-110 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                loading={index < 4 ? "eager" : "lazy"}
               />
               <img src={productImg} alt="" className="hidden" onLoad={() => setImgLoaded(true)} />
             </Link>
@@ -161,14 +162,14 @@ function BestProductCard({
           <div className="bg-white flex-grow p-4 pt-4 flex flex-col items-center text-center">
             <Link to={`/Product/${pid}`} className="block flex-grow">
               {category && (
-                <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-1">
+                <p className="text-[8px] sm:text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-0.5 sm:mb-1">
                   {category}
                 </p>
               )}
-              <h2 className="text-xs font-black text-gray-900 mb-1 uppercase tracking-tight group-hover:text-amber-700 transition-colors line-clamp-2" title={productName}>
+              <h2 className="text-[11px] sm:text-xs font-black text-gray-900 mb-0.5 uppercase tracking-tight group-hover:text-amber-700 transition-colors line-clamp-2" title={productName}>
                 {productName}
               </h2>
-              <p className="text-[10px] text-gray-500 line-clamp-2 leading-relaxed italic">
+              <p className="text-[9px] sm:text-[10px] text-gray-500 line-clamp-2 leading-relaxed italic">
                 {productAbout}
               </p>
             </Link>
@@ -178,8 +179,8 @@ function BestProductCard({
               {isLoggedIn ? (
                 <>
                   <Link to={`/Product/${pid}`} className="block">
-                    <div className="flex items-center gap-2 mb-1 justify-center">
-                      <span className="text-lg font-black text-gray-900 tracking-tighter">
+                    <div className="flex items-center gap-2 mb-0.5 justify-center">
+                      <span className="text-base font-black text-gray-900 tracking-tighter">
                         ${finalPrice}
                       </span>
                       <span className="text-[8px] font-bold text-amber-600 uppercase">USD</span>
@@ -191,12 +192,12 @@ function BestProductCard({
 
                   <div className="flex justify-center gap-2 w-full max-w-[160px]">
                     <Link to={`/Product/${pid}`} className="flex-1">
-                      <button className="w-full py-1.5 px-2 text-[10px] font-bold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded transition-colors flex items-center justify-center gap-1">
+                      <button className="w-full py-1 px-2 text-[10px] font-bold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded transition-colors flex items-center justify-center gap-1">
                         <Eye size={12} /> View
                       </button>
                     </Link>
                     <button
-                      className="flex-1 py-1.5 px-2 text-[10px] font-bold text-white bg-black hover:bg-zinc-800 rounded transition-colors flex items-center justify-center gap-1 shadow-sm"
+                      className="flex-1 py-1 px-2 text-[10px] font-bold text-white bg-black hover:bg-zinc-800 rounded transition-colors flex items-center justify-center gap-1 shadow-sm"
                       onClick={handleAddToCart}
                     >
                       <ShoppingCart size={12} /> Cart
@@ -206,7 +207,7 @@ function BestProductCard({
               ) : (
                 <button
                   onClick={() => navigate('/SignInPage')}
-                  className="w-full py-2 text-[10px] font-black text-amber-900 bg-amber-50 hover:bg-amber-100 rounded border border-amber-200/50 uppercase tracking-wider"
+                  className="w-full py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-black text-amber-900 bg-amber-50 hover:bg-amber-100 rounded border border-amber-200/50 uppercase tracking-wider"
                 >
                   Sign in to shop
                 </button>

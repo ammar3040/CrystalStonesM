@@ -46,10 +46,11 @@ const ViewProduct = () => {
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_API_URL}/api/product/?id=${ProductId}`)
       .then((res) => {
-        setProduct(res.data);
-        setQuantity(parseInt(res.data.MinQuantity));
-        if (res.data.sizes && res.data.sizes.length > 0) {
-          setSelectedSize(res.data.sizes[0]);
+        const productData = res.data.product || res.data; // Handle both old and new format
+        setProduct(productData);
+        setQuantity(parseInt(productData.MinQuantity || 1));
+        if (productData.sizes && productData.sizes.length > 0) {
+          setSelectedSize(productData.sizes[0]);
         }
       })
       .catch((err) => console.error("Error fetching product:", err));

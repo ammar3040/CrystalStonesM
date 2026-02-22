@@ -100,7 +100,7 @@ const RandomTreasures = () => {
                 </div>
 
                 {/* Mobile View All Button */}
-                <div className="mt-12 text-center sm:hidden">
+                <div className="mt-8 text-center sm:hidden">
                     <Link
                         to="/ViewAllProduct"
                         className="inline-flex items-center gap-2 px-10 py-4 bg-amber-500 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-amber-500/20 active:scale-95 transition-all"

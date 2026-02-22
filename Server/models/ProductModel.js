@@ -41,6 +41,7 @@ const productSchema = new mongoose.Schema({
       price: { type: Number },
     }
   ],
+  is_deleted: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -48,6 +49,8 @@ const productSchema = new mongoose.Schema({
 productSchema.index({ category: 1 });
 productSchema.index({ crystalType: 1 });
 productSchema.index({ bestproduct: 1 });
+productSchema.index({ is_deleted: 1 });
+productSchema.index({ modelNumber: 1 });
 productSchema.index({ productName: "text", description: "text" });
 
 module.exports = mongoose.model("Product", productSchema);

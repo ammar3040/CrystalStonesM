@@ -49,7 +49,7 @@ function MainSlides() {
       </div>
 
       {/* Main Content Area - Centered Brand Intro */}
-      <div className="relative z-20 w-full max-w-5xl mx-auto px-6 text-center">
+      <div className="relative z-20 w-full max-w-5xl mx-auto px-6 text-center pt-24 sm:pt-32 lg:pt-40">
         <div className="space-y-8 lg:space-y-12">
 
           {/* Brand Badge */}
@@ -57,14 +57,8 @@ function MainSlides() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="inline-flex flex-col items-center gap-4"
+            className="inline-flex flex-col items-center"
           >
-            <div className="relative">
-              <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full scale-150 animate-pulse" />
-              <div className="relative p-4 bg-zinc-900/80 border border-amber-500/40 rounded-2xl backdrop-blur-xl shadow-2xl">
-                <Sparkles className="text-amber-400 w-8 h-8 lg:w-10 lg:h-10" />
-              </div>
-            </div>
             <div className="flex items-center gap-3 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-amber-500 text-[10px] font-black uppercase tracking-[0.5em]">
               Established 1992
             </div>

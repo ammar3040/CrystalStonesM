@@ -7,7 +7,7 @@ const UserSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-   require:false,
+    require: false,
     unique: true,        // ✅ Prevent duplicate emails
     lowercase: true,     // ✅ Normalize
     trim: true
@@ -29,6 +29,10 @@ const UserSchema = new mongoose.Schema({
     default: "user"
   },
   isSubscribed: {
+    type: Boolean,
+    default: false
+  },
+  is_deleted: {
     type: Boolean,
     default: false
   },

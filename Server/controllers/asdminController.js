@@ -12,8 +12,29 @@ const Product = require('../models/ProductModel'); // Import Product model
 const { v2: cloudinary } = require("cloudinary"); //for deletion
 const UserModel = require("../models/UserModel")
 const CatagoryModel = require("../models/CatagoryModel");
+const InquiryModel = require("../models/InquiryModel");
 
+// Categories
+module.exports.GetCategories = async (req, res) => {
+  try {
+    const categories = await CatagoryModel.find({ is_deleted: { $ne: true } }).lean();
+    res.json({ success: true, categories });
+  } catch (err) {
+    console.error("Error fetching categories:", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
 
+// Unique Crystal Types
+module.exports.GetCrystalTypes = async (req, res) => {
+  try {
+    const types = await Product.distinct("crystalType", { is_deleted: { $ne: true } });
+    res.json({ success: true, crystalTypes: types.filter(Boolean) });
+  } catch (err) {
+    console.error("Error fetching crystal types:", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
 
 // addForm
 module.exports.AddAdminForm = async (req, res) => {
@@ -28,17 +49,117 @@ module.exports.AddAdminForm = async (req, res) => {
 // admintable
 module.exports.AdminTable = async (req, res) => {
   try {
-    let allProductData = await Product.find();
-    // console.log(allProductData); // should log array
+    const { page = 1, limit = 10 } = req.query;
+    const parsedPage = parseInt(page);
+    const parsedLimit = parseInt(limit);
+    const skip = (parsedPage - 1) * parsedLimit;
 
+    let allProductData = await Product.find({ is_deleted: { $ne: true } })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parsedLimit)
+      .lean();
 
-    return res.render("AdminDataTable", { allProductData });
+    const totalCount = await Product.countDocuments({ is_deleted: { $ne: true } });
+
+    return res.status(200).json({
+      success: true,
+      products: allProductData,
+      totalCount,
+      totalPages: Math.ceil(totalCount / parsedLimit)
+    });
   } catch (err) {
     console.error("Error loading admin data:", err.stack || err);
-    return res.status(500).send("Failed to load admin data");
+    return res.status(500).json({ success: false, message: "Failed to load admin data" });
   }
-
 };
+
+module.exports.UserTable = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const parsedPage = parseInt(page);
+    const parsedLimit = parseInt(limit);
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    const AllUserData = await UserModel.find({ is_deleted: { $ne: true } })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parsedLimit)
+      .lean();
+
+    const totalCount = await UserModel.countDocuments({ is_deleted: { $ne: true } });
+
+    return res.status(200).json({
+      success: true,
+      users: AllUserData,
+      totalCount,
+      totalPages: Math.ceil(totalCount / parsedLimit)
+    });
+  } catch (err) {
+    console.error("Error in UserTable controller:", err.stack || err);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+module.exports.AdminShowAllProducts = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+      category,
+      crystalType,
+      sortBy = "createdAt",
+      sortOrder = "desc"
+    } = req.query;
+
+    const parsedPage = parseInt(page);
+    const parsedLimit = parseInt(limit);
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    let query = { is_deleted: { $ne: true } };
+
+    if (search) {
+      query.$or = [
+        { productName: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { category: { $regex: search, $options: "i" } },
+        { modelNumber: { $regex: search, $options: "i" } }
+      ];
+    }
+
+    if (category) query.category = category;
+    if (crystalType) query.crystalType = crystalType;
+
+    const totalCount = await Product.countDocuments(query);
+
+    const sortOptions = {};
+    if (sortBy === "originalPrice" || sortBy === "dollarPrice" || sortBy === "price") {
+      sortOptions["sizes.0.price"] = sortOrder === "asc" ? 1 : -1;
+    } else {
+      sortOptions[sortBy] = sortOrder === "asc" ? 1 : -1;
+    }
+
+    const products = await Product.find(query)
+      .select('productName mainImage description MinQuantity modelNumber sizes category crystalType originalPrice dollarPrice bestproduct createdAt')
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(parsedLimit)
+      .lean();
+
+    res.json({
+      success: true,
+      products: products || [],
+      totalCount: totalCount || 0,
+      currentPage: parsedPage,
+      totalPages: Math.ceil((totalCount || 0) / parsedLimit),
+    });
+  } catch (error) {
+    console.error("Error fetching admin products:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+
 
 
 // insertForm for Product 
@@ -169,37 +290,25 @@ module.exports.ProductDelete = async (req, res) => {
   try {
     const productId = req.query.id;
 
-    const productData = await Product.findById(productId);
-
-    if (!productData) {
-      console.log("Product not found");
-      return res.redirect("/admin/datatable");
+    if (!productId) {
+      return res.status(400).json({ success: false, message: "Product ID is required" });
     }
 
-    // Delete main image from Cloudinary
-    if (productData.mainImage && productData.mainImage.public_id) {
-      await cloudinary.uploader.destroy(productData.mainImage.public_id);
-      console.log("Main image deleted");
+    const product = await Product.findByIdAndUpdate(
+      productId,
+      { is_deleted: true },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    // Delete all additional images from Cloudinary
-    if (productData.additionalImages && productData.additionalImages.length > 0) {
-      for (let img of productData.additionalImages) {
-        if (img.public_id) {
-          await cloudinary.uploader.destroy(img.public_id);
-        }
-      }
-      console.log("Additional images deleted");
-    }
-
-    // Finally, delete the product from MongoDB
-    await Product.findByIdAndDelete(productId);
     res.status(200).json({ success: true, message: "Product deleted successfully" });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'error in deleting ' });
+    console.error("Error deleting product:", err);
+    res.status(500).json({ success: false, message: "Error in deleting product" });
   }
-
-  return res.redirect("/admin/datatable");
 };
 
 // edit form 
@@ -445,9 +554,12 @@ module.exports.updateData = async (req, res) => {
 
 module.exports.UserTable = async (req, res) => {
   try {
-    const AllUserData = await UserModel.find();
+    const AllUserData = await UserModel.find({ is_deleted: { $ne: true } }).sort({ createdAt: -1 });
 
-    return res.status(200).json(AllUserData);
+    return res.status(200).json({
+      success: true,
+      users: AllUserData
+    });
   } catch (error) {
     console.error("Error fetching users:", error);
     return res.status(500).json({ success: false, message: "Server error" });
@@ -463,13 +575,17 @@ module.exports.UserDelete = async (req, res) => {
   }
 
   try {
-    const deletedUser = await UserModel.findByIdAndDelete(userId);
+    const deletedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      { is_deleted: true },
+      { new: true }
+    );
 
     if (!deletedUser) {
       console.error("User not found for deletion");
       return res.status(404).json({ success: false, message: "User not found" });
     } else {
-      console.log("User deleted successfully:", deletedUser);
+      console.log("User soft-deleted successfully:", deletedUser._id);
       return res.json({ success: true, message: "User deleted successfully" });
     }
   } catch (err) {
@@ -526,28 +642,110 @@ module.exports.deleteCatagory = async (req, res) => {
 
     if (!catagoryId) {
       console.error("Catagory ID is required for deletion");
-      return res.status(400).send("Catagory ID is required");
+      return res.status(400).json({ success: false, message: "Catagory ID is required" });
     }
 
-    const deletedCatagory = await CatagoryModel.findByIdAndDelete(catagoryId);
+    const deletedCatagory = await CatagoryModel.findByIdAndUpdate(
+      catagoryId,
+      { is_deleted: true },
+      { new: true }
+    );
+
     if (!deletedCatagory) {
       console.error("Catagory not found for deletion");
-      return res.status(404).send("Catagory not found");
+      return res.status(404).json({ success: false, message: "Catagory not found" });
     }
 
-    // Delete the main image from Cloudinary
-    if (deletedCatagory.mainImage && deletedCatagory.mainImage.public_id) {
-      await cloudinary.uploader.destroy(deletedCatagory.mainImage.public_id);
-      console.log("Main image deleted from Cloudinary");
-    }
+    console.log("Catagory soft-deleted successfully:", deletedCatagory._id);
 
-    console.log("Catagory deleted successfully:", deletedCatagory);
-
-    // ✅ Important: send response back to frontend
-    return res.status(200).json({ message: "Catagory deleted successfully" });
+    return res.status(200).json({ success: true, message: "Catagory deleted successfully" });
 
   } catch (err) {
     console.error("Error deleting catagory:", err);
-    return res.status(500).send("Failed to delete catagory");
+    return res.status(500).json({ success: false, message: "Failed to delete catagory" });
+  }
+};
+
+// Inquiry Management
+
+module.exports.getInquiry = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const parsedPage = parseInt(page);
+    const parsedLimit = parseInt(limit);
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    const inquiries = await InquiryModel.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parsedLimit)
+      .populate("userId", "Uname email mobile") // Keep original population for userId
+      .populate("products.productId", "productName mainImage category") // Keep original population for products
+      .lean(); // Use lean for better performance if not modifying documents
+
+    const totalCount = await InquiryModel.countDocuments();
+
+    // Transform data to match frontend AdminInquiry.js structure
+    const transformedInquiries = inquiries.map(inq => {
+      const customerInfo = {
+        name: inq.userId?.Uname || "Guest",
+        email: inq.userId?.email || "N/A",
+        mobile: inq.userId?.mobile || inq.contactPhone || "N/A",
+        message: inq.message
+      };
+
+      const items = inq.products.map(p => ({
+        productName: p.productId?.productName || "Deleted Product",
+        mainImage: p.productId?.mainImage,
+        category: p.productId?.category || "N/A",
+        price: p.price,
+        quantity: p.quantity,
+        size: p.selectedSize
+      }));
+
+      return {
+        _id: inq._id,
+        status: inq.status,
+        customerInfo,
+        items,
+        createdAt: inq.createdAt,
+        updatedAt: inq.updatedAt
+      };
+    });
+
+    res.status(200).json(transformedInquiries);
+  } catch (err) {
+    console.error("Error fetching inquiries:", err);
+    res.status(500).json({ success: false, message: "Server error while fetching inquiries" });
+  }
+};
+
+module.exports.updateInquiryStatus = async (req, res) => {
+  try {
+    const id = req.query.id || req.body.id;
+    const status = req.query.status || req.body.status;
+
+    if (!id || !status) {
+      return res.status(400).json({ success: false, message: "ID and status are required" });
+    }
+
+    const updatedInquiry = await InquiryModel.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedInquiry) {
+      return res.status(404).json({ success: false, message: "Inquiry not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Inquiry marked as ${status}`,
+      inquiry: updatedInquiry
+    });
+  } catch (err) {
+    console.error("Error updating inquiry status:", err);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };

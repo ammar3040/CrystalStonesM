@@ -47,22 +47,22 @@ function Footer() {
             </h4>
             <ul className="space-y-4">
               <li>
-                <Link to="/" className="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm">
+                <Link to="/" className="group flex items-center gap-2 text-white hover:text-amber-500 transition-colors text-sm">
                   <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-amber-500" /> Home
                 </Link>
               </li>
               <li>
-                <Link to="/ViewAllProduct" className="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm">
+                <Link to="/ViewAllProduct" className="group flex items-center gap-2 text-white hover:text-amber-500 transition-colors text-sm">
                   <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-amber-500" /> All Products
                 </Link>
               </li>
               <li>
-                <Link to="/#contactForm" className="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm">
+                <Link to="/#contactForm" className="group flex items-center gap-2 text-white hover:text-amber-500 transition-colors text-sm">
                   <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-amber-500" /> Contact Us
                 </Link>
               </li>
               <li>
-                <Link to="/#bestProduct" className="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm">
+                <Link to="/#bestProduct" className="group flex items-center gap-2 text-white hover:text-amber-500 transition-colors text-sm">
                   <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-amber-500" /> Best Sellers
                 </Link>
               </li>
@@ -102,16 +102,16 @@ function Footer() {
               <span className="w-4 h-[1px] bg-amber-500" /> Get in Touch
             </h4>
             <div className="space-y-6">
-              <a href="tel:+919016507258" className="group block">
-                <span className="block text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-1 group-hover:text-amber-500 transition-colors">Call Support</span>
+              <a href="tel:+919016507258" className="group block text-white">
+                <span className="block text-[10px] font-bold text-white uppercase tracking-[0.2em] mb-1 group-hover:text-amber-500 transition-colors">Call Support</span>
                 <span className="flex items-center gap-2 text-sm font-bold group-hover:translate-x-1 transition-transform">
-                  <Phone size={16} className="text-amber-500" /> +91 90165 07258
+                  <Phone size={16} className="text-white" /> +91 90165 07258
                 </span>
               </a>
-              <a href="mailto:crystalstonesmart@gmail.com" className="group block">
-                <span className="block text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-1 group-hover:text-amber-500 transition-colors">Email Us</span>
+              <a href="mailto:crystalstonesmart@gmail.com" className="group block text-white">
+                <span className="block text-[10px] font-bold   uppercase tracking-[0.2em] mb-1 group-hover:text-amber-500 transition-colors">Email Us</span>
                 <span className="flex items-center gap-2 text-sm font-bold group-hover:translate-x-1 transition-transform truncate">
-                  <Mail size={16} className="text-amber-500" /> support@crystalstonesmart.in
+                  <Mail size={16} className="text-white" /> support@crystalstonesmart.in
                 </span>
               </a>
               <a
@@ -128,8 +128,8 @@ function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="py-8 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="text-center md:text-left">
+        <div className="py-8 flex flex-col justify-center items-center gap-6 w-full">
+          <div className="text-center">
             <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.4em]">
               &copy; {currentYear} Crystal Stones Mart. All rights reserved.
             </p>
@@ -137,13 +137,13 @@ function Footer() {
               Empowering India's wholesale crystal business with trust & authenticity.
             </p>
           </div>
-          <div className="flex gap-1">
+          {/* <div className="flex gap-1">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="w-6 h-6 rotate-45 border border-zinc-800 flex items-center justify-center">
                 <div className="w-1 h-1 bg-amber-500/20" />
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
       </div>
     </footer>

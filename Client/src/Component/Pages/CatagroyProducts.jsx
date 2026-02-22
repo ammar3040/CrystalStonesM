@@ -195,7 +195,7 @@ function CatagoryProducts() {
                   ? `No products found for "${debouncedSearch}" in ${catagoryName}`
                   : `No products found in this category`}
               </div>
-              : products.map((product) => {
+              : products.map((product, index) => {
                 let firstSizePrice = product.dollarPrice;
                 let sizeLabel = null;
 
@@ -217,6 +217,7 @@ function CatagoryProducts() {
                     ModelNumber={product?.modelNumber || ''}
                     category={product?.category || catagoryName}
                     size={sizeLabel}
+                    index={index}
                   />
                 );
               })

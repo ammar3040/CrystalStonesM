@@ -37,11 +37,11 @@ const AdminInquiry = () => {
     fetchInquiries();
   }, []);
 
-  const fetchInquiries = async () => {
+  const fetchInquiries = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/getInquiry`);
-      setInquiries(response.data.reverse());
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/getInquiry?page=${page}&limit=20`);
+      setInquiries(response.data.data || []);
     } catch (err) {
       toast.error("Failed to fetch inquiries");
       console.error(err);

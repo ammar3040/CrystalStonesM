@@ -30,11 +30,13 @@ const UserTable = () => {
   const [rowsPerPage] = useState(10);
   const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/usertable`);
-      setUsers(response.data);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/usertable?page=${page}&limit=${rowsPerPage}`);
+      const data = response.data;
+      setUsers(data.users || []);
+      setTotalUsers(data.totalCount || 0);
     } catch (error) {
       toast.error('Failed to fetch users');
       console.error(error);
@@ -43,9 +45,11 @@ const UserTable = () => {
     }
   };
 
+  const [totalUsers, setTotalUsers] = useState(0);
+
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    fetchUsers(currentPage);
+  }, [currentPage]);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;

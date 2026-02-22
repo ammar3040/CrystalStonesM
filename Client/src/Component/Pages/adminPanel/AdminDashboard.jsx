@@ -28,8 +28,10 @@ function AdminDashboard() {
     fetch(`${import.meta.env.VITE_API_URL}/admin/usertable`)
       .then((res) => res.json())
       .then((allData) => {
+        const usersList = allData.users || allData;
+
         // Filter for login users
-        const filteredUsers = allData
+        const filteredUsers = (Array.isArray(usersList) ? usersList : [])
           .filter((user) => {
             const onlyMobile = user.mobile && !user.uname && !user.email;
             const onlyEmail = user.Uname && user.email && !user.mobile;
@@ -39,14 +41,14 @@ function AdminDashboard() {
           .slice(0, 10);
 
         // Filter for subscribed users
-        const filteredSubscribers = allData
+        const filteredSubscribers = (Array.isArray(usersList) ? usersList : [])
           .filter((user) => user.isSubscribed === true)
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         setData({
           users: filteredUsers,
           subscribers: filteredSubscribers,
-          totalCount: allData.length
+          totalCount: allData.totalCount || (Array.isArray(usersList) ? usersList.length : 0)
         });
       })
       .catch((err) => {

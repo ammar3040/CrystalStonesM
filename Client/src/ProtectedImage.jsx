@@ -1,6 +1,14 @@
 import { useEffect } from "react";
 
-export default function ProtectedImage({ src, alt, className = "" }) {
+const optimizeImageUrl = (url) => {
+  if (!url || !url.includes('cloudinary.com')) return url;
+  if (url.includes('/upload/f_auto,q_auto/')) return url; // Already optimized
+  return url.replace('/upload/', '/upload/f_auto,q_auto/');
+};
+
+export default function ProtectedImage({ src, alt, className = "", loading = "lazy" }) {
+  const optimizedSrc = optimizeImageUrl(src);
+
   useEffect(() => {
     const preventRightClick = (e) => e.preventDefault();
     const preventDrag = (e) => e.preventDefault();
@@ -16,7 +24,7 @@ export default function ProtectedImage({ src, alt, className = "" }) {
 
   return (
     <div style={{ position: "relative", display: "inline-block", width: "100%", height: "100%" }}>
-      <img src={src} alt={alt} draggable="false" className={className} />
+      <img src={optimizedSrc} alt={alt} draggable="false" className={className} loading={loading} />
       <div
         style={{
           position: "absolute",

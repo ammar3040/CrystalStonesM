@@ -111,7 +111,7 @@ function ProductCard({
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
-      className="w-full max-w-[300px] mx-auto"
+      className="w-full max-w-[250px] sm:max-w-[280px] mx-auto"
       whileHover={{ y: -6 }}
     >
       {/* Golden glow border wrapper */}
@@ -133,7 +133,8 @@ function ProductCard({
               <ProtectedImage
                 src={productImg}
                 alt={productName}
-                className={`w-full h-full object-contain p-4 transition-transform duration-700 group-hover:scale-110 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                className={`w-full h-full object-contain p-2 sm:p-4 transition-transform duration-700 group-hover:scale-110 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                loading={index < 4 ? "eager" : "lazy"}
               />
               <img
                 src={productImg}
@@ -173,17 +174,17 @@ function ProductCard({
           <div className="h-[1px] bg-gradient-to-r from-transparent via-amber-300 to-transparent" />
 
           {/* ── Content Section ── */}
-          <div className="px-4 pt-3 pb-4 flex-1 flex flex-col bg-white">
+          <div className="px-3 py-3 flex-1 flex flex-col bg-white">
             <Link to={`/Product/${pid}`} className="block flex-1">
               {category && (
-                <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-1 text-center">
+                <p className="text-[8px] sm:text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-0.5 sm:mb-1 text-center">
                   {category}
                 </p>
               )}
-              <h3 className="text-sm font-bold text-zinc-900 line-clamp-1 mb-1 text-center group-hover:text-amber-700 transition-colors">
+              <h3 className="text-[11px] sm:text-[13px] font-bold text-zinc-900 line-clamp-1 mb-0.5 text-center group-hover:text-amber-700 transition-colors">
                 {productName}
               </h3>
-              <p className="text-[11px] text-zinc-500 line-clamp-2 leading-relaxed text-center">
+              <p className="text-[9px] sm:text-[10px] text-zinc-500 line-clamp-2 leading-relaxed text-center">
                 {productAbout}
               </p>
             </Link>
@@ -194,8 +195,8 @@ function ProductCard({
                 <>
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <span className="text-lg font-black text-zinc-900">${finalPrice || dollarPrice}</span>
-                      <span className="text-[9px] text-amber-600 ml-1 font-bold uppercase">USD</span>
+                      <span className="text-base font-black text-zinc-900">${finalPrice || dollarPrice}</span>
+                      <span className="text-[8px] text-amber-600 ml-1 font-bold uppercase">USD</span>
                     </div>
                     <span className="text-[9px] text-zinc-500 font-bold bg-amber-50 px-2 py-1 rounded uppercase tracking-wider">
                       Min {minQuentity}
@@ -204,22 +205,22 @@ function ProductCard({
 
                   <div className="flex gap-2">
                     <Link to={`/Product/${pid}`} className="flex-1">
-                      <button className="w-full py-2 px-3 text-xs font-bold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-lg transition-colors flex items-center justify-center gap-1.5">
-                        <Eye size={13} /> View
+                      <button className="w-full py-1.5 px-2 text-[11px] font-bold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-lg transition-colors flex items-center justify-center gap-1">
+                        <Eye size={12} /> View
                       </button>
                     </Link>
                     <button
                       onClick={handleAddToCart}
-                      className="flex-1 py-2 px-3 text-xs font-bold text-white bg-black hover:bg-zinc-800 rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                      className="flex-1 py-1.5 px-2 text-[11px] font-bold text-white bg-black hover:bg-zinc-800 rounded-lg transition-colors flex items-center justify-center gap-1 shadow-sm"
                     >
-                      <ShoppingCart size={13} /> Cart
+                      <ShoppingCart size={12} /> Cart
                     </button>
                   </div>
                 </>
               ) : (
                 <button
                   onClick={() => navigate('/SignInPage')}
-                  className="w-full py-2.5 text-xs font-bold text-amber-800 bg-gradient-to-r from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 rounded-lg transition-all border border-amber-200/50"
+                  className="w-full py-2 sm:py-2.5 text-[10px] sm:text-xs font-bold text-amber-800 bg-gradient-to-r from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 rounded-lg transition-all border border-amber-200/50"
                 >
                   Sign in to see prices
                 </button>

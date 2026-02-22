@@ -12,11 +12,62 @@ const InquiryModel = require('../models/InquiryModel'); // Adjust the path as ne
 const OtpModel = require('../models/OtpModel');
 
 const jwt = require('jsonwebtoken');
+
+// Helper function to shuffle and diversify products by category
+const shuffleAndDiversify = (products) => {
+  // 1. Group products by category
+  const groups = {};
+  products.forEach(p => {
+    const cat = p.category || 'Uncategorized';
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(p);
+  });
+
+  // 2. Shuffle each group
+  Object.keys(groups).forEach(cat => {
+    groups[cat].sort(() => Math.random() - 0.5);
+  });
+
+  const result = [];
+  const categories = Object.keys(groups);
+  let lastCategory = null;
+
+  // 3. Interleave products from different categories
+  while (result.length < products.length) {
+    // Sort categories by remaining count to prioritize larger groups if we get stuck
+    // But for a simple shuffle, we just pick the next available category that isn't the last one
+    let pickedCategory = null;
+
+    // Try to find a category different from the last one
+    const availableCategories = categories.filter(cat => groups[cat].length > 0 && cat !== lastCategory);
+
+    if (availableCategories.length > 0) {
+      // Pick one from available categories (could be random or based on size)
+      pickedCategory = availableCategories[Math.floor(Math.random() * availableCategories.length)];
+    } else {
+      // If only one category left or forced to repeat, pick any category with items
+      const remainingCategories = categories.filter(cat => groups[cat].length > 0);
+      if (remainingCategories.length > 0) {
+        pickedCategory = remainingCategories[0];
+      }
+    }
+
+    if (pickedCategory) {
+      result.push(groups[pickedCategory].shift());
+      lastCategory = pickedCategory;
+    } else {
+      break; // Should not happen
+    }
+  }
+
+  return result;
+};
+
 module.exports.ShowAllProduct = async (req, res) => {
   try {
     const {
       page = 1,
-      limit = 10,
+      limit = 12,
       search = "",
       category,
       crystalType,
@@ -24,11 +75,16 @@ module.exports.ShowAllProduct = async (req, res) => {
       minPrice,
       maxPrice,
       minDollarPrice,
-      maxDollarPrice
+      maxDollarPrice,
+      sortBy = "createdAt",
+      sortOrder = "desc"
     } = req.query;
 
+    const parsedPage = parseInt(page);
     const parsedLimit = parseInt(limit);
-    let query = {};
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    let query = { is_deleted: { $ne: true } };
 
     // Keyword Search
     if (search) {
@@ -45,11 +101,10 @@ module.exports.ShowAllProduct = async (req, res) => {
     if (crystalType) query.crystalType = crystalType;
     if (bestproduct !== undefined) query.bestproduct = bestproduct === 'true';
 
-    // Price Range Filters (based on sizes array)
+    // Price Range Filters
     if (minPrice || maxPrice || minDollarPrice || maxDollarPrice) {
       const min = minPrice || minDollarPrice;
       const max = maxPrice || maxDollarPrice;
-
       query["sizes.price"] = {};
       if (min) query["sizes.price"].$gte = parseFloat(min);
       if (max) query["sizes.price"].$lte = parseFloat(max);
@@ -57,57 +112,53 @@ module.exports.ShowAllProduct = async (req, res) => {
 
     const totalCount = await Product.countDocuments(query);
 
-    // Use aggregation with $sample for shuffling.
-    // Note: $sample is random, traditional skip/limit pagination is less effective with it,
-    // but it provides the variety the user requested.
-    const products = await Product.aggregate([
-      { $match: query },
-      { $sample: { size: parsedLimit } },
-      {
-        $project: {
-          productName: 1,
-          mainImage: 1,
-          description: 1,
-          MinQuantity: 1,
-          modelNumber: 1,
-          sizes: 1,
-          category: 1,
-          crystalType: 1,
-          createdAt: 1
-        }
-      }
-    ]);
+    // Optimization: Instead of fetching ALL products (which causes 8s+ latency), 
+    // fetch a larger pool (e.g., 500) to shuffle, or just the current page if filtering.
+    // Shuffling accurately across high volume requires a different architecture, 
+    // so we fetch a sufficient "shuffle window".
+    const shuffleWindow = 300;
+    const allProducts = await Product.find(query)
+      .select('productName mainImage description MinQuantity modelNumber sizes category crystalType createdAt')
+      .sort({ createdAt: -1 })
+      .limit(shuffleWindow)
+      .lean();
 
-    const responseData = {
+    // Shuffle and diversify
+    const diversifiedProducts = shuffleAndDiversify(allProducts);
+
+    // Apply pagination in-memory from the shuffled subset
+    const paginatedProducts = diversifiedProducts.slice(skip, skip + parsedLimit);
+
+    res.json({
       success: true,
-      products: products || [],
+      products: paginatedProducts || [],
       totalCount: totalCount || 0,
-      currentPage: parseInt(page),
+      currentPage: parsedPage,
       totalPages: Math.ceil((totalCount || 0) / parsedLimit),
-      isShuffled: true
-    };
-
-    res.json(responseData);
+    });
   } catch (error) {
-    console.error("Error fetching shuffled products:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error fetching products:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 }
 module.exports.ShowProduct = async (req, res) => {
   try {
     const productId = req.query.id;
 
-
-    const product = await Product.findById(productId);
-
-    if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+    if (!productId) {
+      return res.status(400).json({ success: false, message: "Product ID is required" });
     }
 
-    res.json(product);
+    const product = await Product.findOne({ _id: productId, is_deleted: { $ne: true } });
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    res.status(200).json({ success: true, product });
   } catch (error) {
     console.error("Error fetching product:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 }
 module.exports.SignUp = async (req, res) => {
@@ -261,7 +312,7 @@ module.exports.SignIn = (req, res) => {
 // get catagory
 module.exports.getCatagory = async (req, res) => {
   try {
-    const allCatagoryData = await CatagoryModel.find();
+    const allCatagoryData = await CatagoryModel.find({ is_deleted: { $ne: true } });
     return res.json(allCatagoryData);
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -293,7 +344,7 @@ module.exports.ShowCatagoryProducts = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Base query — category is mandatory
-    let query = { category: catagoryName };
+    let query = { category: catagoryName, is_deleted: { $ne: true } };
 
     // Keyword Search within the category
     if (search) {
@@ -374,7 +425,7 @@ module.exports.setBestProductList = async (req, res) => {
 }
 module.exports.getBestProductList = async (req, res) => {
   try {
-    const bestProducts = await Product.find({ bestproduct: true });
+    const bestProducts = await Product.find({ bestproduct: true, is_deleted: { $ne: true } });
     res.json(bestProducts);
   } catch (error) {
     console.error("Error fetching best products:", error);
@@ -610,8 +661,13 @@ module.exports.getCartedItem = async (req, res) => {
   }
 
   try {
-    const cartItems = await CartModel.find({ userId }).populate('productId');
-    res.status(200).json(cartItems);
+    const cartItems = await CartModel.find({ userId }).populate({
+      path: 'productId',
+      match: { is_deleted: { $ne: true } }
+    });
+    // Filter out items where the product was soft-deleted
+    const filteredCartItems = cartItems.filter(item => item.productId);
+    res.status(200).json(filteredCartItems);
   } catch (error) {
     console.error("Error fetching cart items:", error);
     res.status(500).json({ success: false, message: "Server error" });
@@ -833,7 +889,7 @@ module.exports.specific = async (req, res) => {
   const { category } = req.query;
 
   try {
-    const product = await Product.findOne({ category }).sort({ createdAt: -1 });
+    const product = await Product.findOne({ category, is_deleted: { $ne: true } }).sort({ createdAt: -1 });
     if (product) {
       return res.status(200).json({ specifications: product.specifications || [] });
     }
@@ -848,16 +904,29 @@ module.exports.completeProfile = async (req, res) => {
   const { uid, address, mobile, password } = req.body;
 
   try {
-    const updateFields = { address, mobile };
-    if (password) {
-      updateFields.password = password;
+    if (!uid) {
+      return res.status(400).json({ success: false, message: "User ID is required" });
     }
 
-    await UserModel.findOneAndUpdate({ uid }, updateFields);
-    res.sendStatus(200);
+    const updateFields = {};
+    if (address !== undefined) updateFields.address = address;
+    if (mobile !== undefined) updateFields.mobile = mobile;
+    if (password) updateFields.password = password;
+
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { _id: uid },
+      updateFields,
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Profile updated successfully", user: updatedUser });
   } catch (err) {
     console.error(err);
-    res.status(500).send("Failed to update profile");
+    res.status(500).json({ success: false, message: "Failed to update profile" });
   }
 }
 

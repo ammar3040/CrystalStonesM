@@ -12,16 +12,18 @@ import { MdLocationOn } from 'react-icons/md';
 import axios from 'axios';
 import { FaBoxOpen, FaClipboardList } from 'react-icons/fa';
 import Inquiry from './Inquiry';
+import { useAuth } from '../../context/AuthContext';
 
 
 
 
 
 function Header({ onCartClick }) {
+  const { user, setUser, logout } = useAuth();
   const [catagorys, setCatagorys] = useState([]);
   const [placeholder, setPlaceholder] = useState('');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [user, setUser] = useState(null); // to hold cookie user
+  // const [user, setUser] = useState(null); // to hold cookie user
 
   const navigate = useNavigate();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -98,35 +100,6 @@ function Header({ onCartClick }) {
     return () => clearTimeout(timeout);
   }, [placeholder, placeholderIndex]);
   useEffect(() => {
-    const getUserFromCookie = () => {
-      const cookieString = document.cookie;
-      const cookies = cookieString.split('; ');
-      const userCookie = cookies.find(cookie => cookie.startsWith('user='));
-
-      if (userCookie) {
-        try {
-          const cookieValue = decodeURIComponent(userCookie.split('=')[1]);
-
-          // Check if it's valid
-          if (cookieValue === 'undefined') {
-            setUser(null);
-          } else {
-            const parsedUser = JSON.parse(cookieValue);
-            setUser(parsedUser);
-            fetchCartItems(parsedUser.uid); // 👈 Fetch with Axios
-          }
-        } catch (error) {
-          console.error('Error parsing user cookie:', error);
-          setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
-    };
-
-    getUserFromCookie();
-  }, [isProfileOpen, isLoginOpen]);
-  useEffect(() => {
     if (user) {
       setIsProfileOpen(true);
       setIsLoginOpen(false);
@@ -134,14 +107,10 @@ function Header({ onCartClick }) {
       setIsProfileOpen(false);
       setIsLoginOpen(true);
     }
-  }, []);
-
+  }, [user]);
 
   const handleLogout = () => {
-    // Clear local storage
-    localStorage.removeItem('token');
-    // Call server logout to clear cookies and redirect
-    window.location.href = `${import.meta.env.VITE_API_URL}/logout`;
+    logout();
   };
 
   // handle seach input change

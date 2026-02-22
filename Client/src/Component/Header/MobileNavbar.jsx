@@ -6,9 +6,11 @@ import { MdEmail, MdLocationOn, MdPhoneAndroid } from 'react-icons/md';
 import { FaBoxOpen } from 'react-icons/fa';
 import Inquiry from './Inquiry';
 import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 
 
 const MobileNavbar = ({ catagory, MobilecartItems, Mobileuser }) => {
+  const { user, login: contextLogin, logout: contextLogout } = useAuth();
   const navigate = useNavigate();
   const [showInquiry, setShowInquiry] = useState(false);
 
@@ -16,54 +18,13 @@ const MobileNavbar = ({ catagory, MobilecartItems, Mobileuser }) => {
   const [cartOpen, setCartOpen] = useState(false);
   const [showAside, setShowAside] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
   const [openCollection, setOpenCollection] = useState(false);
-  // Function to read user from cookie
-  useEffect(() => {
-    const getUserFromCookie = () => {
-      const cookieString = document.cookie;
-      const cookies = cookieString.split('; ');
-      const userCookie = cookies.find(cookie => cookie.startsWith('user='));
-
-      if (userCookie) {
-        const cookieValue = userCookie.split('=')[1];
-        try {
-          // First decode the URI component, then handle any unexpected prefixes
-          const decodedValue = decodeURIComponent(cookieValue);
-
-          // Handle cases where the value might start with "j:" or similar
-          const jsonString = decodedValue.startsWith('j:')
-            ? decodedValue.substring(2)
-            : decodedValue;
-
-          const userData = JSON.parse(jsonString);
-          setUser(userData);
-        } catch (error) {
-          console.error('Error parsing user cookie:', error);
-          // Try to manually extract data if parsing fails
-          try {
-            const manualMatch = decodedValue.match(/"name":"([^"]+)"/);
-            if (manualMatch) {
-              setUser({ name: manualMatch[1] });
-            } else {
-              setUser(null);
-            }
-          } catch {
-            setUser(null);
-          }
-        }
-      } else {
-        setUser(null);
-      }
-    };
-
-    getUserFromCookie();
-  }, [showProfile]); // Re-check when modal opens
+  // Function to read user from cookie - REMOVED redundant logic
 
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = `${import.meta.env.VITE_API_URL}/logout`;
+    contextLogout();
   };
 
   const homeIcon = (
@@ -261,7 +222,7 @@ const MobileNavbar = ({ catagory, MobilecartItems, Mobileuser }) => {
           ) : (
             <LoginMain
               onLoginSuccess={(userData) => {
-                setUser(userData);
+                // setUser(userData); // Context handles it via onLoginSuccess callback chain or direct use
                 if (userData.role === 'admin') {
                   window.location.href = `${import.meta.env.VITE_API_URL}/admin`;
                 } else {

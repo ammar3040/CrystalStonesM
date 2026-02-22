@@ -17,6 +17,7 @@ const path = require("path");
 const { NEW_MESSAGE, NEW_MESSAGE_ALERT, JOIN_ROOM, LEAVE_ROOM, ONLINE_USERS, START_TYPING, STOP_TYPING, USER_STATUS_CHANGED } = require("./utils/events");
 const MessageModel = require("./models/MessageModel");
 const ChatModel = require("./models/ChatModel");
+const UserModel = require("./models/UserModel");
 const socketAuthentication = require("./middleware/socketAuth");
 const { globalLimiter } = require("./middleware/rateLimiter");
 
@@ -140,6 +141,30 @@ io.on("connection", (socket) => {
       socket.to(chatId).emit(NEW_MESSAGE, { chatId, message: messageForRealTime });
       socket.to(chatId).emit(NEW_MESSAGE_ALERT, { chatId });
 
+      // --- Auto-reply logic (similar to chatController.js) ---
+      const messageCount = await MessageModel.countDocuments({ chat: chatId });
+      if (messageCount === 1 && chat.isHelpCenter && user.role !== 'admin') {
+        const admin = await UserModel.findOne({ role: 'admin' }).select('_id');
+        if (admin) {
+          const autoReplyContent = "Welcome to Crystal Store Mart. We will reply to you as soon as possible. If you can't get a reply, contact us on WhatsApp number +91 90165 07258. Thank you for your effort.";
+
+          const autoReply = await MessageModel.create({
+            content: autoReplyContent,
+            sender: admin._id,
+            chat: chatId
+          });
+
+          const populatedAutoReply = await MessageModel.findById(autoReply._id)
+            .populate('sender', 'Uname email role').lean();
+
+          if (populatedAutoReply.sender) {
+            populatedAutoReply.sender.Uname = 'Crystal Store Mart Service';
+          }
+
+          io.to(chatId).emit(NEW_MESSAGE, { chatId, message: populatedAutoReply });
+          io.to(chatId).emit(NEW_MESSAGE_ALERT, { chatId });
+        }
+      }
     } catch (err) {
       console.error('Socket NEW_MESSAGE error:', err);
     }

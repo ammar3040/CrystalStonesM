@@ -4,6 +4,7 @@ import { User, Mail, Phone, MapPin, Lock, Eye, EyeOff, ArrowRight, Gem, X } from
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
 
 /* ─── Crystal SVG Accents ─── */
 const CrystalShard = ({ className, style }) => (
@@ -55,6 +56,7 @@ const GlassInput = ({ icon: Icon, focused, name, onFocus, onBlur, ...props }) =>
 
 /* ─── Main SignUp Component ─── */
 const SignUpMain = ({ onClose }) => {
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,7 +83,15 @@ const SignUpMain = ({ onClose }) => {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/register`, formData);
       if (response.data.success) {
         toast.success(response.data.message || "Registration Successful!");
-        if (response.data.token) localStorage.setItem('token', response.data.token);
+
+        const user = response.data.user;
+        if (user && !user.uid && user.id) user.uid = user.id;
+
+        // Update context immediately if token is provided
+        if (response.data.token) {
+          login(user, response.data.token);
+        }
+
         setTimeout(() => { if (onClose) onClose(); navigate('/'); }, 1500);
       } else {
         toast.error(response.data.message || "Registration failed");

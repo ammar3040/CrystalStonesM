@@ -31,6 +31,7 @@ import ScrollToTop from './ScrollToTop';
 import ScrollToHashElement from './ScrollToHashElement';
 import WhatsappLogo from './WhatsappLogo';
 import ChatPopup from './Component/Chat/ChatPopup';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Loading fallback
 const PageLoader = () => (
@@ -40,25 +41,10 @@ const PageLoader = () => (
 );
 
 
-function getUserFromCookie() {
-  try {
-    const cookies = document.cookie.split('; ');
-    const userCookie = cookies.find(c => c.startsWith('user='));
-    if (userCookie) {
-      const userString = decodeURIComponent(userCookie.split('=')[1]);
-      return JSON.parse(userString);
-    }
-  } catch (err) {
-    console.error('Failed to parse user cookie:', err);
-  }
-  return null;
-}
-
 // This wrapper is needed to use useLocation inside App
 function AppWrapper() {
   const location = useLocation();
-  const user = getUserFromCookie();
-  const isLoggedIn = !!user;
+  const { user, isLoggedIn } = useAuth();
 
   // Admin path condition
   const isAdminRoute = location.pathname.startsWith('/admin');
@@ -122,8 +108,9 @@ function AppWrapper() {
 function App() {
   return (
     <BrowserRouter>
-      <AppWrapper />
-
+      <AuthProvider>
+        <AppWrapper />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

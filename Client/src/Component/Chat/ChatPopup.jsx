@@ -4,16 +4,15 @@ import { Send, X, Loader2, Clock, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../lib/api';
 import socket from '../../lib/socket';
+import { useAuth } from '../../context/AuthContext';
 
 const ChatPopup = () => {
+    const { isLoggedIn, user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [message, setMessage] = useState('');
     const queryClient = useQueryClient();
     const scrollRef = useRef(null);
     const inputRef = useRef(null);
-
-    // Check if user is logged in
-    const isLoggedIn = !!localStorage.getItem('token');
 
     // 1. Get Chat ID (Initialize Chat)
     const { data: chatData, isLoading: isChatLoading, isError: isChatError } = useQuery({

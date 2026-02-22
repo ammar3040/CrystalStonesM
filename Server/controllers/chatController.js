@@ -136,8 +136,36 @@ exports.sendMessage = async (req, res) => {
             populatedMessage.sender.Uname = 'Crystal Store Mart Service';
         }
 
-        // Emit via Socket.IO if available
         const io = req.app.get('io');
+
+        // Check for Auto-reply (only for first message from user in help center)
+        const messageCount = await MessageModel.countDocuments({ chat: chatId });
+        if (messageCount === 1 && chat.isHelpCenter && req.user.role !== 'admin') {
+            const admin = await UserModel.findOne({ role: 'admin' }).select('_id');
+            if (admin) {
+                const autoReplyContent = "Welcome to Crystal Store Mart. We will reply to you as soon as possible. If you can't get a reply, contact us on WhatsApp number +91 90165 07258. Thank you for your effort.";
+
+                const autoReply = await MessageModel.create({
+                    content: autoReplyContent,
+                    sender: admin._id,
+                    chat: chatId
+                });
+
+                const populatedAutoReply = await MessageModel.findById(autoReply._id)
+                    .populate('sender', 'Uname email role').lean();
+
+                if (populatedAutoReply.sender) {
+                    populatedAutoReply.sender.Uname = 'Crystal Store Mart Service';
+                }
+
+                if (io) {
+                    io.to(chatId).emit('NEW_MESSAGE', { chatId, message: populatedAutoReply });
+                    io.to(chatId).emit('NEW_MESSAGE_ALERT', { chatId });
+                }
+            }
+        }
+
+        // Emit current message via Socket.IO if available
         if (io) {
             io.to(chatId).emit('NEW_MESSAGE', { chatId, message: populatedMessage });
             io.to(chatId).emit('NEW_MESSAGE_ALERT', { chatId });

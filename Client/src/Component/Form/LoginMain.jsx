@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../../lib/api';
 import { useMutation } from '@tanstack/react-query';
+import { useAuth } from '../../context/AuthContext';
 
 /* ─── Premium Crystal SVG Components ─── */
 
@@ -86,6 +87,7 @@ const floatingCrystals = [
 /* ─── Main Login Component ─── */
 
 const LoginMain = ({ onLoginSuccess, onClose }) => {
+  const { login: contextLogin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [focused, setFocused] = useState('');
@@ -102,16 +104,21 @@ const LoginMain = ({ onLoginSuccess, onClose }) => {
       return data;
     },
     onSuccess: (data) => {
-      if (data.token) localStorage.setItem('token', data.token);
+      // if (data.token) localStorage.setItem('token', data.token); // Context's login() handles this
       toast.success('✅ Login successful!');
+
+      const user = data.user;
+      if (user && !user.uid && user.id) user.uid = user.id;
+
+      // Update context immediately
+      contextLogin(user, data.token);
+
       setTimeout(() => {
-        if (data.role === 'admin' || (data.user && data.user.role === 'admin')) {
+        if (data.role === 'admin' || (user && user.role === 'admin')) {
           window.location.href = '/admin-a9xK72rQ1m8vZpL0';
         } else {
           if (onClose) onClose();
           if (onLoginSuccess) {
-            const user = data.user;
-            if (user && !user.uid && user.id) user.uid = user.id;
             onLoginSuccess(user);
           }
           navigate('/');

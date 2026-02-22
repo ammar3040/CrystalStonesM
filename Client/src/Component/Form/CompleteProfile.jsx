@@ -4,6 +4,7 @@ import { User, Mail, MapPin, Phone, Lock, Eye, EyeOff, ArrowRight, Gem } from 'l
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import api from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
 
 /* ─── Crystal SVG Accents ─── */
 const CrystalShard = ({ className, style }) => (
@@ -53,8 +54,9 @@ const GlassInput = ({ icon: Icon, focused, name, onFocus, onBlur, disabled, ...p
 );
 
 const CompleteProfile = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
   const [focused, setFocused] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -62,32 +64,16 @@ const CompleteProfile = () => {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const getUserFromCookie = () => {
-      const cookieString = document.cookie;
-      const cookies = cookieString.split('; ');
-      const userCookie = cookies.find(cookie => cookie.startsWith('user='));
-      if (userCookie) {
-        const cookieValue = decodeURIComponent(userCookie.split('=')[1]);
-        if (cookieValue && cookieValue !== 'undefined') {
-          try {
-            const parsedUser = JSON.parse(cookieValue.startsWith('j:') ? cookieValue.substring(2) : cookieValue);
-            setUser(parsedUser);
-            setFormData({
-              email: parsedUser.email || '',
-              Uname: parsedUser.name || parsedUser.Uname || '',
-              address: parsedUser.address || '',
-              mobile: parsedUser.mobile || '',
-              password: ''
-            });
-          } catch (e) {
-            console.error("Failed to parse user cookie", e);
-          }
-        }
-      }
-    };
-    getUserFromCookie();
-  }, []);
+    if (user) {
+      setFormData({
+        email: user.email || '',
+        Uname: user.name || user.Uname || '',
+        address: user.address || '',
+        mobile: user.mobile || user.phoneNumber || '',
+        password: ''
+      });
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -98,7 +84,7 @@ const CompleteProfile = () => {
     e.preventDefault();
     try {
       const { data } = await api.post('/api/updateProfile', {
-        uid: user.uid || user.id,
+        uid: user.uid,
         ...formData
       });
       if (data.success || data.message === "Profile updated successfully!") {

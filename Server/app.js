@@ -109,23 +109,33 @@ io.on("connection", (socket) => {
   socket.on(JOIN_ROOM, ({ chatId }) => {
     if (!chatId) return;
     socket.join(chatId);
+
+    // If the user joining is an admin, also join a global admin room for alerts
+    if (user.role === 'admin') {
+      socket.join('admins');
+    }
   });
 
   // New message via socket
-  socket.on(NEW_MESSAGE, async ({ chatId, message }) => {
+  socket.on(NEW_MESSAGE, async ({ chatId, message }, callback) => {
     try {
-      if (!chatId || !message) return;
+      if (!chatId || !message) {
+        if (callback) callback({ error: 'Missing chatId or message' });
+        return;
+      }
 
-      const [chat, savedMessage] = await Promise.all([
-        ChatModel.findById(chatId).lean(),
-        MessageModel.create({
-          content: message,
-          sender: user.uid,
-          chat: chatId,
-        })
-      ]);
+      // 1. Save and emit user message FIRST
+      const savedMessage = await MessageModel.create({
+        content: message,
+        sender: user.uid,
+        chat: chatId,
+      });
 
-      if (!chat) return;
+      const chat = await ChatModel.findById(chatId).lean();
+      if (!chat) {
+        if (callback) callback({ error: 'Chat not found' });
+        return;
+      }
 
       const messageForRealTime = {
         ...savedMessage._doc,
@@ -137,10 +147,16 @@ io.on("connection", (socket) => {
         createdAt: new Date().toISOString(),
       };
 
+      // Emit to others in the room
       socket.to(chatId).emit(NEW_MESSAGE, { chatId, message: messageForRealTime });
-      socket.to(chatId).emit(NEW_MESSAGE_ALERT, { chatId });
 
-      // --- Auto-reply logic (similar to chatController.js) ---
+      // Emit alert to everyone (admins use this to update their chat lists)
+      io.emit(NEW_MESSAGE_ALERT, { chatId });
+
+      // Send ACK back to the sender
+      if (callback) callback({ status: 'ok', messageId: savedMessage._id });
+
+      // 2. Auto-reply logic (SECOND)
       const messageCount = await MessageModel.countDocuments({ chat: chatId });
       if (messageCount === 1 && chat.isHelpCenter && user.role !== 'admin') {
         const admin = await UserModel.findOne({ role: 'admin' }).select('_id');
@@ -160,12 +176,16 @@ io.on("connection", (socket) => {
             populatedAutoReply.sender.Uname = 'Crystal Store Mart Service';
           }
 
-          io.to(chatId).emit(NEW_MESSAGE, { chatId, message: populatedAutoReply });
-          io.to(chatId).emit(NEW_MESSAGE_ALERT, { chatId });
+          // Small delay for natural feel and to ensure order
+          setTimeout(() => {
+            io.to(chatId).emit(NEW_MESSAGE, { chatId, message: populatedAutoReply });
+            io.to(chatId).emit(NEW_MESSAGE_ALERT, { chatId });
+          }, 500);
         }
       }
     } catch (err) {
       console.error('Socket NEW_MESSAGE error:', err);
+      if (callback) callback({ error: 'Server error' });
     }
   });
 

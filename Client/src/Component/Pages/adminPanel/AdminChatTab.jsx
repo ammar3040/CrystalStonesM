@@ -38,28 +38,38 @@ const AdminChatTab = () => {
     useEffect(() => {
         socket.connect();
 
+        // Join global admin room for alerts
+        socket.emit('JOIN_ROOM', { chatId: 'admins' });
+
         const handleNewMessage = (payload) => {
             // Update message list if it's the active chat
-            queryClient.setQueryData(['messages', payload.chatId], (old) => {
-                const oldMessages = old?.messages || [];
-                return { ...old, messages: [...oldMessages, payload.message] };
-            });
+            if (payload.chatId === selectedChatId) {
+                queryClient.setQueryData(['messages', payload.chatId], (old) => {
+                    const oldMessages = old?.messages || [];
+                    // Prevent duplicate messages if already added optimistically
+                    const isDuplicate = oldMessages.some(m => m._id === payload.message._id);
+                    if (isDuplicate) return old;
+
+                    return { ...old, messages: [...oldMessages, payload.message] };
+                });
+            }
 
             // Also update the chat list to show recent message/alert
             queryClient.invalidateQueries({ queryKey: ['admin-chats'] });
         };
 
         socket.on('NEW_MESSAGE', handleNewMessage);
-        socket.on('NEW_MESSAGE_ALERT', () => {
+        socket.on('NEW_MESSAGE_ALERT', (payload) => {
+            // Invalidate chats list to show status/recent message
             queryClient.invalidateQueries({ queryKey: ['admin-chats'] });
         });
 
         return () => {
-            socket.off('NEW_MESSAGE');
+            socket.off('NEW_MESSAGE', handleNewMessage);
             socket.off('NEW_MESSAGE_ALERT');
             socket.disconnect();
         };
-    }, [queryClient]);
+    }, [queryClient, selectedChatId]);
 
     // Join/Leave rooms when changing selection
     useEffect(() => {

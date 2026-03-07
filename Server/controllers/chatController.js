@@ -138,7 +138,13 @@ exports.sendMessage = async (req, res) => {
 
         const io = req.app.get('io');
 
-        // Check for Auto-reply (only for first message from user in help center)
+        // 1. Emit current message via Socket.IO FIRST
+        if (io) {
+            io.to(chatId).emit('NEW_MESSAGE', { chatId, message: populatedMessage });
+            io.to(chatId).emit('NEW_MESSAGE_ALERT', { chatId });
+        }
+
+        // 2. Check for Auto-reply (SECOND)
         const messageCount = await MessageModel.countDocuments({ chat: chatId });
         if (messageCount === 1 && chat.isHelpCenter && req.user.role !== 'admin') {
             const admin = await UserModel.findOne({ role: 'admin' }).select('_id');
@@ -159,16 +165,13 @@ exports.sendMessage = async (req, res) => {
                 }
 
                 if (io) {
-                    io.to(chatId).emit('NEW_MESSAGE', { chatId, message: populatedAutoReply });
-                    io.to(chatId).emit('NEW_MESSAGE_ALERT', { chatId });
+                    // Small delay to ensure order and natural feel
+                    setTimeout(() => {
+                        io.to(chatId).emit('NEW_MESSAGE', { chatId, message: populatedAutoReply });
+                        io.to(chatId).emit('NEW_MESSAGE_ALERT', { chatId });
+                    }, 500);
                 }
             }
-        }
-
-        // Emit current message via Socket.IO if available
-        if (io) {
-            io.to(chatId).emit('NEW_MESSAGE', { chatId, message: populatedMessage });
-            io.to(chatId).emit('NEW_MESSAGE_ALERT', { chatId });
         }
 
         return res.status(201).json({ success: true, message: populatedMessage });

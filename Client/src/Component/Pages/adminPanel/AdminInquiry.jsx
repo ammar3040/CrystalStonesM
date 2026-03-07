@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { ADMIN_GET_INQUIRY, ADMIN_UPDATE_INQUIRY_STATUS } from '../../../lib/apiConstants';
 import axios from "axios";
 import {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { ADMIN_GET_INQUIRY, ADMIN_UPDATE_INQUIRY_STATUS } from '../../../lib/apiConstants';
 import axios from "axios";
 import {
   Search,
@@ -40,7 +40,7 @@ const AdminInquiry = () => {
   const fetchInquiries = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/getInquiry?page=${page}&limit=20`);
+      const response = await axios.get(`${ADMIN_GET_INQUIRY}?page=${page}&limit=20`);
       setInquiries(response.data.data || []);
     } catch (err) {
       toast.error("Failed to fetch inquiries");
@@ -52,7 +52,7 @@ const AdminInquiry = () => {
 
   const handleStatusChange = async (id, status) => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/updateInquiryStatus/?id=${id}&status=${status}`);
+      const response = await axios.get(`${ADMIN_UPDATE_INQUIRY_STATUS}/?id=${id}&status=${status}`);
       if (response.data.success) {
         toast.success(`Inquiry marked as ${status}`);
         setInquiries((prev) =>

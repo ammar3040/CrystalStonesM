@@ -6,6 +6,7 @@ import 'swiper/css';
 import 'swiper/css/free-mode';
 import axios from 'axios';
 import { Diamond } from 'lucide-react';
+import { API_GET_CATEGORY } from '../../lib/apiConstants';
 
 
 function ProductCategory() {
@@ -24,7 +25,7 @@ function ProductCategory() {
 
   useEffect(() => {
     setLoading(true);
-    axios.get(`${import.meta.env.VITE_API_URL}/getCatagory`)
+    axios.get(API_GET_CATEGORY)
       .then((res) => {
         setCatagory(res.data);
       })

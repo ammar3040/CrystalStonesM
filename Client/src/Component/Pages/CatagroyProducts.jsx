@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import ProductCard, { ProductCardSkeleton } from '../Product/ProductCard';
 import axios from 'axios';
+import { API_CATEGORY_PRODUCTS } from '../../lib/apiConstants';
 import { Helmet } from 'react-helmet';
 import { Search, SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 
@@ -52,7 +53,7 @@ function CatagoryProducts() {
         }
 
         const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/catagoryproduct?${params.toString()}`
+          `${API_CATEGORY_PRODUCTS}?${params.toString()}`
         );
 
         const data = res.data;

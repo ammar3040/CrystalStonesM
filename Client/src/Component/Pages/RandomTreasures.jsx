@@ -3,6 +3,7 @@ import ProductCard, { ProductCardSkeleton } from '../Product/ProductCard';
 import { motion } from 'framer-motion';
 import { Sparkles, RefreshCw, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { API_ALL_PRODUCTS } from '../../lib/apiConstants';
 
 const RandomTreasures = () => {
     const [products, setProducts] = useState([]);
@@ -13,7 +14,7 @@ const RandomTreasures = () => {
         const fetchRandomProducts = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/all?limit=50`);
+                const response = await fetch(`${API_ALL_PRODUCTS}?limit=50`);
                 const data = await response.json();
                 const allProducts = data.products || [];
 

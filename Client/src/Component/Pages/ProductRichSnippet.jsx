@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import axios from 'axios';
+import { API_ALL_PRODUCTS } from '../../lib/apiConstants';
 
 const ProductRichSnippet = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/all?limit=20`);
+        const res = await axios.get(`${API_ALL_PRODUCTS}?limit=20`);
         const products = res.data.products || [];
 
         // Randomly pick 4 products

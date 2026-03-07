@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './OTP/otp.css';
 import toast from 'react-hot-toast';
+import { API_UPDATE_PHONE } from '../../lib/apiConstants';
 
 const MissMobileNumber = ({ user }) => {
   const [showPopup, setShowPopup] = useState(false);
@@ -35,7 +36,7 @@ const MissMobileNumber = ({ user }) => {
         return toast.error('❌ Invalid mobile number');
       }
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/updatePhone`, {
+      const res = await fetch(API_UPDATE_PHONE, {
         method: 'Post',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: user.email, mobile: phoneNumber }),

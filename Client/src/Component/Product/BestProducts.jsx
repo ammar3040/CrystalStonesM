@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import BestProductCard, { BestProductCardSkeleton } from './BestProdcutCard';
 import axios from 'axios';
+import { API_GET_BEST_PRODUCT_LIST } from '../../lib/apiConstants';
 import { motion } from 'framer-motion';
 import { Diamond } from 'lucide-react';
 
@@ -10,7 +11,7 @@ function BestProduct() {
 
   useEffect(() => {
     setLoading(true);
-    axios.get(`${import.meta.env.VITE_API_URL}/getbestproductlist`)
+    axios.get(API_GET_BEST_PRODUCT_LIST)
       .then((res) => {
         setBestProducts(res.data);
       })

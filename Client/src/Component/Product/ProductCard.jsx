@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Cookies from "js-cookie";
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import { API_GET_CART_ITEM } from '../../lib/apiConstants';
 import { Link, useNavigate } from "react-router-dom";
 import ProtectedImage from '../../ProtectedImage';
 
@@ -82,7 +83,7 @@ function ProductCard({
 
     const uid = JSON.parse(user).uid;
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/getCartItem`, {
+      const res = await axios.post(API_GET_CART_ITEM, {
         pid,
         quantity: minQuentity,
         uid,

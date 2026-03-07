@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import { ADMIN_EDIT_PAGE, ADMIN_UPDATE_DATA } from '../../../lib/apiConstants';
 import axios from "axios";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -75,7 +76,7 @@ const EditProduct = () => {
   useEffect(() => {
     const fetchProductDetails = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/EditPage/?id=${pid}`);
+        const res = await axios.get(`${ADMIN_EDIT_PAGE}/?id=${pid}`);
         if (res.data.success) {
           const product = res.data.product;
           setFormData({
@@ -183,7 +184,7 @@ const EditProduct = () => {
     removedAdditionalImages.forEach((id) => form.append("removedAdditionalImages", id));
 
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/admin/updateData`, form, {
+      const res = await axios.post(ADMIN_UPDATE_DATA, form, {
         headers: { "Content-Type": "multipart/form-data" }
       });
 

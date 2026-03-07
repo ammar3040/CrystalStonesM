@@ -7,6 +7,7 @@ import { FaBoxOpen } from 'react-icons/fa';
 import Inquiry from './Inquiry';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { API_ADMIN_REDIRECT } from '../../lib/apiConstants';
 
 
 const MobileNavbar = ({ catagory, MobilecartItems, Mobileuser }) => {
@@ -224,7 +225,7 @@ const MobileNavbar = ({ catagory, MobilecartItems, Mobileuser }) => {
               onLoginSuccess={(userData) => {
                 // setUser(userData); // Context handles it via onLoginSuccess callback chain or direct use
                 if (userData.role === 'admin') {
-                  window.location.href = `${import.meta.env.VITE_API_URL}/admin`;
+                  window.location.href = API_ADMIN_REDIRECT;
                 } else {
                   setShowProfile(false);
                 }

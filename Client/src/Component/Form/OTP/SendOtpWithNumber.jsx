@@ -3,6 +3,7 @@ import VerificationForm from './VerificationForm';
 import './otp.css';
 import SignUpMain from '../SignUpMain';
 import toast from 'react-hot-toast';
+import { API_SEND_OTP } from '../../../lib/apiConstants';
 
 const SendOtpWithNumber = ({ forceOpen = false, onClose }) => {
   const [showPopup, setShowPopup] = useState(false);
@@ -42,7 +43,7 @@ const SendOtpWithNumber = ({ forceOpen = false, onClose }) => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/send-otp`, {
+      const res = await fetch(API_SEND_OTP, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: phoneNumber }),

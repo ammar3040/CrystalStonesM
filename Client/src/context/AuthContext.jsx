@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { API_LOGOUT } from '../lib/apiConstants';
 
 const AuthContext = createContext();
 
@@ -85,7 +86,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         // Redirect will be handled by window.location.href in components if needed,
         // but clearing state here is essential for UI reactivity.
-        window.location.href = `${import.meta.env.VITE_API_URL}/logout`;
+        window.location.href = API_LOGOUT;
     };
 
     // Sync state if cookies change (optional, but good for reactivity)

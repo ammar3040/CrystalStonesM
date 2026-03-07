@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { API_GET_CATEGORY, ADMIN_ADD_CATEGORY, ADMIN_DELETE_CATEGORY } from '../../../lib/apiConstants';
 import toast from 'react-hot-toast';
 import {
   Search,
@@ -37,7 +37,7 @@ function AddCategory() {
   const fetchCategories = async () => {
     setIsFetching(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/getCatagory`);
+      const response = await fetch(API_GET_CATEGORY);
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
       setCategories(data);
@@ -93,7 +93,7 @@ function AddCategory() {
       formData.append("category", categoryName);
       formData.append("mainImage", mainImage);
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/addcatagory`, {
+      const response = await fetch(ADMIN_ADD_CATEGORY, {
         method: "POST",
         body: formData,
       });
@@ -116,7 +116,7 @@ function AddCategory() {
   const handleDelete = async (categoryId) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/admin/deletecatagory/?cid=${categoryId}`,
+        `${ADMIN_DELETE_CATEGORY}/?cid=${categoryId}`,
         { method: "GET" }
       );
       const result = await response.json();

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ADMIN_SHOW_ALL_PRODUCTS, ADMIN_CATEGORIES, ADMIN_CRYSTAL_TYPES, API_SET_BEST_PRODUCT_LIST, ADMIN_DELETE_PRODUCT } from '../../../lib/apiConstants';
 import axios from 'axios';
 import {
   Pencil,
@@ -56,7 +57,7 @@ const ProductTable = () => {
         sortOrder: sortDirection
       });
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/show-all-products?${params}`);
+      const response = await fetch(`${ADMIN_SHOW_ALL_PRODUCTS}?${params}`);
       const data = await response.json();
 
       setAllProducts(data.products || []);
@@ -91,8 +92,8 @@ const ProductTable = () => {
     const fetchFilterData = async () => {
       try {
         const [catRes, typeRes] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL}/admin/categories`),
-          fetch(`${import.meta.env.VITE_API_URL}/admin/crystal-types`)
+          fetch(ADMIN_CATEGORIES),
+          fetch(ADMIN_CRYSTAL_TYPES)
         ]);
         const catData = await catRes.json();
         const typeData = await typeRes.json();
@@ -141,7 +142,7 @@ const ProductTable = () => {
     if (e) e.preventDefault();
     setIsSavingBest(true);
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/setbestproductlist`, { bestProducts: selectedBestProducts });
+      await axios.post(API_SET_BEST_PRODUCT_LIST, { bestProducts: selectedBestProducts });
       toast.success('Best products updated successfully!');
     } catch (err) {
       toast.error('Error updating best products');
@@ -156,7 +157,7 @@ const ProductTable = () => {
     if (!confirmDelete) return;
 
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/deleteProduct/?id=${id}`);
+      const res = await axios.get(`${ADMIN_DELETE_PRODUCT}/?id=${id}`);
       if (res.data.success) {
         toast.success('Product deleted successfully!');
         fetchProducts();

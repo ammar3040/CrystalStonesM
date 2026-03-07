@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Mail, X, Gem, ArrowRight, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { API_SUBSCRIBE, API_GOOGLE_AUTH } from '../../../lib/apiConstants';
 
 /* ─── Crystal SVG Accent ─── */
 const GeodeCross = ({ className, style }) => (
@@ -64,7 +65,7 @@ const SubscribeEmailModal = ({ forceOpen = false, onClose }) => {
       return;
     }
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/subscribe`, {
+      const response = await fetch(API_SUBSCRIBE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -184,7 +185,7 @@ const SubscribeEmailModal = ({ forceOpen = false, onClose }) => {
               </div>
 
               {/* Google Sign In */}
-              <a href={`${import.meta.env.VITE_API_URL}/api/google`}>
+              <a href={API_GOOGLE_AUTH}>
                 <button className="w-full py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-zinc-300 text-xs font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] hover:border-white/[0.15] transition-all duration-300 group">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-5 h-5">
                     <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />

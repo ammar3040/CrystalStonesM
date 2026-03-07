@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import api from '../../lib/api';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '../../context/AuthContext';
+import { API_GOOGLE_AUTH } from '../../lib/apiConstants';
 
 /* ─── Premium Crystal SVG Components ─── */
 
@@ -324,7 +325,7 @@ const LoginMain = ({ onLoginSuccess, onClose }) => {
 
           {/* Google Sign In */}
           <motion.a
-            href={`${import.meta.env.VITE_API_URL}/api/google`}
+            href={API_GOOGLE_AUTH}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8, duration: 0.5 }}

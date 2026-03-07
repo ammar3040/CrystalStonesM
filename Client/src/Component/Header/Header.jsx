@@ -14,6 +14,7 @@ import { FaBoxOpen, FaClipboardList } from 'react-icons/fa';
 import Inquiry from './Inquiry';
 import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import { API_ADMIN_REDIRECT } from '../../lib/apiConstants';
 
 
 
@@ -480,7 +481,7 @@ function Header({ onCartClick }) {
                 onLoginSuccess={(userData) => {
                   setUser(userData);
                   if (userData.role === 'admin') {
-                    window.location.href = `${import.meta.env.VITE_API_URL}/admin`;
+                    window.location.href = API_ADMIN_REDIRECT;
                   }
                 }}
                 onClose={() => {

@@ -12,10 +12,13 @@ const getCookie = (name) => {
 const getBaseURL = () => {
     let url = import.meta.env.VITE_API_URL || '';
     if (url.endsWith('/')) url = url.slice(0, -1);
-    // Ensure it ends with /api but not /api/api
-    if (!url.endsWith('/api')) {
-        url += '/api';
-    }
+    return url;
+};
+
+// Server root URL (without /api) — used for admin routes which are mounted at /admin/ not /api/admin/
+export const getServerURL = () => {
+    let url = getBaseURL();
+    if (url.endsWith('/api')) url = url.slice(0, -4);
     return url;
 };
 

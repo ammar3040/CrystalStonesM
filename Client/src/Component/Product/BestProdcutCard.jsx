@@ -3,6 +3,7 @@ import { ShoppingCart, Eye, MessageCircle, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_GET_CART_ITEM } from '../../lib/apiConstants';
 import Cookies from "js-cookie";
 import toast from 'react-hot-toast';
 import ProtectedImage from '../../ProtectedImage';
@@ -81,7 +82,7 @@ function BestProductCard({
     const uid = JSON.parse(user).uid;
 
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/getCartItem`, {
+      const res = await axios.post(API_GET_CART_ITEM, {
         pid,
         quantity: productMinQuentity,
         uid,

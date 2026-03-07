@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { ADMIN_USER_TABLE, ADMIN_DELETE_USER } from '../../../lib/apiConstants';
 import axios from 'axios';
 import {
   Trash2,
@@ -33,7 +33,7 @@ const UserTable = () => {
   const fetchUsers = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/usertable?page=${page}&limit=${rowsPerPage}`);
+      const response = await axios.get(`${ADMIN_USER_TABLE}?page=${page}&limit=${rowsPerPage}`);
       const data = response.data;
       setUsers(data.users || []);
       setTotalUsers(data.totalCount || 0);
@@ -54,7 +54,7 @@ const UserTable = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/deleteUser/?id=${id}`);
+      const res = await axios.get(`${ADMIN_DELETE_USER}/?id=${id}`);
       if (res.data.success) {
         toast.success('User deleted successfully');
         fetchUsers();

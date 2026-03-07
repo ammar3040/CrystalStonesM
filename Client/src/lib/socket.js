@@ -8,14 +8,14 @@ const getCookie = (name) => {
     return null;
 };
 
-// Ensure socket connects to the ROOT domain, not /api
+// Get the root domain for Socket.IO connection
 const getSocketURL = () => {
     const url = import.meta.env.VITE_API_URL || '';
     try {
         const origin = new URL(url).origin;
         return origin;
     } catch {
-        return url.replace(/\/api$/, '');
+        return url;
     }
 };
 

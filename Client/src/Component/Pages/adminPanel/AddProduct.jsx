@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { API_GET_CATEGORY, API_SPECIFICATIONS_BY_CATEGORY, ADMIN_ADD_PRODUCT } from '../../../lib/apiConstants';
 import toast from "react-hot-toast";
 import {
   Package,
@@ -123,7 +123,7 @@ const AddProduct = () => {
 
   const fetchCatagorys = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/getCatagory`);
+      const response = await fetch(API_GET_CATEGORY);
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
       setCatagorys(data);
@@ -145,7 +145,7 @@ const AddProduct = () => {
       setFormData((prev) => ({ ...prev, [name]: value }));
       if (name === "category") {
         try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/specifications-by-category?category=${value}`);
+          const response = await fetch(`${API_SPECIFICATIONS_BY_CATEGORY}?category=${value}`);
           const data = await response.json();
           if (response.ok) {
             setSpecifications(data.specifications);
@@ -181,7 +181,7 @@ const AddProduct = () => {
     additionalImages.forEach((img) => form.append('additionalImages', img));
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/AddProduct`, {
+      const response = await fetch(ADMIN_ADD_PRODUCT, {
         method: 'POST',
         body: form,
       });

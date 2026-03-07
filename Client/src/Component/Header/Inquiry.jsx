@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { API_GET_USER_INQUIRIES } from '../../lib/apiConstants';
 
 function Inquiry({ show, onClose, user }) {
   const [inquiries, setInquiries] = useState([]);
@@ -10,7 +11,7 @@ function Inquiry({ show, onClose, user }) {
     const fetchInquiries = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/getUserInquiries/${user.uid}`
+          `${API_GET_USER_INQUIRIES}/${user.uid}`
         );
         const data = await res.json();
 
@@ -46,9 +47,8 @@ function Inquiry({ show, onClose, user }) {
 
       {/* Sliding Panel */}
       <div
-        className={`fixed top-0 right-0 h-full max-w-md w-full bg-white z-50 shadow-lg transform transition-transform duration-300 ease-in-out ${
-          show ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full max-w-md w-full bg-white z-50 shadow-lg transform transition-transform duration-300 ease-in-out ${show ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex justify-between items-center border-b px-4 py-3">
           <h2 className="text-lg font-semibold">Your Inquiries</h2>
@@ -75,13 +75,12 @@ function Inquiry({ show, onClose, user }) {
                       Submitted: {formatDate(inq.submittedAt)}
                     </span>
                     <span
-                      className={`text-xs px-2 py-1 rounded ${
-                        inq.status === "replied"
-                          ? "bg-green-100 text-green-700"
-                          : inq.status === "cancelled"
+                      className={`text-xs px-2 py-1 rounded ${inq.status === "replied"
+                        ? "bg-green-100 text-green-700"
+                        : inq.status === "cancelled"
                           ? "bg-red-100 text-red-700"
                           : "bg-yellow-100 text-yellow-700"
-                      }`}
+                        }`}
                     >
                       {inq.status}
                     </span>
@@ -106,7 +105,7 @@ function Inquiry({ show, onClose, user }) {
                       const product = prod.productId;
                       const price = prod.selectedSize?.price || product?.dollarPrice || 0;
                       const totalPrice = price * prod.quantity;
-                      
+
                       return (
                         <div
                           key={idx}
@@ -121,14 +120,14 @@ function Inquiry({ show, onClose, user }) {
                             <p className="text-sm font-medium text-gray-800">
                               {product?.productName || "Unnamed Product"}
                             </p>
-                            
+
                             {/* Display selected size if available */}
-                        {prod.selectedSize&&(<p className="text-xs text-gray-600">
-                                Size: {prod.selectedSize}
-                              </p>)}
-                              
-                          
-                            
+                            {prod.selectedSize && (<p className="text-xs text-gray-600">
+                              Size: {prod.selectedSize}
+                            </p>)}
+
+
+
                             <div className="flex justify-between items-center mt-1">
                               <p className="text-xs text-gray-500">
                                 Qty: {prod.quantity}

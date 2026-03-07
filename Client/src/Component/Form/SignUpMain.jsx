@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, MapPin, Lock, Eye, EyeOff, ArrowRight, Gem, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { API_REGISTER } from '../../lib/apiConstants';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 
@@ -80,7 +81,7 @@ const SignUpMain = ({ onClose }) => {
     }
     setIsSubmitting(true);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/register`, formData);
+      const response = await axios.post(API_REGISTER, formData);
       if (response.data.success) {
         toast.success(response.data.message || "Registration Successful!");
 

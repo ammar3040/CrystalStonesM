@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { ADMIN_USER_TABLE_ALL } from '../../../lib/apiConstants';
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Users as UsersIcon,
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { useEffect, useState } from 'react';
 
 function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -25,7 +26,7 @@ function AdminDashboard() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`${import.meta.env.VITE_API_URL}/admin/usertable`)
+    fetch(ADMIN_USER_TABLE_ALL)
       .then((res) => res.json())
       .then((allData) => {
         const usersList = allData.users || allData;

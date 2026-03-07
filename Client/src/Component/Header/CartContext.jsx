@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { API_CARTED_ITEM } from '../../lib/apiConstants';
 
 const CartContext = createContext();
 
@@ -9,7 +10,7 @@ export const CartProvider = ({ children }) => {
   // Function to update cart from anywhere in the app
   const updateCart = async (userId) => {
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/cartedItem`, {
+      const res = await axios.post(API_CARTED_ITEM, {
         uid: userId
       }, {
         withCredentials: true
